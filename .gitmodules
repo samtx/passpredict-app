@@ -1,3 +1,0 @@
-[submodule "passpredict"]
-	path = passpredict
-	url = git@github.com:samtx/passpredict.git
