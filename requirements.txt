@@ -1,6 +1,6 @@
 astropy==4.1rc1
 sgp4==2.12
-passpredict==0.0.9
+passpredict==0.0.10
 fastapi
 uvicorn
 python-dotenv
