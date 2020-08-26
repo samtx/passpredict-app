@@ -16,7 +16,7 @@ from passpredict.utils import get_TLE
 from passpredict.models import SatPredictData, SunPredictData
 
 app = FastAPI()
-cache = redis.Redis(host='0.0.0.0', port=6379)
+cache = redis.Redis(host='redis', port=6379)
 
 @app.get('/')
 def read_root():
