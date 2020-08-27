@@ -6,6 +6,7 @@ from fastapi import FastAPI, Query
 from astropy.time import Time
 import redis
 import numpy as np
+from pydantic import BaseModel
 
 from passpredict.predictions import find_overpasses
 from passpredict.propagate import compute_satellite_data
@@ -18,6 +19,12 @@ from passpredict.models import SatPredictData, SunPredictData
 app = FastAPI()
 cache = redis.Redis(host='redis', port=6379)
 
+class OverpassResult(BaseModel):
+    location: Location
+    satid: int
+    overpasses: List[Overpass]
+
+
 @app.get('/')
 def read_root():
     return {"Hello": "World"}
@@ -26,7 +33,7 @@ def read_root():
 def read_item(item_id: int, q: str = None):
     return {"item_id": item_id, "q": q}
 
-@app.get("/overpasses/", response_model=List[Overpass], response_model_exclude_unset=True)
+@app.get("/overpasses/", response_model=OverpassResult, response_model_exclude_unset=True)
 def predict(
     satid: int = Query(..., title="Satellite NORAD ID number"),
     lat: float = Query(..., title="Location latitude North in decimals"),
@@ -34,6 +41,7 @@ def predict(
     h: float = Query(0.0, title="Location elevation above ellipsoid in meters"),
     days: int = Query(10, title="Future days to predict, max 14", le=14)
     ):
+
     date_start = datetime.date.today()
     date_end = date_start + datetime.timedelta(days=days)
     dt_seconds = 10
@@ -91,11 +99,12 @@ def predict(
             sat_illuminated = np.frombuffer(sat[b'illuminated'], dtype=bool)
             sat = SatPredictData(id=satid, rECEF=sat_rECEF, illuminated=sat_illuminated)
 
+        overpasses = find_overpasses(jd, location, [sat], sun, min_elevation)
+        overpass_result = OverpassResult(location=location, satid=satid, overpasses=overpasses)
         if len(pipe) > 0:
-            pipe.execute()
+                pipe.execute()
 
-    overpasses = find_overpasses(jd, location, [sat], sun, min_elevation)
-    return overpasses
+    return overpass_result
 
 
 if __name__ == "__main__":
