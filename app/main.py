@@ -1,6 +1,6 @@
 # main.py
 import datetime
-from typing import List
+from typing import List, Optional
 import pickle
 import os
 
@@ -38,8 +38,8 @@ visible_sats = (
 
 class OverpassResult(BaseModel):
     location: Location
-    satid: int
     overpasses: List[Overpass]
+    satid: Optional[int] = None
 
 
 @app.get('/hello/')
@@ -97,13 +97,12 @@ def all_passes(
                 sat_key = 'sat:' + str(satid) + time_key
                 pipe = set_sat_cache(sat_key, sat, pipe, 86400)
             else:
-                sat = get_sat_cache(sat, satid)
+                sat = get_sat_cache(satdata, satid)
             sat_list[i] = sat
 
         overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation)
         overpass_result = OverpassResult(
             location=location,
-            satid=satid,
             overpasses=overpasses
         )
         # cache results for 5 minutes
