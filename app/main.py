@@ -1,6 +1,8 @@
 # main.py
 import datetime
 from typing import List
+import pickle
+import os
 
 from fastapi import FastAPI, Query
 from astropy.time import Time
@@ -17,7 +19,16 @@ from passpredict.utils import get_TLE
 from passpredict.models import SatPredictData, SunPredictData
 
 app = FastAPI()
-cache = redis.Redis(host='redis', port=6379)
+redis_host = os.getenv('REDIS_HOST', 'localhost')
+cache = redis.Redis(host=redis_host, port=6379)
+
+MAX_DAYS = 14  # maximum days to predict overpasses
+DT_SECONDS = 15
+SEC_PER_DAY = 86400
+# Make sure that dt_seconds evenly divides into number of seconds per day
+assert SEC_PER_DAY % DT_SECONDS == 0 
+NUM_TIMESTEPS_PER_DAY = SEC_PER_DAY / DT_SECONDS
+
 
 class OverpassResult(BaseModel):
     location: Location
@@ -25,13 +36,10 @@ class OverpassResult(BaseModel):
     overpasses: List[Overpass]
 
 
-@app.get('/')
+@app.get('/hello/')
 def read_root():
     return {"Hello": "World"}
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: str = None):
-    return {"item_id": item_id, "q": q}
 
 @app.get("/overpasses/", response_model=OverpassResult, response_model_exclude_unset=True)
 def predict(
@@ -39,19 +47,26 @@ def predict(
     lat: float = Query(..., title="Location latitude North in decimals"),
     lon: float = Query(..., title="Location longitude East in decimals"),
     h: float = Query(0.0, title="Location elevation above ellipsoid in meters"),
-    days: int = Query(10, title="Future days to predict, max 14", le=14)
-    ):
+    days: int = Query(10, title="Future days to predict", le=MAX_DAYS)
+):
+    # Check cache with input string
+    main_key = f'overpasses:{satid}:lat{lat}:lon{lon}:h{h}:days{days}'
+    result = cache.get(main_key)
+    if result:
+        overpass_result = pickle.loads(result)
+        return overpass_result
 
     date_start = datetime.date.today()
-    date_end = date_start + datetime.timedelta(days=days)
-    dt_seconds = 10
+    date_end = date_start + datetime.timedelta(days=MAX_DAYS)
+    
+    time_slice = slice(0, days*NUM_TIMESTEPS_PER_DAY)
 
     satellite = Satellite(id=satid)
     location = Location(lat=lat, lon=lon, h=h)
     min_elevation = 10.01
 
-    jd = julian_date_array_from_date(date_start, date_end, dt_seconds)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(dt_seconds)
+    jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(DT_SECONDS)
     sun_key = 'sun:' + time_key
     sat_key = 'sat:' + str(satid) + time_key
 
@@ -64,16 +79,15 @@ def predict(
         if not sun:
             t = Time(jd, format='jd')
             sun = compute_sun_data(t)
-            sun_rECEF = sun.rECEF
-            sun_rECEF_value = {
-                'n': sun_rECEF.shape[1],
-                'dtype': str(sun_rECEF.dtype),
-                'array': sun_rECEF.tobytes()
+            rECEF = sun.rECEF
+            rECEF_value = {
+                'n': rECEF.shape[1],
+                'dtype': str(rECEF.dtype),
+                'array': rECEF.tobytes()
             }
-            pipe.hset(sun_key, mapping=sun_rECEF_value)
+            pipe.hset(sun_key, mapping=rECEF_value)
             pipe.expire(sun_key, 86400)
         else:
-            # print(sun)
             n = int(sun[b'n'])
             dtype = sun[b'dtype'].decode()
             arr = np.frombuffer(sun[b'array'], dtype=dtype).reshape((3,n))
@@ -94,15 +108,25 @@ def predict(
             pipe.expire(sat_key, 86400)
         else:
             n = int(sat[b'n'])
-            rECEF_dtype = sat[b'dtype'].decode()
-            sat_rECEF = np.frombuffer(sat[b'rECEF'], dtype=dtype).reshape((3,n))
-            sat_illuminated = np.frombuffer(sat[b'illuminated'], dtype=bool)
-            sat = SatPredictData(id=satid, rECEF=sat_rECEF, illuminated=sat_illuminated)
+            dtype = sat[b'dtype'].decode()
+            rECEF = np.frombuffer(sat[b'rECEF'], dtype=dtype).reshape((3, n))
+            illuminated = np.frombuffer(sat[b'illuminated'], dtype=bool)
+            sat = SatPredictData(
+                id=satid,
+                rECEF=rECEF,
+                illuminated=illuminated
+            )
 
         overpasses = find_overpasses(jd, location, [sat], sun, min_elevation)
-        overpass_result = OverpassResult(location=location, satid=satid, overpasses=overpasses)
+        overpass_result = OverpassResult(
+            location=location,
+            satid=satid,
+            overpasses=overpasses
+        )
+        # cache results for 5 minutes
+        pipe.set(main_key, pickle.dumps(overpass_result), ex=300)
         if len(pipe) > 0:
-                pipe.execute()
+            pipe.execute()
 
     return overpass_result
 
