@@ -3,6 +3,7 @@ import datetime
 from typing import List, Optional
 import pickle
 import os
+from itertools import zip_longest
 
 from fastapi import FastAPI, Query, Path
 from astropy.time import Time
@@ -19,6 +20,8 @@ from passpredict.schemas import Location, Satellite, Overpass
 from passpredict.utils import get_TLE
 from passpredict.models import SatPredictData, SunPredictData
 
+from .utils import get_visible_satellites
+
 app = FastAPI()
 redis_host = os.getenv('REDIS_HOST', 'localhost')
 cache = redis.Redis(host=redis_host, port=6379)
@@ -30,10 +33,9 @@ SEC_PER_DAY = 86400
 assert SEC_PER_DAY % DT_SECONDS == 0 
 NUM_TIMESTEPS_PER_DAY = SEC_PER_DAY / DT_SECONDS
 
-visible_sats = (
-    25544, 10967, 15354, 20580, 20511, 25994,
-    25977, 41868, 41337, 44064, 43641, 39766
-)
+
+VISIBLE_SATS = get_visible_satellites()
+print(f'{len(VISIBLE_SATS)} visible satellites found')
 
 
 class OverpassResult(BaseModel):
@@ -74,7 +76,7 @@ def all_passes(
     with cache.pipeline() as pipe:
 
         pipe.hgetall(sun_key)
-        for satid in visible_sats:
+        for satid in VISIBLE_SATS:
             sat_key = 'sat:' + str(satid) + time_key
             pipe.hgetall(sat_key)
         sun, *sats = pipe.execute()
@@ -86,11 +88,12 @@ def all_passes(
         else:
             sun = get_sun_cache(sun)
         
-        num_visible_sats = len(visible_sats)
+        num_visible_sats = len(VISIBLE_SATS)
         sat_list = [None] * num_visible_sats
 
-        for i, satid, satdata in zip(range(num_visible_sats), visible_sats, sats):
+        for i, satid, satdata in zip(range(num_visible_sats), VISIBLE_SATS, sats):
             if not satdata:
+                print(f'Computing satellite position for satellite {satid}')
                 tle = get_TLE(satid)
                 t = Time(jd, format='jd')
                 sat = compute_satellite_data(tle, t, sun)
