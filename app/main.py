@@ -29,6 +29,7 @@ SEC_PER_DAY = 86400
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert SEC_PER_DAY % DT_SECONDS == 0 
 NUM_TIMESTEPS_PER_DAY = SEC_PER_DAY / DT_SECONDS
+TIME_KEY_SUFFIX = ':' + str(MAX_DAYS) + ':' + str(DT_SECONDS)
 
 visible_sats = (
     25544, 10967, 15354, 20580, 20511, 25994,
@@ -63,19 +64,19 @@ def all_passes(
         overpass_result = pickle.loads(result)
         return overpass_result
     date_start = datetime.date.today()
-    date_end = date_start + datetime.timedelta(days=1)
+    date_end = date_start + datetime.timedelta(days=MAX_DAYS)
     location = Location(lat=lat, lon=lon, h=h)
     min_elevation = 10.01
 
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(DT_SECONDS)
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + TIME_KEY_SUFFIX
     sun_key = 'sun:' + time_key
 
     with cache.pipeline() as pipe:
 
         pipe.hgetall(sun_key)
         for satid in visible_sats:
-            sat_key = 'sat:' + str(satid) + time_key
+            sat_key = 'sat:' + str(satid) + ':' + time_key
             pipe.hgetall(sat_key)
         sun, *sats = pipe.execute()
 
@@ -138,9 +139,9 @@ def passes(
     min_elevation = 10.01
 
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(DT_SECONDS)
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + TIME_KEY_SUFFIX
     sun_key = 'sun:' + time_key
-    sat_key = 'sat:' + str(satid) + time_key
+    sat_key = 'sat:' + str(satid) + ':' + time_key
 
     with cache.pipeline() as pipe:
 
@@ -162,6 +163,13 @@ def passes(
             pipe = set_sat_cache(sat_key, sat, pipe, 86400)
         else:
             sat = get_sat_cache(sat, satid)
+
+        # Only use slice of position and time arrays requested
+        if days < MAX_DAYS:
+            end_index = NUM_TIMESTEPS_PER_DAY * days
+            jd = jd[:end_index]
+            sat = sat[:end_index]
+            sun = sun[:end_index]
 
         overpasses = find_overpasses(jd, location, [sat], sun, min_elevation)
         overpass_result = OverpassResult(
