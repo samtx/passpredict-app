@@ -28,7 +28,7 @@ DT_SECONDS = 15
 SEC_PER_DAY = 86400
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert SEC_PER_DAY % DT_SECONDS == 0 
-NUM_TIMESTEPS_PER_DAY = SEC_PER_DAY / DT_SECONDS
+NUM_TIMESTEPS_PER_DAY = int(SEC_PER_DAY / DT_SECONDS)
 TIME_KEY_SUFFIX = ':' + str(MAX_DAYS) + ':' + str(DT_SECONDS)
 
 visible_sats = (
@@ -64,12 +64,12 @@ def all_passes(
         overpass_result = pickle.loads(result)
         return overpass_result
     date_start = datetime.date.today()
-    date_end = date_start + datetime.timedelta(days=MAX_DAYS)
+    date_end = date_start + datetime.timedelta(days=1)
     location = Location(lat=lat, lon=lon, h=h)
     min_elevation = 10.01
 
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + TIME_KEY_SUFFIX
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + ':1:' + str(DT_SECONDS)
     sun_key = 'sun:' + time_key
 
     with cache.pipeline() as pipe:
@@ -89,7 +89,6 @@ def all_passes(
         
         num_visible_sats = len(visible_sats)
         sat_list = [None] * num_visible_sats
-
         for i, satid, satdata in zip(range(num_visible_sats), visible_sats, sats):
             if not satdata:
                 tle = get_TLE(satid)
@@ -101,7 +100,7 @@ def all_passes(
                 sat = get_sat_cache(satdata, satid)
             sat_list[i] = sat
 
-        overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation)
+        overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation, visible_only=True)
         overpass_result = OverpassResult(
             location=location,
             overpasses=overpasses
@@ -241,4 +240,4 @@ def get_sat_cache(sat: bytes, satid: int):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level='debug')#, interface='WSGI')
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level='debug')
