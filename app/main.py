@@ -24,7 +24,7 @@ redis_host = os.getenv('REDIS_HOST', 'localhost')
 cache = redis.Redis(host=redis_host, port=6379)
 
 MAX_DAYS = 14  # maximum days to predict overpasses
-DT_SECONDS = 15
+DT_SECONDS = 30
 SEC_PER_DAY = 86400
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert SEC_PER_DAY % DT_SECONDS == 0 
@@ -94,7 +94,7 @@ def all_passes(
                 tle = get_TLE(satid)
                 t = Time(jd, format='jd')
                 sat = compute_satellite_data(tle, t, sun)
-                sat_key = 'sat:' + str(satid) + time_key
+                sat_key = 'sat:' + str(satid) + ':' + time_key
                 pipe = set_sat_cache(sat_key, sat, pipe, 86400)
             else:
                 sat = get_sat_cache(satdata, satid)
