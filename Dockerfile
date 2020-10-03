@@ -3,13 +3,30 @@ FROM python:3.8-slim
 ENV PYTHONPATH=/app
 ENV PYTHONBUFFERED=1
 
+RUN apt-get update \
+&& apt-get install gcc -y \
+&& apt-get install build-essential -y
+
 WORKDIR /app
 
-COPY requirements.lock .
+# copy and build IAU SOFA static library
+COPY cextern/sofa sofa
+RUN cd sofa \
+&& make \
+&& make install \
+&& make test \
+&& cd .. \
+&& rm -r sofa
 
-RUN pip install -r requirements.lock
+# && cd .. \
+# && rm -r sofa
 
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY setup.py .
 COPY app .
+RUN python setup.py build_ext --inplace
 
 EXPOSE 80
 EXPOSE 8000

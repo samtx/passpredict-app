@@ -11,13 +11,13 @@ from redis.client import Pipeline
 import numpy as np
 from pydantic import BaseModel
 
-from passpredict.predictions import find_overpasses
-from passpredict.propagate import compute_satellite_data
-from passpredict.solar import compute_sun_data
-from passpredict.timefn import julian_date_array_from_date
-from passpredict.schemas import Location, Satellite, Overpass
-from passpredict.utils import get_TLE
-from passpredict.models import SatPredictData, SunPredictData
+from .passpredict.predictions import find_overpasses
+from .passpredict.propagate import compute_satellite_data
+from .passpredict.solar import compute_sun_data
+from .passpredict.timefn import julian_date_array_from_date
+from .passpredict.schemas import Location, Satellite, Overpass
+from .passpredict.tle import get_TLE
+from .passpredict.models import SatPredictData, SunPredictData
 
 app = FastAPI()
 redis_host = os.getenv('REDIS_HOST', 'localhost')
@@ -233,4 +233,4 @@ def get_sat_cache(sat: bytes, satid: int):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level='debug', interface='WSGI')
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level='debug')#, interface='WSGI')

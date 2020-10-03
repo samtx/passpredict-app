@@ -4,9 +4,9 @@ from astropy.coordinates import TEME, CartesianRepresentation, ITRS
 from astropy.time import Time
 from sgp4.api import Satrec, WGS84
 
-from passpredict.solar import is_sat_illuminated
-from passpredict.schemas import Tle
-from passpredict.models import Sat, SatPredictData, SunPredictData
+from .solar import is_sat_illuminated
+from .schemas import Tle
+from .models import Sat, SatPredictData, SunPredictData
 
 
 def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
