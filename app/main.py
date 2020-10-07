@@ -12,13 +12,13 @@ from redis.client import Pipeline
 import numpy as np
 from pydantic import BaseModel
 
-from passpredict.predictions import find_overpasses
-from passpredict.propagate import compute_satellite_data
-from passpredict.solar import compute_sun_data
-from passpredict.timefn import julian_date_array_from_date
-from passpredict.schemas import Location, Satellite, Overpass
-from passpredict.utils import get_TLE
-from passpredict.models import SatPredictData, SunPredictData
+from .passpredict.predictions import find_overpasses
+from .passpredict.propagate import compute_satellite_data
+from .passpredict.solar import compute_sun_data
+from .passpredict.timefn import julian_date_array_from_date
+from .passpredict.schemas import Location, Satellite, Overpass
+from .passpredict.tle import get_TLE
+from .passpredict.models import SatPredictData, SunPredictData
 
 from .utils import get_visible_satellites
 
@@ -27,11 +27,12 @@ redis_host = os.getenv('REDIS_HOST', 'localhost')
 cache = redis.Redis(host=redis_host, port=6379)
 
 MAX_DAYS = 14  # maximum days to predict overpasses
-DT_SECONDS = 15
+DT_SECONDS = 30
 SEC_PER_DAY = 86400
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert SEC_PER_DAY % DT_SECONDS == 0 
-NUM_TIMESTEPS_PER_DAY = SEC_PER_DAY / DT_SECONDS
+NUM_TIMESTEPS_PER_DAY = int(SEC_PER_DAY / DT_SECONDS)
+TIME_KEY_SUFFIX = ':' + str(MAX_DAYS) + ':' + str(DT_SECONDS)
 
 
 VISIBLE_SATS = get_visible_satellites()
@@ -70,14 +71,14 @@ def all_passes(
     min_elevation = 10.01
 
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(DT_SECONDS)
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + ':1:' + str(DT_SECONDS)
     sun_key = 'sun:' + time_key
 
     with cache.pipeline() as pipe:
 
         pipe.hgetall(sun_key)
-        for satid in VISIBLE_SATS:
-            sat_key = 'sat:' + str(satid) + time_key
+        for satid in visible_sats:
+            sat_key = 'sat:' + str(satid) + ':' + time_key
             pipe.hgetall(sat_key)
         sun, *sats = pipe.execute()
 
@@ -97,13 +98,13 @@ def all_passes(
                 tle = get_TLE(satid)
                 t = Time(jd, format='jd')
                 sat = compute_satellite_data(tle, t, sun)
-                sat_key = 'sat:' + str(satid) + time_key
+                sat_key = 'sat:' + str(satid) + ':' + time_key
                 pipe = set_sat_cache(sat_key, sat, pipe, 86400)
             else:
                 sat = get_sat_cache(satdata, satid)
             sat_list[i] = sat
 
-        overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation)
+        overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation, visible_only=True)
         overpass_result = OverpassResult(
             location=location,
             overpasses=overpasses
@@ -141,9 +142,9 @@ def passes(
     min_elevation = 10.01
 
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + date_end.strftime('%Y%m%d') + str(DT_SECONDS)
+    time_key = 'time:' + date_start.strftime('%Y%m%d') + TIME_KEY_SUFFIX
     sun_key = 'sun:' + time_key
-    sat_key = 'sat:' + str(satid) + time_key
+    sat_key = 'sat:' + str(satid) + ':' + time_key
 
     with cache.pipeline() as pipe:
 
@@ -165,6 +166,13 @@ def passes(
             pipe = set_sat_cache(sat_key, sat, pipe, 86400)
         else:
             sat = get_sat_cache(sat, satid)
+
+        # Only use slice of position and time arrays requested
+        if days < MAX_DAYS:
+            end_index = NUM_TIMESTEPS_PER_DAY * days
+            jd = jd[:end_index]
+            sat = sat[:end_index]
+            sun = sun[:end_index]
 
         overpasses = find_overpasses(jd, location, [sat], sun, min_elevation)
         overpass_result = OverpassResult(
@@ -236,4 +244,4 @@ def get_sat_cache(sat: bytes, satid: int):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level='debug', interface='WSGI')
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level='debug')

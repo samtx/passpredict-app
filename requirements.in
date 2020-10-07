@@ -1,0 +1,9 @@
+astropy==4.1rc1
+sgp4==2.12
+fastapi
+uvicorn
+python-dotenv
+gunicorn
+redis
+requests
+Cython
