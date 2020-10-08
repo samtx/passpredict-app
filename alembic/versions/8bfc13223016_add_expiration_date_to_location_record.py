@@ -20,10 +20,7 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column(
-        'location',
-        Column('expires', Date)  # used for expiring geocoding results after 30 days
-    )
+    op.add_column('location', Column('expires', Date))  # used for expiring geocoding results after 30 days
 
 
 def downgrade():
