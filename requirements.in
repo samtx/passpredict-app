@@ -7,3 +7,4 @@ gunicorn
 redis
 requests
 Cython
+aiohttp[speedups]
