@@ -219,3 +219,36 @@ def load_initial_city_data():
         data = [city for city in city_reader]   
         with engine.connect() as conn:
             conn.execute(location.insert(), data)
+
+
+def epoch_from_tle_datetime(epoch_string: str) -> datetime:
+    """
+    Return datetime object from tle epoch string
+    """
+    epoch_year = int(epoch_string[0:2])
+    if epoch_year < 57:
+        epoch_year += 2000
+    else:
+        epoch_year += 1900
+    epoch_day = float(epoch_string[2:])
+    epoch_day, epoch_day_fraction = divmod(epoch_day, 1)
+    epoch_microseconds = epoch_day_fraction * 24 * 60 * 60 * 1e6
+    return datetime(epoch_year, month=1, day=1, tzinfo=timezone.utc) + \
+        timedelta(days=int(epoch_day-1)) + \
+        timedelta(microseconds=int(epoch_microseconds)
+    )
+    
+
+def epoch_from_tle(tle1: str) -> datetime:
+    """
+    Extract epoch as datetime from tle line 1
+    """
+    epoch_string = tle1[18:32]
+    return epoch_from_tle_datetime(epoch_string)
+    
+
+def satid_from_tle(tle1: str) -> int:
+    """
+    Extract satellite NORAD ID as int from tle line 1
+    """
+    return int(tle1[2:7])

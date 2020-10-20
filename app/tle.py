@@ -5,72 +5,18 @@ import requests
 import numpy as np
 from pydantic import BaseModel, Field
 
-from .utils import grouper
+from .utils import grouper, satid_from_tle, epoch_from_tle
+from .schemas import Tle
 
 
-class TleSchema(BaseModel):
-    tle1: str
-    tle2: str
-    epoch: datetime
-    satid: int
 
-    class Config:
-        title = 'TLE'
-
-
-class Tle():
-    def __init__(self, tle1: str, tle2: str):
-        self.tle1 = tle1
-        self.tle2 = tle2
-        
-    @cached_property
-    def epoch(self) -> datetime:
-        return epoch_from_tle(self.tle1)
-
-    @cached_property
-    def satid(self) -> int:
-        return satid_from_tle(self.tle1)
-
-    def to_schema(self):
-        return TleSchema(
-            tle1=self.tle1,
-            tle2=self.tle2,
-            epoch=self.epoch,
-            satid=self.satid    
-        )
-
-
-def epoch_from_tle_datetime(epoch_string: str) -> datetime:
-    """
-    Return datetime object from tle epoch string
-    """
-    epoch_year = int(epoch_string[0:2])
-    if epoch_year < 57:
-        epoch_year += 2000
-    else:
-        epoch_year += 1900
-    epoch_day = float(epoch_string[2:])
-    epoch_day, epoch_day_fraction = np.divmod(epoch_day, 1)
-    epoch_microseconds = epoch_day_fraction * 24 * 60 * 60 * 1e6
-    return datetime(epoch_year, month=1, day=1, tzinfo=timezone.utc) + \
-        timedelta(days=int(epoch_day-1)) + \
-        timedelta(microseconds=int(epoch_microseconds)
-    )
-    
-
-def epoch_from_tle(tle1: str) -> datetime:
-    """
-    Extract epoch as datetime from tle line 1
-    """
-    epoch_string = tle1[18:32]
-    return epoch_from_tle_datetime(epoch_string)
-    
-
-def satid_from_tle(tle1: str) -> int:
-    """
-    Extract satellite NORAD ID as int from tle line 1
-    """
-    return int(tle1[2:7])
+# class TleDB(BaseModel):
+#     id: int
+#     tle1: str
+#     tle2: str
+#     epoch: datetime.datetime
+#     satellite_id: int
+#     created: datetime.datetime
 
 
 def get_orbit_data_from_celestrak(satellite_id):
@@ -133,11 +79,12 @@ def parse_tle(tle_string_list):
     return {satellite_id : {'name': name, 'tle1': tle1, 'tle2': tle2}}
 
 
-def get_TLE(satid: int, tle_data=None):
+def get_TLE(satid: int, tle_data=None) -> Tle:
     tle_data = parse_tles_from_celestrak(satid)
     tle1 = tle_data[satid]['tle1']
     tle2 = tle_data[satid]['tle2']
-    return Tle(tle1=tle1, tle2=tle2)
+    tle = Tle.from_string(tle1=tle1, tle2=tle2)
+    return tle
     
 
 def save_TLE_data(url=None):
