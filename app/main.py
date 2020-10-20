@@ -12,13 +12,13 @@ from redis.client import Pipeline
 import numpy as np
 from pydantic import BaseModel
 
-from .passpredict.predictions import find_overpasses
-from .passpredict.propagate import compute_satellite_data
-from .passpredict.solar import compute_sun_data
-from .passpredict.timefn import julian_date_array_from_date
-from .passpredict.schemas import Location, Satellite, Overpass
-from .passpredict.tle import get_TLE
-from .passpredict.models import SatPredictData, SunPredictData
+from .predictions import find_overpasses
+from .propagate import compute_satellite_data
+from .solar import compute_sun_data
+from .timefn import julian_date_array_from_date
+from .schemas import Location, Satellite, Overpass
+from .tle import get_TLE
+from .models import SatPredictData, SunPredictData
 
 from .utils import get_visible_satellites
 

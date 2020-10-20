@@ -1,15 +1,36 @@
 import logging
 import datetime
+from itertools import zip_longest
 from typing import Dict
 
 import requests
 
 from .dbmodels import location, satellite
 
-from .passpredict.utils import grouper
-from .passpredict.tle import parse_tle
 
 logger = logging.getLogger(__name__)
+
+
+def shift_angle(x: float) -> float:
+    """Shift angle in radians to [-pi, pi)
+    
+    Args:
+        x: float, angle in radians
+
+    Reference: 
+        https://stackoverflow.com/questions/15927755/opposite-of-numpy-unwrap/32266181#32266181
+    """
+    return (x + np.pi) % (2 * np.pi) - np.pi
+
+
+def grouper(iterable, n, fillvalue=None):
+    """
+    from itertools recipes https://docs.python.org/3.7/library/itertools.html#itertools-recipes
+    Collect data into fixed-length chunks or blocks
+    """
+    args = [iter(iterable)] * n
+    return zip_longest(*args, fillvalue=fillvalue)
+
 
 def get_visible_satellites():
     """
@@ -22,6 +43,15 @@ def get_visible_satellites():
         tle_data.update(parse_tle(tle_strings))
     return tle_data
 
+
+def parse_tle(tle_string_list):
+    """
+    Parse a single 3-line TLE from celestrak
+    """
+    tle0, tle1, tle2 = tle_string_list
+    name = tle0.strip()  # satellite name
+    satellite_id = satid_from_tle(tle1)
+    return {satellite_id : {'name': name, 'tle1': tle1, 'tle2': tle2}}
 
 
 def load_satellite_and_tle_data():
@@ -233,9 +263,9 @@ def epoch_from_tle_datetime(epoch_string: str) -> datetime:
     epoch_day = float(epoch_string[2:])
     epoch_day, epoch_day_fraction = divmod(epoch_day, 1)
     epoch_microseconds = epoch_day_fraction * 24 * 60 * 60 * 1e6
-    return datetime(epoch_year, month=1, day=1, tzinfo=timezone.utc) + \
-        timedelta(days=int(epoch_day-1)) + \
-        timedelta(microseconds=int(epoch_microseconds)
+    return datetime.datetime(epoch_year, month=1, day=1, tzinfo=datetime.timezone.utc) + \
+        datetime.timedelta(days=int(epoch_day-1)) + \
+        datetime.timedelta(microseconds=int(epoch_microseconds)
     )
     
 

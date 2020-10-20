@@ -37,12 +37,16 @@ class LocationResult(BaseModel):
     """
     Location result from geocoder
     """
-    name: str
     lat: float
     lon: float
+    name: str = None
     
 
 class Location(LocationResult):
+    height: float = Field(0.0, alias='h')
+
+
+class LocationInDB(Location):
     """
     Location record in database
 
@@ -53,13 +57,12 @@ class Location(LocationResult):
     """
     id: int
     query: str
-    height: float = None
 
 
 class Tle(BaseModel):
     tle1: str
     tle2: str
-    epoch: datetime
+    epoch: datetime.datetime
     satid: int
 
     @classmethod    

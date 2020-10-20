@@ -5,7 +5,7 @@ import requests
 import numpy as np
 from pydantic import BaseModel, Field
 
-from .utils import grouper, satid_from_tle, epoch_from_tle
+from .utils import grouper, satid_from_tle, epoch_from_tle, parse_tle
 from .schemas import Tle
 
 
@@ -67,16 +67,6 @@ def parse_tles_from_celestrak(satellite_id=None):
     for tle_strings in grouper(r.text.splitlines(), 3):
         tle_data.update(parse_tle(tle_strings))
     return tle_data
-
-
-def parse_tle(tle_string_list):
-    """
-    Parse a single 3-line TLE from celestrak
-    """
-    tle0, tle1, tle2 = tle_string_list
-    name = tle0.strip()  # satellite name
-    satellite_id = satid_from_tle(tle1)
-    return {satellite_id : {'name': name, 'tle1': tle1, 'tle2': tle2}}
 
 
 def get_TLE(satid: int, tle_data=None) -> Tle:

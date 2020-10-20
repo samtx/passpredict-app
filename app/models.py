@@ -82,7 +82,7 @@ class RhoVector():
         
     @cached_property
     def rsiteECEF(self):
-        r = site_ECEF(self.location.lat, self.location.lon, self.location.h)
+        r = site_ECEF(self.location.lat, self.location.lon, self.location.height)
         return np.array([[r[0]],[r[1]],[r[2]]], dtype=np.float64)
     
     def  _rECEF(self):

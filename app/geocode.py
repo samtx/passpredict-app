@@ -8,9 +8,6 @@ from .schemas import LocationResult
 
 
 HERE_URL_BASE = 'https://geocode.search.hereapi.com/v1/geocode'
-    r = requests.get(here_url_base, params).json()['items'][0]
-    position = r.get('position')
-
 
 
 async def geocode_api(q: str) -> LocationResult:
