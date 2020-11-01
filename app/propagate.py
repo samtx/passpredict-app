@@ -4,7 +4,7 @@ from astropy.coordinates import TEME, CartesianRepresentation, ITRS
 from astropy.time import Time
 from sgp4.api import Satrec, WGS84
 
-from .solar import is_sat_illuminated
+from .solar import is_sat_illuminated, sat_illumination_distance
 from .schemas import Tle
 from .models import Sat, SatPredictData, SunPredictData
 
@@ -43,16 +43,20 @@ def compute_satellite_data(tle: Tle, t: Time, sun: SunPredictData = None) -> Sat
         https://docs.astropy.org/en/latest/coordinates/satellites.html
 
     """
-    sat = Sat()
-    sat.time = t
     r, _ = propagate_satellite(tle.tle1, tle.tle2, t.jd)
     # Use the TEME reference frame from astropy
     teme = TEME(CartesianRepresentation(r * u.km), obstime=t)
     ecef = teme.transform_to(ITRS(obstime=t))
-    sat.rECEF = ecef.data.xyz.value.astype(np.float32)  # extract numpy array from astropy object
+    rECEF = ecef.data.xyz.value.astype(np.float32)  # extract numpy array from astropy object
     # sat.subpoint = ecef.earth_location
     # sat.latitude = sat.subpoint.lat.value
     # sat.longitude = sat.subpoint.lon.value
-    if sun is not None:
-        sat.illuminated = is_sat_illuminated(sat.rECEF, sun.rECEF)
-    return SatPredictData(id=tle.satid, rECEF=sat.rECEF, illuminated=sat.illuminated)
+    print(sun)
+    
+    if sun:
+        sun_sat_dist = sat_illumination_distance(rECEF, sun.rECEF)
+        illuminated = is_sat_illuminated(rECEF, sun.rECEF)
+        satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
+    else:
+        satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF)
+    return satpredictdata

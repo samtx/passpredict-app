@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import List, Optional
 from enum import Enum
 from functools import cached_property
 from math import floor
@@ -108,6 +108,15 @@ class Point(BaseModel):
             range=rho.rng[idx]
         )
 
+    @classmethod
+    def from_jd_razel(jd, rng, az, el):
+        return cls.construct(
+            datetime=jday2datetime(jd),
+            azimuth=round(az, 2),
+            elevation=round(el, 2),
+            range=round(rng, 3)
+        )
+
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
         s = "{}UTC el={:.1f}d, az={:.1f}d, rng={:.1f}km".format(
@@ -146,6 +155,12 @@ class Overpass(BaseModel):
     vis_end_pt: Point = None
     brightness: float = None
     
+
+class OverpassResult(BaseModel):
+    location: Location
+    overpasses: List[Overpass]
+    satid: Optional[int] = None
+
 
 class OverpassResultBase(BaseModel):
     location: Location

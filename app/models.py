@@ -1,5 +1,6 @@
 # models.py
-from dataclasses import dataclass
+from typing import Optional
+from dataclasses import dataclass, field
 from functools import cached_property
 import math
 
@@ -48,16 +49,20 @@ class SunPredictData:
 
 @dataclass
 class SatPredictData:
-    __slots__ = ['id', 'rECEF', 'illuminated']
+    # __slots__ = ['id', 'rECEF', 'illuminated', 'sun_sat_dist']
     id: int
-    rECEF: np.ndarray         # dtype np.float32
-    illuminated: np.ndarray   # dtype bool
-
+    rECEF: np.ndarray         # dtype np.float64
+    illuminated: np.ndarray = field(default_factory=lambda: np.empty(0, dtype=bool))   # dtype bool
+    sun_sat_dist: np.ndarray = field(default_factory=lambda: np.empty(0, dtype=np.float64)) # dtype np.float64
+    intrinsinc_mag: float = -1.8  # default for ISS
+    
     def __getitem__(self, slc):
         return SatPredictData(
             id=self.id,
             rECEF=self.rECEF[:, slc],
-            illuminated=self.illuminated[slc]
+            illuminated=self.illuminated[slc],
+            sun_sat_dist=self.sun_sat_dist[slc],
+            intrinsinc_mag=self.intrinsinc_mag
         )
 
 

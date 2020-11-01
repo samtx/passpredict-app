@@ -69,10 +69,19 @@ def sun_sat_orthogonal_distance(rsat, zeta):
     return norm(rsat, axis=0) * np.cos(zeta - math.pi * 0.5)
 
 
-def is_sat_illuminated(rsat, rsun):
+def sat_illumination_distance(rsat, rsun):
+    """
+    Compute sun-satellite orthogonal distance
+    """
     zeta = sun_sat_angle(rsat, rsun)
     dist = sun_sat_orthogonal_distance(rsat, zeta)
-    return dist > R_EARTH
+    return dist
+    
+
+def is_sat_illuminated(rsat, rsun):
+    dist = sat_illumination_distance(rsat, rsun)
+    is_illum = dist > R_EARTH
+    return is_illum
 
 
 def compute_sun_data(t: Time) -> SunPredictData:
