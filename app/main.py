@@ -55,7 +55,8 @@ def all_passes(
         lon, 
         date_start=today, 
         h=h, 
-        min_elevation=10.0
+        min_elevation=10.0,
+        visible_only=True
     )
     # cache results for 5 minutes
     cache.set(main_key, pickle.dumps(overpass_result), ex=300)

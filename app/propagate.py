@@ -8,6 +8,8 @@ from .solar import is_sat_illuminated, sat_illumination_distance
 from .schemas import Tle
 from .models import Sat, SatPredictData, SunPredictData
 
+# import debugpy
+# debugpy.debug_this_thread()
 
 def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
     """Propagate satellite position forward in time.
@@ -35,7 +37,7 @@ def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
     return r, v
 
 
-def compute_satellite_data(tle: Tle, t: Time, sun: SunPredictData = None) -> SatPredictData:
+def compute_satellite_data(tle: Tle, t: Time, sun_rECEF: np.ndarray = None) -> SatPredictData:
     """
     Compute satellite data for Time
     
@@ -51,11 +53,10 @@ def compute_satellite_data(tle: Tle, t: Time, sun: SunPredictData = None) -> Sat
     # sat.subpoint = ecef.earth_location
     # sat.latitude = sat.subpoint.lat.value
     # sat.longitude = sat.subpoint.lon.value
-    print(sun)
     
-    if sun:
-        sun_sat_dist = sat_illumination_distance(rECEF, sun.rECEF)
-        illuminated = is_sat_illuminated(rECEF, sun.rECEF)
+    if sun_rECEF is not None:
+        sun_sat_dist = sat_illumination_distance(rECEF, sun_rECEF)
+        illuminated = is_sat_illuminated(rECEF, sun_rECEF)
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
     else:
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF)

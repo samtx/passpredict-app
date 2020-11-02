@@ -84,7 +84,7 @@ def is_sat_illuminated(rsat, rsun):
     return is_illum
 
 
-def compute_sun_data(t: Time) -> SunPredictData:
+def compute_sun_data(t: Time) -> np.ndarray:
     """
     Compute sun position data
 
@@ -94,8 +94,7 @@ def compute_sun_data(t: Time) -> SunPredictData:
     sun_tmp = get_sun(t_tmp)  # get astropy coordinates for sun in GCRS
     sun_tmp = sun_tmp.transform_to(ITRS(obstime=t_tmp))  # transform to ECEF frame
     sun_tmp = sun_tmp.data.xyz.to('km').value
-    sun_data = np.empty((3, t.size), dtype=np.float32)
+    sun_rECEF = np.empty((3, t.size), dtype=np.float32)
     for i in range(3):
-        sun_data[i] = np.interp(t.jd, t_tmp.jd, sun_tmp[i])
-    rECEF = sun_data.astype(np.float32)
-    return SunPredictData(rECEF)
+        sun_rECEF[i] = np.interp(t.jd, t_tmp.jd, sun_tmp[i])
+    return sun_rECEF

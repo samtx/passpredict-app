@@ -11,14 +11,13 @@ cache = redis.Redis(host=REDIS_HOST, port=6379)
 
 def set_sun_cache(
     sun_key: str,
-    sun: SunPredictData,
+    rECEF: np.ndarray,
     pipe: Pipeline,
     ttl: int = 86400
 ):
     """
     Add sun hashdata to redis pipeline
     """
-    rECEF = sun.rECEF
     rECEF_value = {
         'n': rECEF.shape[1],
         'dtype': str(rECEF.dtype),

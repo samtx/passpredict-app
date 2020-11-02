@@ -5,19 +5,20 @@ import pickle
 
 from astropy.time import Time
 from numpy import ndarray
+import numpy as np
 from scipy.interpolate import interp1d
 
 from .solar import compute_sun_data
 from .propagate import compute_satellite_data
-from .timefn import julian_date_array_from_date
+from .timefn import julian_date_array_from_date, jday2datetime
 from .schemas import Overpass, Location, Satellite, OverpassResult, Point
-from .models import Sun, RhoVector, Sat, SatPredictData
+from .models import Sun, RhoVector, Sat, SatPredictData, PassType
 from .tle import get_TLE
 from .constants import RAD2DEG, DAY_S
 from .rotations import ecef2sez
 from .topocentric import site_ECEF
 from .settings import MAX_DAYS
-from .cache import cache
+from .cache import cache, set_sat_cache, set_sun_cache, get_sat_cache, get_sun_cache
 from .utils import get_visible_satellites
 
 
@@ -80,22 +81,22 @@ def find_overpasses(
     return overpasses
 
 
-def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECEF=None , min_elevation=10.0, visibile_only=False, store_sat_id=True):
-    r_site_ECEF = site_ECEF(location.lat, location.lon, location.h)
-    rho_ECEF = sat.rECEF - r_site_ECEF.T
+def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECEF=None, min_elevation=10.0, visible_only=False, store_sat_id=True, sunset_el=-8.0):
+    r_site_ECEF = site_ECEF(location.lat, location.lon, location.height)[:, np.newaxis]
+    rho_ECEF = sat.rECEF - r_site_ECEF
     rSEZ = ecef2sez(rho_ECEF, location.lat, location.lon)
     # use cubic splines to interpolate the 
     n = jd.size
     rSEZ_interp = np.empty((3, (n-1)*DT_SECONDS), dtype=np.float64) 
-    jd_interp = np.linspace(jd[0], jd[n], 1/DAY_S, endpoint=True)
+    jd_interp = np.linspace(jd[0], jd[n-1], (n-1)*DT_SECONDS, endpoint=True)
     fn = interp1d(jd, rSEZ, kind='cubic', fill_value='extrapolate', assume_sorted=True)
     rSEZ_interp = fn(jd_interp)
-    rho = RhoVector(jd, rSEZ_interp)
+    rho = RhoVector(jd_interp, rSEZ_interp)
     start_idx, end_idx = _start_end_index(rho.el - min_elevation)
     num_overpasses = min(start_idx.size, end_idx.size)       # Iterate over start/end indecies and gather inbetween indecies
     if start_idx.size < end_idx.size:
         end_idx = end_idx[1:]
-    overpasses = [None]*num_overpasses if not visibile_only else []
+    overpasses = [None]*num_overpasses if not visible_only else []
     for j in range(num_overpasses):
         # Store indecies of overpasses in a list
         idx0 = start_idx[j]
@@ -105,8 +106,8 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         max_pt = rho.point(idx0 + idxmax)
         end_pt = rho.point(idxf)
         # Find visible start and end times
-        if sun_rECEF:
-            sun_rho_ECEF = sun_rECEF[:,idx0:idxf+1] - rsiteECEF
+        if sun_rECEF is not None:
+            sun_rho_ECEF = sun_rECEF[:,idx0:idxf+1] - r_site_ECEF
             sun_sez = ecef2sez(sun_rho_ECEF, location.lat, location.lon)
             sun_rng = np.linalg.norm(sun_sez, axis=0)
             sun_el = np.arcsin(sun_sez[2] / sun_rng) * RAD2DEG
@@ -199,19 +200,19 @@ def predict_single_satellite_overpasses(
         sun, sat = pipe.execute()
         if not sun:
             t = Time(jd, format='jd')
-            sun = compute_sun_data(t)
-            pipe = set_sun_cache(sun_key, sun, pipe, 86400)
+            sun_rECEF = compute_sun_data(t)
+            pipe = set_sun_cache(sun_key, sun_rECEF, pipe, 86400)
         else:
-            sun = get_sun_cache(sun)
+            sun_rECEF = get_sun_cache(sun)
         if not sat:
             tle = get_TLE(satellite.id)
             t = Time(jd, format='jd')
-            sat = compute_satellite_data(tle, t, sun)
+            sat = compute_satellite_data(tle, t, sun_rECEF)
             pipe = set_sat_cache(sat_key, sat, pipe, 86400)
         else:
             sat = get_sat_cache(sat, satid)
         pipe.execute()
-    sun_rECEF = sun.rECEF  # we only need the position data
+    # sun_rECEF = sun.rECEF  # we only need the position data
     # Only use slice of position and time arrays requested
     if days < MAX_DAYS:
         end_index = NUM_TIMESTEPS_PER_DAY * days
@@ -230,7 +231,7 @@ def predict_single_satellite_overpasses(
         location=location, 
         sun_rECEF=sun_rECEF, 
         min_elevation=min_elevation,
-        visibile_only=visible_only,
+        visible_only=visible_only,
         store_sat_id=False
     )
     overpass_result = OverpassResult(
@@ -290,7 +291,7 @@ def predict_all_visible_satellite_overpasses(
         )
 
 
-def _start_end_index(self, x):
+def _start_end_index(x):
     """
     Finds the start and end indecies when a 1D array crosses zero
     """
