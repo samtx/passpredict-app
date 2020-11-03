@@ -10,7 +10,7 @@ ext = []
 # ext.append(cythonize(['passpredict/timefn_ext.pyx']))
 
 setup(
-    name="passpredict",
+    name="app",
     ext_modules = ext,
     zip_safe = False,
 )
