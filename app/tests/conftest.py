@@ -18,7 +18,7 @@ def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 
     tle = Tle.from_string(tle1=tle1, tle2=tle2)
     date_start = tle.epoch.date()
     date_end = date_start + timedelta(days=10)
-    dt_seconds = 10
+    dt_seconds = 1
     jd = julian_date_array_from_date(date_start, date_end, dt_seconds)
     t = Time(jd, format='jd')
     sun = compute_sun_data(t)

@@ -212,7 +212,6 @@ def predict_single_satellite_overpasses(
         else:
             sat = get_sat_cache(sat, satid)
         pipe.execute()
-    # sun_rECEF = sun.rECEF  # we only need the position data
     # Only use slice of position and time arrays requested
     if days < MAX_DAYS:
         end_index = NUM_TIMESTEPS_PER_DAY * days
