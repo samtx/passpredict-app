@@ -15,4 +15,7 @@ void c_sun_pos_ecef(double *jd, double *r, int n);
 void c_sun_pos(double *jd, double *r, int n);
 void c_sun_sat_illumination_distance(double *rsat, double *rsun, double *illum_dist, int n);
 
+/*  coverpass.c  */
+void c_sez2rngel(double *r_view, double *rng_view, double *el_view, int n);
+
 #endif

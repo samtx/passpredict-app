@@ -23,6 +23,11 @@ ext = [
         'app._solar',
         ['app/_solar.pyx', 'app/crotations.c', 'app/csolar.c'],
         **common_kw,
+    ),
+    Extension(
+        'app._overpass',
+        ['app/_overpass.pyx', 'app/coverpass.c'],
+        **common_kw,
     )
 ]
 

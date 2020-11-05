@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, date, timezone
 from typing import List, Callable
 import time
+import math
 import pickle
 
 from astropy.time import Time
@@ -8,6 +9,8 @@ from numpy import ndarray
 import numpy as np
 from scipy.interpolate import interp1d
 
+import ._overpass
+from ._solar import sun_pos_ecef
 from .solar import compute_sun_data
 from .propagate import compute_satellite_data
 from .timefn import julian_date_array_from_date, jday2datetime
@@ -15,7 +18,7 @@ from .schemas import Overpass, Location, Satellite, OverpassResult, Point
 from .models import Sun, RhoVector, Sat, SatPredictData, PassType
 from .tle import get_TLE
 from .constants import RAD2DEG, DAY_S
-from .rotations import ecef2sez
+from ._rotations import ecef2sez
 from .topocentric import site_ECEF
 from .settings import MAX_DAYS
 from .cache import cache, set_sat_cache, set_sun_cache, get_sat_cache, get_sun_cache
@@ -37,20 +40,21 @@ class RhoVector:
     def __init__(self, jd, rSEZ):
         self.jd = jd
         self.rSEZ = rSEZ      
-        self.rng = self._compute_range()
-        self.el = self._compute_elevation()
+        self.rng, self.el = self._compute_range_and_elevation()
 
     def _compute_range(self):
-        return np.linalg.norm(self.rSEZ, axis=0)
+        return np.linalg.norm(self.rSEZ, axis=1)
 
     def _compute_elevation(self):
-        return np.arcsin(self.rSEZ[2] / self.rng) * RAD2DEG
+        return np.arcsin(self.rSEZ[:,2] / self.rng) * RAD2DEG
+
+    def _compute_range_and_elevation(self):
+        return _overpass._compute_range_and_elevation(self.rSEZ)
 
     def _azimuth_from_idx(self, idx):
-        rS = self.rSEZ[0, idx]
-        rE = self.rSEZ[1, idx]
+        rS, rE = self.rSEZ[idx, [0,1]]
         tmp = np.arctan2(rS, rE)
-        az = (tmp + np.pi * 0.5) * RAD2DEG
+        az = (tmp + math.pi * 0.5) * RAD2DEG
         if rS < 0 and rE < 0:
             az %= 360 
         return az
@@ -107,7 +111,7 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         end_pt = rho.point(idxf)
         # Find visible start and end times
         if sun_rECEF is not None:
-            sun_rho_ECEF = sun_rECEF[:,idx0:idxf+1] - r_site_ECEF
+            sun_rho_ECEF = sun_rECEF[idx0:idxf+1] - r_site_ECEF
             sun_sez = ecef2sez(sun_rho_ECEF, location.lat, location.lon)
             sun_rng = np.linalg.norm(sun_sez, axis=0)
             sun_el = np.arcsin(sun_sez[2] / sun_rng) * RAD2DEG
@@ -199,15 +203,13 @@ def predict_single_satellite_overpasses(
         pipe.hgetall(sat_key)
         sun, sat = pipe.execute()
         if not sun:
-            t = Time(jd, format='jd')
-            sun_rECEF = compute_sun_data(t)
+            sun_rECEF = sun_pos_ecef(jd)
             pipe = set_sun_cache(sun_key, sun_rECEF, pipe, 86400)
         else:
             sun_rECEF = get_sun_cache(sun)
         if not sat:
             tle = get_TLE(satellite.id)
-            t = Time(jd, format='jd')
-            sat = compute_satellite_data(tle, t, sun_rECEF)
+            sat = compute_satellite_data(tle, jd, sun_rECEF)
             pipe = set_sat_cache(sat_key, sat, pipe, 86400)
         else:
             sat = get_sat_cache(sat, satid)
@@ -262,8 +264,7 @@ def predict_all_visible_satellite_overpasses(
         sun, *sats = pipe.execute()
 
         if not sun:
-            t = Time(jd, format='jd')
-            sun = compute_sun_data(t)
+            sun = sun_pos_ecef(jd)
             pipe = set_sun_cache(sun_key, sun, pipe, 86400)
         else:
             sun = get_sun_cache(sun)
@@ -275,8 +276,7 @@ def predict_all_visible_satellite_overpasses(
             if not satdata:
                 print(f'Computing satellite position for satellite {satid}')
                 tle = get_TLE(satid)
-                t = Time(jd, format='jd')
-                sat = compute_satellite_data(tle, t, sun)
+                sat = compute_satellite_data(tle, jd, sun)
                 sat_key = 'sat:' + str(satid) + ':' + time_key
                 pipe = set_sat_cache(sat_key, sat, pipe, 86400)
             else:
