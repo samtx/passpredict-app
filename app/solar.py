@@ -75,12 +75,13 @@ def sat_illumination_distance(rsat, rsun):
     """
     zeta = sun_sat_angle(rsat, rsun)
     dist = sun_sat_orthogonal_distance(rsat, zeta)
+    dist -= R_EARTH
     return dist
     
 
 def is_sat_illuminated(rsat, rsun):
     dist = sat_illumination_distance(rsat, rsun)
-    is_illum = dist > R_EARTH
+    is_illum = dist > 0
     return is_illum
 
 

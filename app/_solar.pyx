@@ -8,6 +8,7 @@ ctypedef np.float64_t DTYPE_f64_t
 cdef extern from "passpredict.h":
     void c_sun_pos(double *jd, double *r, int n)
     void c_sun_pos_ecef(double *jd, double *r, int n)
+    void c_sun_sat_illumination_distance(double *rsat, double *rsun, double *illum_dist, int n)
 
 
 @cython.boundscheck(False)
@@ -18,10 +19,8 @@ def sun_pos(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     """
     cdef int n = jd.shape[0]
     cdef double[::1] jd_view = jd
-
-    cdef np.ndarray[np.float64_t, ndim=1] r = np.zeros(3*n, dtype=np.float64)
     cdef double[::1] r_view
-    r_view = r
+    r_view = np.zeros(3*n, dtype=np.float64)
     
     c_sun_pos(&jd_view[0], &r_view[0], n)
     r_view_array = np.asarray(r_view)
@@ -59,5 +58,21 @@ def sun_pos_ecef(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     return r
 
       
+@cython.boundscheck(False)
+@cython.wraparound(False)
+def sun_sat_illumination_distance(np.ndarray[DTYPE_f64_t, ndim=2] rsat, np.ndarray[DTYPE_f64_t, ndim=2] rsun):
+    """
+    Find illumination distance of satellite
+    """
+    cdef int n = rsat.shape[0]
+    cdef double[::1] rsat_view = rsat.ravel()
+    cdef double[::1] rsun_view = rsun.ravel()
+    cdef np.ndarray[np.float64_t, ndim=1] illum_dist_array
+    cdef double[::1] illum_dist_view = np.zeros(n, dtype=np.float64)
 
+    c_sun_sat_illumination_distance(&rsat_view[0], &rsun_view[0], &illum_dist_view[0], n)
+    illum_dist_array = np.asarray(illum_dist_view)
+    return illum_dist_array
+
+      
 

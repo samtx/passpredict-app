@@ -13,10 +13,9 @@
     */
 void c_sun_pos(double *jd, double *r, int n){
     
+    int i;
     double t_ut1, t_tdb, lmda_Msun, M_sun, lmda_eclp;
     double r_sun_mag, eps, coslmda, sinlmda, coseps, sineps;
-
-    int i, j;
 
     for(i=0; i<n; i++){
         t_ut1 = (jd[i] - DJ00) / DJC; // DJ00=2451545.0, DJC=36525.0
@@ -65,4 +64,31 @@ void c_sun_pos_ecef(double *jd, double *r, int n){
     //     for(j=0; j<3; j++)
     //         r[i*3 + j] = p[j];
     // }
+}
+
+
+void c_sun_sat_illumination_distance(double *rsat, double *rsun, double *illum_dist, int n){
+    int i, j;
+    double zeta, d;
+    double sat_i[3] = {0, 0, 0};
+    double sun_i[3] = {0, 0, 0};
+
+    for(i=0; i<n; i++)
+    {
+        for(j=0; j<3; j++)
+        {
+            sat_i[j] = rsat[i*3 + j];
+            sun_i[j] = rsun[i*3 + j];
+        }
+        /*  compute sun-sat angle  */
+        zeta = iauSepp(sat_i, sun_i);
+
+        /*  compute normal distance from satellite vector  */
+        d = iauPm(sat_i) * cos(zeta - DPI*0.5);
+
+        /*  store difference from radius of Earth  */
+        illum_dist[i] = d - D_R_EARTH;
+    }
+
+
 }
