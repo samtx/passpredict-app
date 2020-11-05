@@ -28,6 +28,6 @@ ext = [
 
 setup(
     name="app",
-    ext_modules = cythonize(ext, language_level="3"),
+    ext_modules = cythonize(ext, language_level="3")#, annotate=True),
     zip_safe = False,
 )
