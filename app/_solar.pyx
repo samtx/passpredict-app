@@ -1,3 +1,5 @@
+# cython: boundscheck=False, wraparound=False
+
 cimport cython
 
 import numpy as np
@@ -11,8 +13,6 @@ cdef extern from "passpredict.h":
     void c_sun_sat_illumination_distance(double *rsat, double *rsun, double *illum_dist, int n)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def sun_pos(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     """
     Get sun position vector in MOD frame
@@ -28,8 +28,6 @@ def sun_pos(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     return r
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def sun_pos_ecef(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     """
     Rotate position vector r from TEME -> ECEF (ITRF)
@@ -49,17 +47,15 @@ def sun_pos_ecef(np.ndarray[DTYPE_f64_t, ndim=1] jd):
     """
     cdef int n = jd.shape[0]
     cdef double[::1] jd_view = jd
+    #cdef np.ndarray[DTYPE_f64_t, ndim=2] r
     cdef double[::1] r_view
-    r_view = np.zeros((n), dtype=np.float64)
+    r_view = np.zeros(3*n, dtype=np.float64)
     
     c_sun_pos_ecef(&jd_view[0], &r_view[0], n)
-    r_view_array = np.asarray(r_view)
-    r = r_view_array.reshape((n, 3))
+    r = np.asarray(r_view).reshape((n, 3))
     return r
-
+    
       
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def sun_sat_illumination_distance(np.ndarray[DTYPE_f64_t, ndim=2] rsat, np.ndarray[DTYPE_f64_t, ndim=2] rsun):
     """
     Find illumination distance of satellite

@@ -8,8 +8,7 @@ from astropy.time import Time
 from ..schemas import Location, Satellite, Tle
 from ..timefn import julian_date_array_from_date
 from ..propagate import compute_satellite_data
-from ..solar import compute_sun_data
-
+from .._solar import sun_pos_ecef
 
 @pytest.fixture(scope='session')
 def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 'SatPredictData']:
@@ -20,11 +19,10 @@ def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 
     date_end = date_start + timedelta(days=10)
     dt_seconds = 1
     jd = julian_date_array_from_date(date_start, date_end, dt_seconds)
-    t = Time(jd, format='jd')
-    sun = compute_sun_data(t)
-    sat = compute_satellite_data(tle, t, sun)
+    sun_rECEF = sun_pos_ecef(jd)
+    sat = compute_satellite_data(tle, jd, sun_rECEF)
     location = Location(lat=32.1234, lon=-97.9876)
-    return jd, location, sun, sat
+    return jd, location, sun_rECEF, sat
 
 
 @pytest.fixture(scope='session')

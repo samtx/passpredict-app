@@ -4,7 +4,9 @@ from astropy.coordinates import TEME, CartesianRepresentation, ITRS
 from astropy.time import Time
 from sgp4.api import Satrec, WGS84
 
-from .solar import is_sat_illuminated, sat_illumination_distance
+from ._rotations import teme2ecef
+from ._solar import sun_sat_illumination_distance
+# from .solar import is_sat_illuminated, sat_illumination_distance
 from .schemas import Tle
 from .models import Sat, SatPredictData, SunPredictData
 
@@ -32,12 +34,12 @@ def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
     jd_array, fr_array = np.divmod(jd, 1)
     error, r, v = satrec.sgp4_array(jd_array, fr_array)
     # Change arrays from column major to row major while keeping C-continuous
-    r = np.reshape(r.ravel(order='F'), (3, r.shape[0]))
-    v = np.reshape(v.ravel(order='F'), (3, v.shape[0]))
+    # r = np.reshape(r.ravel(order='F'), (3, r.shape[0]))
+    # v = np.reshape(v.ravel(order='F'), (3, v.shape[0]))
     return r, v
 
 
-def compute_satellite_data(tle: Tle, t: Time, sun_rECEF: np.ndarray = None) -> SatPredictData:
+def compute_satellite_data(tle: Tle, jd: np.ndarray, sun_rECEF: np.ndarray = None) -> SatPredictData:
     """
     Compute satellite data for Time
     
@@ -45,18 +47,19 @@ def compute_satellite_data(tle: Tle, t: Time, sun_rECEF: np.ndarray = None) -> S
         https://docs.astropy.org/en/latest/coordinates/satellites.html
 
     """
-    r, _ = propagate_satellite(tle.tle1, tle.tle2, t.jd)
+    rTEME, _ = propagate_satellite(tle.tle1, tle.tle2, jd)
+    rECEF = teme2ecef(jd, rTEME)
     # Use the TEME reference frame from astropy
-    teme = TEME(CartesianRepresentation(r * u.km), obstime=t)
-    ecef = teme.transform_to(ITRS(obstime=t))
-    rECEF = ecef.data.xyz.value.astype(np.float32)  # extract numpy array from astropy object
+    # teme = TEME(CartesianRepresentation(r * u.km), obstime=t)
+    # ecef = teme.transform_to(ITRS(obstime=t))
+    # rECEF = ecef.data.xyz.value.astype(np.float32)  # extract numpy array from astropy object
     # sat.subpoint = ecef.earth_location
     # sat.latitude = sat.subpoint.lat.value
     # sat.longitude = sat.subpoint.lon.value
     
     if sun_rECEF is not None:
-        sun_sat_dist = sat_illumination_distance(rECEF, sun_rECEF)
-        illuminated = is_sat_illuminated(rECEF, sun_rECEF)
+        sun_sat_dist = sun_sat_illumination_distance(rECEF, sun_rECEF)
+        illuminated = sun_sat_dist > 0
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
     else:
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF)

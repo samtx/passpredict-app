@@ -1,3 +1,5 @@
+# cython: boundscheck=False, wraparound=False
+
 cimport cython
 
 cimport numpy as np
@@ -11,8 +13,6 @@ cdef extern from "passpredict.h":
     void c_ecef2sez(double *r, double phi, double lmda, int n)
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def mod2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim=2] r):
     """
     Rotate position vector r from MOD -> ECEF
@@ -38,8 +38,6 @@ def mod2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim=
     return r
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def teme2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim=2] r):
     """
     Rotate position vector r from TEME -> ECEF (ITRF)
@@ -67,8 +65,6 @@ def teme2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim
     return r
 
 
-@cython.boundscheck(False)
-@cython.wraparound(False)
 def ecef2sez(np.ndarray[np.float64_t, ndim=2] r, double phi, double lmda):
     """
     Rotate position vector r from ECEF -> SEZ

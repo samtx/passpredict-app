@@ -19,7 +19,7 @@ def set_sun_cache(
     Add sun hashdata to redis pipeline
     """
     rECEF_value = {
-        'n': rECEF.shape[1],
+        'n': rECEF.shape[0],
         'dtype': str(rECEF.dtype),
         'array': rECEF.tobytes()
     }
@@ -34,7 +34,7 @@ def get_sun_cache(sun: bytes):
     """
     n = int(sun[b'n'])
     dtype = sun[b'dtype'].decode()
-    arr = np.frombuffer(sun[b'array'], dtype=dtype).reshape((3, n))
+    arr = np.frombuffer(sun[b'array'], dtype=dtype).reshape((n, 3))
     return arr
 
 
@@ -44,7 +44,7 @@ def set_sat_cache(sat_key: str, sat: SatPredictData, pipe: Pipeline, ttl: int=86
     """
     sat_rECEF = sat.rECEF
     data = {
-        'n': sat_rECEF.shape[1],
+        'n': sat_rECEF.shape[0],
         'dtype': str(sat_rECEF.dtype),
         'rECEF': sat_rECEF.tobytes(),
         'illuminated': sat.illuminated.tobytes(),
@@ -58,7 +58,7 @@ def set_sat_cache(sat_key: str, sat: SatPredictData, pipe: Pipeline, ttl: int=86
 def get_sat_cache(sat: bytes, satid: int):
     n = int(sat[b'n'])
     dtype = sat[b'dtype'].decode()
-    rECEF = np.frombuffer(sat[b'rECEF'], dtype=dtype).reshape((3, n))
+    rECEF = np.frombuffer(sat[b'rECEF'], dtype=dtype).reshape((n, 3))
     illuminated = np.frombuffer(sat[b'illuminated'], dtype=bool)
     sun_sat_dist = np.frombuffer(sat[b'sun_sat_dist'], dtype=dtype)
     return SatPredictData(id=satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)

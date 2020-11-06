@@ -9,8 +9,8 @@ common_kw = {
     'extra_link_args': ['--verbose'],
     'include_dirs': ['app/', '/home/sam/include/', '/usr/include/', '/usr/local/include/', np.get_include()],
     'extra_compile_args': ['-O2'],
-    # define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
     'language': 'c'
+    # define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
 }
 
 ext = [
@@ -33,6 +33,6 @@ ext = [
 
 setup(
     name="app",
-    ext_modules = cythonize(ext, language_level="3"),#, annotate=True),
+    ext_modules = cythonize(ext, language_level="3"),#, gdb_debug=True),#, annotate=True),
     zip_safe = False,
 )
