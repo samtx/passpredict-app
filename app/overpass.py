@@ -176,8 +176,8 @@ def predict_single_satellite_overpasses(
     satid: int,
     lat: float,
     lon: float,
-    date_start: datetime,
     *,
+    date_start: date = None,
     days: int = 10,
     min_elevation: float = 10.0,
     visible_only: bool = False,
@@ -196,41 +196,15 @@ def predict_single_satellite_overpasses(
         satellite: Satellite object
             satellite ID number in Celestrak, ISS is 25544
     """
+    if date_start is None:
+        date_start = date.today()
     date_end = date_start + timedelta(days=days)  
     satellite = Satellite(id=satid)
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + TIME_KEY_SUFFIX
-    sun_key = 'sun:' + time_key
-    sat_key = 'sat:' + str(satid) + ':' + time_key
-    with cache.pipeline() as pipe:
-        pipe.hgetall(sun_key)
-        pipe.hgetall(sat_key)
-        sun, sat = pipe.execute()
-        if not sun:
-            sun_rECEF = sun_pos_ecef(jd)
-            pipe = set_sun_cache(sun_key, sun_rECEF, pipe, 86400)
-        else:
-            sun_rECEF = get_sun_cache(sun)
-        if not sat:
-            tle = get_TLE(satellite.id)
-            sat = compute_satellite_data(tle, jd, sun_rECEF)
-            pipe = set_sat_cache(sat_key, sat, pipe, 86400)
-        else:
-            sat = get_sat_cache(sat, satid)
-        pipe.execute()
-    # Only use slice of position and time arrays requested
-    if days < MAX_DAYS:
-        end_index = NUM_TIMESTEPS_PER_DAY * days
-        jd = jd[:end_index]
-        sun_rECEF = sun_rECEF[:end_index]
-        sat = SatPredictData(
-            id=sat.id,
-            rECEF=sat.rECEF[:, :end_index],
-            illuminated=sat.illuminated[:end_index],
-            sun_sat_dist=sat.sun_sat_dist[:end_index],
-            intrinsinc_mag=sat.intrinsinc_mag
-        )
+    sun_rECEF = sun_pos_ecef(jd)
+    tle = get_TLE(satellite.id)
+    sat = compute_satellite_data(tle, jd, sun_rECEF)
     overpasses = compute_single_satellite_overpasses(
         sat,
         jd=jd, 
@@ -256,43 +230,32 @@ def predict_all_visible_satellite_overpasses(
     h: float = 0.0,
     min_elevation: float = 10.0,
 ):
+    if date_start is None:
+        date_start = date.today()
     date_end = date_start + timedelta(days=1)
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    time_key = 'time:' + date_start.strftime('%Y%m%d') + ':1:' + str(DT_SECONDS)
-    sun_key = 'sun:' + time_key
-    with cache.pipeline() as pipe:
-        pipe.hgetall(sun_key)
-        for satid in VISIBLE_SATS:
-            sat_key = 'sat:' + str(satid) + ':' + time_key
-            pipe.hgetall(sat_key)
-        sun, *sats = pipe.execute()
-
-        if not sun:
-            sun = sun_pos_ecef(jd)
-            pipe = set_sun_cache(sun_key, sun, pipe, 86400)
-        else:
-            sun = get_sun_cache(sun)
-        
-        num_visible_sats = len(VISIBLE_SATS)
-        sat_list = [None] * num_visible_sats
-
-        for i, satid, satdata in zip(range(num_visible_sats), VISIBLE_SATS, sats):
-            if not satdata:
-                print(f'Computing satellite position for satellite {satid}')
-                tle = get_TLE(satid)
-                sat = compute_satellite_data(tle, jd, sun)
-                sat_key = 'sat:' + str(satid) + ':' + time_key
-                pipe = set_sat_cache(sat_key, sat, pipe, 86400)
-            else:
-                sat = get_sat_cache(satdata, satid)
-            sat_list[i] = sat
-
-        overpasses = find_overpasses(jd, location, sat_list, sun, min_elevation, visible_only=True)
-        overpass_result = OverpassResult(
-            location=location,
-            overpasses=overpasses
+    sun = sun_pos_ecef(jd)    
+    num_visible_sats = len(VISIBLE_SATS)
+    overpasses = []
+    for satid in zip(range(num_visible_sats), VISIBLE_SATS):        
+        tle = get_TLE(satid)
+        sat = compute_satellite_data(tle, jd, sun)
+        sat_overpasses = compute_single_satellite_overpasses(
+            sat,
+            jd=jd, 
+            location=location, 
+            sun_rECEF=sun_rECEF, 
+            min_elevation=min_elevation,
+            visible_only=visible_only,
+            store_sat_id=True
         )
+        overpasses += sat_overpasses
+    overpass_result = OverpassResult(
+        location=location,
+        overpasses=overpasses
+    )
+    return overpass_result
 
 
 def _start_end_index(x):
