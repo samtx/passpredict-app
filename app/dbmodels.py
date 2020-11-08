@@ -93,7 +93,7 @@ tle = Table(
     Column('tle1', String(70)),
     Column('tle2', String(70)),
     Column('epoch', DateTime),
-    Column('satellite_id', Integer, ForeignKey('satellite.id', ondelete='CASCADE')),
+    Column('satellite_id', Integer, ForeignKey('satellite.id', ondelete='CASCADE'), index=True),
     Column('created', DateTime, onupdate=datetime.datetime.now())
 )
 
