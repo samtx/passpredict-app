@@ -75,6 +75,10 @@ class Tle(BaseModel):
             epoch=epoch,
             satid=satid,
         )
+
+    def __hash__(self):
+        hash_str = str(self.satid) + self.tle1 + self.tle2
+        return hash(hash_str)
     
     class Config:
         title = 'TLE'

@@ -1,12 +1,18 @@
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
+import json
+from typing import Dict, Set
 
 import requests
 import numpy as np
 from pydantic import BaseModel, Field
+from sqlalchemy.sql import select
+from sqlalchemy import and_
 
 from .utils import grouper, satid_from_tle, epoch_from_tle, parse_tle
 from .schemas import Tle
+from .database import engine
+from .dbmodels import tle as tledb
 
 
 
@@ -17,6 +23,56 @@ from .schemas import Tle
 #     epoch: datetime.datetime
 #     satellite_id: int
 #     created: datetime.datetime
+
+def download_common_tles_from_celestrak() -> Set:
+    """
+    Download common tle data from celestrak
+    """
+    urls = [
+        'https://www.celestrak.com/NORAD/elements/active.txt',
+        'https://celestrak.com/NORAD/elements/visual.txt',
+        'https://celestrak.com/NORAD/elements/stations.txt',
+    ]
+    tles = set()
+    for url in urls:
+        r = requests.get(url)
+        print(f'request url {url}')
+        for tle_strings in grouper(r.text.splitlines(), 3):
+            tle = Tle.from_string(tle_strings[1], tle_strings[2])
+            tles.add(tle)
+    return tles
+
+
+def import_tle_data_to_database(tle_data: Set) -> None:
+    """
+    Use SQLAlchemy to update database with tle data
+    """
+    # tle_data_list = [tle.dict() for tle in tle_data]
+    created_at = datetime.utcnow()
+    with engine.connect() as conn:
+        for tle in tle_data:
+            # Check if there is a tle for the datetime, 
+            # if not then insert record, otherwise skip
+            stmt = select([tledb]).where(
+                and_(
+                    tledb.c.satellite_id==tle.satid,
+                    tledb.c.epoch==tle.epoch
+                )
+            )
+            res = conn.execute(stmt).fetchone()
+            if not res:
+                stmt = tledb.insert({
+                    'satellite_id': tle.satid,
+                    'tle1': tle.tle1,
+                    'tle2': tle.tle2,
+                    'epoch': tle.epoch,
+                    'created': created_at
+                })
+                res = conn.execute(stmt)
+                print(f'Inserted sat {tle.satid} for epoch {tle.epoch} in db.')
+            else:
+                print(f'sat {tle.satid} for epoch {tle.epoch} already exists in db. skipping...')
+
 
 
 def get_orbit_data_from_celestrak(satellite_id):

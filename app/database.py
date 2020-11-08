@@ -3,7 +3,9 @@
 import sqlalchemy
 import sqlalchemy.ext.declarative
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///passpredict.db"
+from .settings import database_uri
+
+SQLALCHEMY_DATABASE_URL = database_uri
 
 engine = sqlalchemy.create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={'check_same_thread': False}
