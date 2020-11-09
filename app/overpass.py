@@ -4,7 +4,7 @@ import time
 import math
 import pickle
 
-from astropy.time import Time
+#from astropy.time import Time
 from numpy import ndarray
 import numpy as np
 from scipy.interpolate import interp1d
@@ -16,7 +16,7 @@ from .propagate import compute_satellite_data
 from .timefn import julian_date_array_from_date, jday2datetime
 from .schemas import Overpass, Location, Satellite, OverpassResult, Point
 from .models import Sun, RhoVector, Sat, SatPredictData, PassType
-from .tle import get_TLE
+from .tle import get_TLE, get_most_recent_tle
 from .constants import RAD2DEG, DAY_S
 from ._rotations import ecef2sez
 from .topocentric import site_ECEF
@@ -203,7 +203,7 @@ def predict_single_satellite_overpasses(
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)
-    tle = get_TLE(satellite.id)
+    tle = get_most_recent_tle(satellite.id)
     sat = compute_satellite_data(tle, jd, sun_rECEF)
     overpasses = compute_single_satellite_overpasses(
         sat,
@@ -235,19 +235,22 @@ def predict_all_visible_satellite_overpasses(
     date_end = date_start + timedelta(days=1)
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    sun = sun_pos_ecef(jd)    
+    sun_rECEF = sun_pos_ecef(jd)    
     num_visible_sats = len(VISIBLE_SATS)
     overpasses = []
-    for satid in zip(range(num_visible_sats), VISIBLE_SATS):        
-        tle = get_TLE(satid)
-        sat = compute_satellite_data(tle, jd, sun)
+    for satid in VISIBLE_SATS:        
+        tle = get_most_recent_tle(satid)
+        if not tle:
+            # no TLE data for satellite
+            continue
+        sat = compute_satellite_data(tle, jd, sun_rECEF)
         sat_overpasses = compute_single_satellite_overpasses(
             sat,
             jd=jd, 
             location=location, 
             sun_rECEF=sun_rECEF, 
             min_elevation=min_elevation,
-            visible_only=visible_only,
+            visible_only=True,
             store_sat_id=True
         )
         overpasses += sat_overpasses

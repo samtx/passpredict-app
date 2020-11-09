@@ -133,6 +133,27 @@ def get_TLE(satid: int, tle_data=None) -> Tle:
     return tle
     
 
+def get_most_recent_tle(satid: int) -> Tle:
+    """
+    Queries database for most recent tle for satellite
+    """
+    with engine.connect() as conn:
+        stmt = select([tledb]).where(
+            tledb.c.satellite_id == satid
+        ).order_by(
+            tledb.c.epoch.desc()
+        )
+        res = conn.execute(stmt).fetchone()
+        if res:
+            tle = Tle.from_string(
+                tle1=res['tle1'],
+                tle2=res['tle2']
+            )
+            return tle
+        else:
+            # satellite tle not found
+            return None
+
 def save_TLE_data(url=None):
     tle_data = parse_tles_from_celestrak(url)
     with open('tle_data.json', 'w') as file:
