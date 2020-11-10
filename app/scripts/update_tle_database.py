@@ -11,7 +11,16 @@ from app.schemas import Tle
 from app.database import engine
 from app.dbmodels import tle as tledb
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__file__)
+logger.setLevel(logging.DEBUG)
+
+# Create handlers
+fh = logging.FileHandler('passpredict-update-tle.log')
+fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(fmt)
+fh.setLevel(logging.INFO)
+logger.addHandler(fh)
+
 
 #  Download common tle data from celestrak
 urls = [
@@ -71,10 +80,10 @@ try:
                 'created': created_at
             })
             res = conn.execute(stmt)
-            logger.info(f'Inserted satellite {tle.satid} TLE for epoch {tle.epoch} in db.')
+            logger.debug(f'Inserted satellite {tle.satid} TLE for epoch {tle.epoch} in db.')
             num_inserted += 1
         else:
-            logger.info(f'Sat {tle.satid} for epoch {tle.epoch} already exists in db. Skipping...')
+            logger.debug(f'Sat {tle.satid} for epoch {tle.epoch} already exists in db. Skipping...')
             num_skipped += 1
 except Exception:
     logger.exception('Exception trying to update database with new TLEs')

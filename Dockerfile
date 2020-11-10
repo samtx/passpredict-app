@@ -1,11 +1,13 @@
 FROM python:3.8-slim
 
-ENV PYTHONPATH=/app
+ENV PYTHONPATH "${PYTHONPATH}:/app"
 ENV PYTHONBUFFERED=1
+ENV SOFA_INSTALL_DIR=/usr/local/
 
 RUN apt-get update \
 && apt-get install gcc -y \
-&& apt-get install build-essential -y
+&& apt-get install build-essential -y \
+&& apt-get install cron -y
 
 WORKDIR /app
 
@@ -25,11 +27,17 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY setup.py .
-COPY app .
+COPY app app
 RUN python setup.py build_ext --inplace
+RUN python setup.py install
+
+# set up cron jobs to update TLE database
+COPY crontab /etc/cron.d/passpredict
+RUN chmod 0644 /etc/cron.d/passpredict
+RUN service cron start
 
 EXPOSE 80
 EXPOSE 8000
 
 # CMD [ "gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
