@@ -1,4 +1,4 @@
-astropy==4.1rc1
+astropy==4.2
 sgp4==2.12
 fastapi
 uvicorn
@@ -7,4 +7,6 @@ gunicorn
 redis
 requests
 Cython
+sqlalchemy
+alembic
 aiohttp[speedups]

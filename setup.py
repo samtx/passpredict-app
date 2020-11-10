@@ -5,7 +5,7 @@ import numpy as np
 
 common_kw = {
     'libraries': ['sofa_c'],#, 'math'],
-    'library_dirs': ['/home/sam/lib/'],
+    'library_dirs': ['/home/sam/lib/', '/usr/local/lib/'],
     'extra_link_args': ['--verbose'],
     'include_dirs': ['app/', '/home/sam/include/', '/usr/include/', '/usr/local/include/', np.get_include()],
     'extra_compile_args': ['-O2'],

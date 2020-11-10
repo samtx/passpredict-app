@@ -49,7 +49,7 @@
 
 # Specify the installation home directory.
 
-INSTALL_DIR = $(HOME)
+INSTALL_DIR = $(SOFA_INSTALL_DIR)
 
 # Specify the installation directory for the library.
 
@@ -64,8 +64,8 @@ SOFA_INC_DIR = $(INSTALL_DIR)/include/
 # for functions, CFLAGX for executables) here.
 
 CCOMPC = gcc
-CFLAGF = -c -pedantic -Wall -W -O
-CFLAGX = -pedantic -Wall -W -O
+CFLAGF = -c -pedantic -Wall -W -O2
+CFLAGX = -pedantic -Wall -W -O2
 
 #----YOU SHOULDN'T HAVE TO MODIFY ANYTHING BELOW THIS LINE---------
 

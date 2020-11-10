@@ -1,2 +1,4 @@
--r requirements.in
+-r requirements.txt
 pytest
+pip-tools
+
