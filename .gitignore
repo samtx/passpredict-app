@@ -1,4 +1,10 @@
 
+# log files
+*.log
+
+# Cython annotated html
+app/_*.html
+
 .vscode/
 .venv/
 .env/
