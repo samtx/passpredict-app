@@ -51,6 +51,16 @@ def test_c_ecef2sez():
     # for i in [0, 1, 2]:
     #     assert_almost_equal(rSEZ[i], rSEZ_true[i], decimal=0, verbose=True)
 
+def test_teme2ecef():
+    """
+    Vallado matlab files, exsgp4_teme.m
+    """
+    jd = np.array([453101.50000000])
+    rECEF = np.array([[-1033.4793830, 7901.2952754, 6380.3565958]])
+    rTEME = np.array([[5094.1801072, 6127.6447052, 6380.3445327]])
+    rTEME_2 = _rotations.teme2ecef(jd, rECEF)
+    assert_allclose(rTEME_2, rTEME)
+
 
 if __name__ == "__main__":
     import pytest
