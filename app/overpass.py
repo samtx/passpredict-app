@@ -8,9 +8,11 @@ import pickle
 from numpy import ndarray
 import numpy as np
 from scipy.interpolate import interp1d
+from sqlalchemy.sql import select
 
 from . import _overpass
 from ._solar import sun_pos_ecef
+from .dbmodels import tle as tledb
 from .solar import compute_sun_data
 from .propagate import compute_satellite_data
 from .timefn import julian_date_array_from_date, jday2datetime
@@ -26,8 +28,6 @@ from .utils import get_visible_satellites
 
 
 VISIBLE_SATS = get_visible_satellites()
-print(f'{len(VISIBLE_SATS)} visible satellites found')
-
 
 DT_SECONDS = 120
 # Make sure that dt_seconds evenly divides into number of seconds per day
@@ -236,10 +236,24 @@ def predict_all_visible_satellite_overpasses(
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)    
-    num_visible_sats = len(VISIBLE_SATS)
+
+    # # Query TLEs for visible satellites
+    # try:
+    #     conn = engine.connect()
+    #     s = select(
+    #         [tledb.c.satellite_id, tledb.c.tle1, tledb.c.tle2]) \
+    #         .where(tledb.c.satellite_id.in_(VISIBLE_SATS))
+    #     )
+    #     res = conn.execute(s)
+
+    # except:
+    #     print("Error quering TLEs")
+    # finally:
+    #     conn.close()
+
     overpasses = []
     for satid in VISIBLE_SATS:        
-        tle = get_most_recent_tle(satid)
+        tle = get_most_recent_tle(satid, raise_404=False)
         if not tle:
             # no TLE data for satellite
             continue

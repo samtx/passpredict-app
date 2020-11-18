@@ -1,18 +1,20 @@
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
 import json
-from typing import Dict, Set
+from typing import Dict, Set, Union, List, Tuple, Sequence
 
 import requests
 import numpy as np
 from pydantic import BaseModel, Field
 from sqlalchemy.sql import select
 from sqlalchemy import and_
+from fastapi import HTTPException
 
 from .utils import grouper, satid_from_tle, epoch_from_tle, parse_tle
 from .schemas import Tle
 from .database import engine
 from .dbmodels import tle as tledb
+from .cache import cache
 
 
 
@@ -131,13 +133,20 @@ def get_TLE(satid: int, tle_data=None) -> Tle:
     tle2 = tle_data[satid]['tle2']
     tle = Tle.from_string(tle1=tle1, tle2=tle2)
     return tle
-    
 
-def get_most_recent_tle(satid: int) -> Tle:
+
+def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=True) -> Union[Tle, Sequence[Tle]]:
     """
     Queries database for most recent tle for satellite
     """
-    with engine.connect() as conn:
+
+    # Check TLE in cache first
+
+
+
+    # Get TLE from database
+    try:
+        conn = engine.connect()
         stmt = select([tledb]).where(
             tledb.c.satellite_id == satid
         ).order_by(
@@ -151,8 +160,16 @@ def get_most_recent_tle(satid: int) -> Tle:
             )
             return tle
         else:
-            # satellite tle not found
-            return None
+            if raise_404:
+                # satellite tle not found
+                raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
+            pass
+    except Exception:
+        pass
+        # log an exception error here    
+    finally:
+        conn.close()
+    return
 
 def save_TLE_data(url=None):
     tle_data = parse_tles_from_celestrak(url)

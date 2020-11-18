@@ -2,6 +2,7 @@ import logging
 import datetime
 from itertools import zip_longest
 from typing import Dict
+from pathlib import Path
 
 import requests
 
@@ -36,12 +37,21 @@ def get_visible_satellites():
     """
     Download the latest TLEs from celestrak's visible.txt file
     """
-    visible_sat_url = 'https://celestrak.com/NORAD/elements/visual.txt'
-    r = requests.get(visible_sat_url)
-    tle_data = {}
-    for tle_strings in grouper(r.text.splitlines(), 3):
-        tle_data.update(parse_tle(tle_strings))
-    return tle_data
+    # Read satellite IDs from visible.txt file
+    p = Path(__file__).parent / 'visible.txt'
+    with open(p, 'r') as f:
+        sat_id_strings = f.readlines()
+        print(f'{len(sat_id_strings)} visible satellites found')
+        visible_sat_ids = [int(sat) for sat in sat_id_strings]
+    return visible_sat_ids
+
+
+    # visible_sat_url = 'https://celestrak.com/NORAD/elements/visual.txt'
+    # r = requests.get(visible_sat_url)
+    # tle_data = {}
+    # for tle_strings in grouper(r.text.splitlines(), 3):
+    #     tle_data.update(parse_tle(tle_strings))
+    # return tle_data
 
 
 def parse_tle(tle_string_list):

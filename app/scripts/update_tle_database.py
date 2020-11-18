@@ -15,9 +15,7 @@ logger = logging.getLogger(__file__)
 logger.setLevel(logging.DEBUG)
 
 # Create handlers
-fh = logging.FileHandler('passpredict-update-tle.log')
-fmt = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(fmt)
+fh = logging.FileHandler('app-update-tle.log')
 fh.setLevel(logging.INFO)
 logger.addHandler(fh)
 
@@ -32,7 +30,8 @@ urls = [
     'https://www.celestrak.com/NORAD/elements/tle-new.txt',
     'https://www.celestrak.com/NORAD/elements/noaa.txt',
     'https://www.celestrak.com/NORAD/elements/goes.txt',
-
+    'https://celestrak.com/NORAD/elements/supplemental/starlink.txt',
+    'https://celestrak.com/NORAD/elements/supplemental/planet.txt',
 ]
 url_responses = []
 for url in urls:
@@ -70,7 +69,7 @@ try:
                 tledb.c.epoch == tle.epoch
             )
         )
-        res = conn.execute(stmt).fetchone()
+        res = conn.execute(stmt).fetchall()
         if not res:
             stmt = tledb.insert({
                 'satellite_id': tle.satid,
