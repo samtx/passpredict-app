@@ -3,12 +3,27 @@ import os
 
 import numpy as np
 
-from .. import propagate
-from ..timefn import compute_time_array
-from ..schemas import Satellite, Tle
-from ..tle import epoch_from_tle
+from app import propagate
+from app.timefn import julian_date_array_from_datetime, jday2datetime_array
+from app.schemas import Satellite, Tle
+from app.tle import epoch_from_tle
 
 tz_utc = datetime.timezone.utc
+
+def compute_skyfield_ecef_position(tle1, tle2, jd):
+    """
+    Use the skyfield api to compute the position coordinates for satellite
+    """
+    from skyfield.api import Topos, load, EarthSatellite
+    from skyfield.sgp4lib import TEME_to_ITRF
+    ts = load.timescale()
+    sat = EarthSatellite(tle1, tle2, ts=ts)
+    datetimes = jday2datetime_array(jd)
+    t = ts.from_datetimes(datetimes)
+    rTEME, vTEME, _ = sat._position_and_velocity_TEME_km(t)
+    rECEF, _ = TEME_to_ITRF(jd, rTEME, vTEME)
+    return rECEF
+
 
 def test_propagate_iss():
     """
@@ -32,12 +47,13 @@ def test_propagate_iss():
         epoch=epoch_from_tle(tle1),
         satid=satellite.id
     )
-    t = compute_time_array(datetime_start, datetime_end, dt_sec)
-    sat = propagate.compute_satellite_data(tle, t)
+    jd = julian_date_array_from_datetime(datetime_start, datetime_end, dt_sec)
+    skyfield_rECEF = compute_skyfield_ecef_position(tle.tle1, tle.tle2, jd)
+    sat = propagate.compute_satellite_data(tle, jd)
     
-    fname = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data/skyfield_iss_rECEF.npy'))
-    skyfield_rECEF = np.load(fname, allow_pickle=True)
-    diff = np.linalg.norm(sat.rECEF - skyfield_rECEF, axis=0)
+    # fname = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data/skyfield_iss_rECEF.npy'))
+    # skyfield_rECEF = np.load(fname, allow_pickle=True)
+    diff = np.linalg.norm(sat.rECEF - skyfield_rECEF.T, axis=1)
 
     # TODO: Make this more accurate in the future!!
     np.testing.assert_array_less(diff, 20.0, verbose=True)  # difference less than 20 km

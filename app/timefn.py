@@ -38,7 +38,7 @@ def utc2tt(UTC, deltaAT=37.0, deltaUT1=0.0):
     return TT
 
 
-def julian_date(yr, mo=None, dy=None, hr=None, mn=None, sec=None):
+def julian_date(yr, mo=None, dy=None, hr=None, mn=None, sec=None, us=0.0):
     """Compute Julian Date from datetime or equivalent elements
 
     Notes
@@ -55,6 +55,7 @@ def julian_date(yr, mo=None, dy=None, hr=None, mn=None, sec=None):
         yr, mo, dy = dt.year, dt.month, dt.day
         hr, mn, sec = dt.hour, dt.minute, dt.second
         sec += dt.microsecond * (10 ** -6)
+    sec += us * 10e-6
     jd1 = 367 * yr
     jd2 = 7 * (yr + (mo + 9) // 12) // 4
     jd3 = (275 * mo) // 9
@@ -78,7 +79,7 @@ def julian_day(year, month=1, day=1):
     )
 
 
-def julian_date2(yr, mo=1, dy=1, hr=0, mn=0, sec=0.0):
+def julian_date2(yr, mo=1, dy=1, hr=0, mn=0, sec=0.0, us=0.0):
     """Given a proleptic Gregorian calendar date, return a Julian date float."""
     if isinstance(yr, datetime.datetime) or isinstance(yr, np.datetime64):
         if isinstance(yr, np.datetime64):
@@ -276,5 +277,31 @@ def julian_date_array_from_date(date_start: datetime.date, date_end: datetime.da
     """
     jdt0 = julian_day(date_start.year, date_start.month, date_start.day)
     jdtf = julian_day(date_end.year, date_end.month, date_end.day)
+    dt_days = dt_seconds/(24*60*60.0)
+    return np.arange(jdt0, jdtf, dt_days, dtype=float)
+
+
+def julian_date_array_from_datetime(datetime_start: datetime.datetime, datetime_end: datetime.datetime, dt_seconds: float) -> np.ndarray:
+    """
+    Create a numpy array of julian date values from python datetimes
+    """
+    jdt0 = julian_date(
+        datetime_start.year,
+        datetime_start.month, 
+        datetime_start.day, 
+        datetime_start.hour, 
+        datetime_start.minute, 
+        datetime_start.second,
+        datetime_start.microsecond
+    )
+    jdtf = julian_date(
+        datetime_end.year,
+        datetime_end.month, 
+        datetime_end.day, 
+        datetime_end.hour, 
+        datetime_end.minute, 
+        datetime_end.second,
+        datetime_end.microsecond
+    )
     dt_days = dt_seconds/(24*60*60.0)
     return np.arange(jdt0, jdtf, dt_days, dtype=float)

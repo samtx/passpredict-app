@@ -118,7 +118,7 @@ void c_teme2ecef(double *jd, double *r, int n){
         err = iauDat(year, month, day, day_fraction, &delta_at);
         tai = (jd1 + jd2) + delta_at/DAYSEC;
         tt = tai + 32.184/DAYSEC;
-        tt -= DJ00;   // Leave terrestial time in J2000 format
+        // tt -= DJ00;   // Leave terrestial time in J2000 format
 
         /* IAU 1980 Nutation */
         iauNut80(DJ00, tt, &dp80, &de80); 
@@ -132,6 +132,7 @@ void c_teme2ecef(double *jd, double *r, int n){
         tt1 = fmod(tt, 1);
         tt2 = tt - tt1;
         gst = iauAnp(iauGmst82(DJ00 + tt1, tt2) + ee);
+        // gst = iauAnp(iauGmst82(tt1, tt2));
         /* Form celestial-terrestrial matrix (no polar motion yet). */
         iauIr(rn); // Initialize rn to identity matrix
         iauRz(gst, rn);
@@ -139,8 +140,8 @@ void c_teme2ecef(double *jd, double *r, int n){
         /* Rotate the i position vector in-place */
         for(j=0; j<3; j++) 
             p[j] = r[i*3 + j];
-        // iauRxp(rn, p, rnp);
-        iauTrxp(rn, p, rnp);
+        iauRxp(rn, p, rnp);
+        // iauTrxp(rn, p, rnp);
         for(j=0; j<3; j++) 
             r[i*3 + j] = rnp[j];   
     }

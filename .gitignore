@@ -1,4 +1,13 @@
 
+.ipynb_checkpoints
+
+# benchmarks
+.asv
+
+# Environment variable files
+.env
+
+
 # log files
 *.log
 
