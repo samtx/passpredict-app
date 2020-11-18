@@ -2,26 +2,27 @@
 import datetime
 from typing import List, Optional
 import pickle
-import os
-from itertools import zip_longest
+import logging
 
 from fastapi import FastAPI, Query, Path
-from astropy.time import Time
-import numpy as np
 from pydantic import BaseModel
 
-from .predictions import find_overpasses
-from .propagate import compute_satellite_data
-from .solar import compute_sun_data
-from .timefn import julian_date_array_from_date
-from .schemas import Location, Satellite, Overpass
-from .tle import get_TLE
-from .models import SatPredictData, SunPredictData
-from .overpass import predict_all_visible_satellite_overpasses, predict_single_satellite_overpasses
+from .schemas import Location, Overpass
+from .overpass import (
+    predict_all_visible_satellite_overpasses,
+    predict_single_satellite_overpasses
+)
 from .cache import cache
 from .settings import MAX_DAYS
 
 app = FastAPI()
+
+logging.basicConfig(
+    filename='app.log',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+
 
 class OverpassResult(BaseModel):
     location: Location
