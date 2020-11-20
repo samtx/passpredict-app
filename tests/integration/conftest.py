@@ -9,6 +9,7 @@ from app.schemas import Location, Satellite, Tle
 from app.timefn import julian_date_array_from_date
 from app.propagate import compute_satellite_data
 from app._solar import sun_pos_ecef
+from app.overpass import DT_SECONDS
 
 @pytest.fixture(scope='session')
 def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 'SatPredictData']:
@@ -17,8 +18,7 @@ def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 
     tle = Tle.from_string(tle1=tle1, tle2=tle2)
     date_start = tle.epoch.date()
     date_end = date_start + timedelta(days=10)
-    dt_seconds = 1
-    jd = julian_date_array_from_date(date_start, date_end, dt_seconds)
+    jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)
     sat = compute_satellite_data(tle, jd, sun_rECEF)
     location = Location(lat=32.1234, lon=-97.9876)
