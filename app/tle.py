@@ -145,8 +145,7 @@ def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=Tru
 
 
     # Get TLE from database
-    try:
-        conn = engine.connect()
+    with engine.connect() as conn:
         stmt = select([tledb]).where(
             tledb.c.satellite_id == satid
         ).order_by(
@@ -164,11 +163,6 @@ def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=Tru
                 # satellite tle not found
                 raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
             pass
-    except Exception:
-        pass
-        # log an exception error here    
-    finally:
-        conn.close()
     return
 
 def save_TLE_data(url=None):
