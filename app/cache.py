@@ -1,8 +1,12 @@
+from __future__ import annotations
 import numpy as np
-import redis
-from redis.client import Pipeline
 
-from .models import SunPredictData, SatPredictData
+try:
+    import redis
+except ImportError:
+    import fakeredis as redis
+
+from .models import SatPredictData
 from .settings import REDIS_HOST
 
 

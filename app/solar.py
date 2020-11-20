@@ -3,11 +3,8 @@ import math
 
 import numpy as np
 from numpy.linalg import norm
-from astropy.time import Time
-from astropy.coordinates import ITRS, get_sun
 
 from .constants import DEG2RAD, AU_KM, R_EARTH
-from .models import SunPredictData
 
 
 def sun_pos(t):
@@ -53,7 +50,7 @@ def sun_sat_angle(rsat, rsun):
     sinzeta = norm(crossproduct, axis=0) / (norm(rsun, axis=0) * norm(rsat, axis=0))
     if len(sinzeta.shape) > 0:
         sinzeta[np.logical_and(1.0000003 > sinzeta, sinzeta > 1)] = 1.0  # fix some out of bounds warnings where sinzeta > 1.0
-    else: 
+    else:
         sinzeta = 1 if (1.0000003 > sinzeta > 1) else sinzeta
     return np.arcsin(sinzeta)
 
@@ -77,25 +74,10 @@ def sat_illumination_distance(rsat, rsun):
     dist = sun_sat_orthogonal_distance(rsat, zeta)
     dist -= R_EARTH
     return dist
-    
+
 
 def is_sat_illuminated(rsat, rsun):
     dist = sat_illumination_distance(rsat, rsun)
     is_illum = dist > 0
     return is_illum
 
-
-def compute_sun_data(t: Time) -> np.ndarray:
-    """
-    Compute sun position data
-
-    Compute for each minute, then interpolate for each second
-    """
-    t_tmp = t[::60]
-    sun_tmp = get_sun(t_tmp)  # get astropy coordinates for sun in GCRS
-    sun_tmp = sun_tmp.transform_to(ITRS(obstime=t_tmp))  # transform to ECEF frame
-    sun_tmp = sun_tmp.data.xyz.to('km').value
-    sun_rECEF = np.empty((3, t.size), dtype=np.float32)
-    for i in range(3):
-        sun_rECEF[i] = np.interp(t.jd, t_tmp.jd, sun_tmp[i])
-    return sun_rECEF

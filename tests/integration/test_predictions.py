@@ -1,23 +1,11 @@
 # Test using pytest
 
-from datetime import datetime, timedelta, timezone, date
-
-from numpy.testing import assert_allclose, assert_almost_equal
-import numpy as np
 import pytest
 
-from app import predictions
-from app import timefn
-from app.constants import ASEC2RAD
-from app.tle import get_TLE
-from app.schemas import Location, Satellite
-from app.propagate import propagate_satellite
-from app.models import PassType
 from app.overpass import (
     compute_single_satellite_overpasses,
-    predict_single_satellite_overpasses, 
-    predict_all_visible_satellite_overpasses
 )
+
 
 @pytest.mark.predict
 def test_predict_nocache(init_find_overpasses):

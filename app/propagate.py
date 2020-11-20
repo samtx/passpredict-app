@@ -1,17 +1,15 @@
 import numpy as np
-from astropy import units as u
-from astropy.coordinates import TEME, CartesianRepresentation, ITRS
-from astropy.time import Time
 from sgp4.api import Satrec, WGS84
 
 from ._rotations import teme2ecef
 from ._solar import sun_sat_illumination_distance
 # from .solar import is_sat_illuminated, sat_illumination_distance
 from .schemas import Tle
-from .models import Sat, SatPredictData, SunPredictData
+from .models import SatPredictData
 
 # import debugpy
 # debugpy.debug_this_thread()
+
 
 def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
     """Propagate satellite position forward in time.
@@ -42,8 +40,8 @@ def propagate_satellite(tle1, tle2, jd, *args, **kwargs):
 def compute_satellite_data(tle: Tle, jd: np.ndarray, sun_rECEF: np.ndarray = None) -> SatPredictData:
     """
     Compute satellite data for Time
-    
-    Reference: 
+
+    Reference:
         https://docs.astropy.org/en/latest/coordinates/satellites.html
 
     """
@@ -52,7 +50,8 @@ def compute_satellite_data(tle: Tle, jd: np.ndarray, sun_rECEF: np.ndarray = Non
     if sun_rECEF is not None:
         sun_sat_dist = sun_sat_illumination_distance(rECEF, sun_rECEF)
         illuminated = sun_sat_dist > 0
-        satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
+        satpredictdata = SatPredictData(
+            id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
     else:
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF)
     return satpredictdata

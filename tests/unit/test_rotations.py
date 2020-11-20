@@ -1,6 +1,4 @@
 # test rotations.py
-import datetime
-
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 import pytest
@@ -9,7 +7,6 @@ from app import _rotations
 from app import rotations
 from app import topocentric
 from app.constants import ASEC2RAD
-from app.models import RhoVector
 from app.timefn import julian_date
 
 

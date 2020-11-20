@@ -1,24 +1,21 @@
-from datetime import datetime, timedelta, date, timezone
-from typing import List, Callable
-import time
+from __future__ import annotations
+from datetime import timedelta, date
+from typing import List
 import math
-import pickle
 
-#from astropy.time import Time
+# from astropy.time import Time
 from numpy import ndarray
 import numpy as np
-from scipy.interpolate import interp1d
-from sqlalchemy.sql import select
+# from scipy.interpolate import interp1d
 
 from . import _overpass
 from ._solar import sun_pos_ecef
-from .dbmodels import tle as tledb
-from .solar import compute_sun_data
+# from .dbmodels import tle as tledb
 from .propagate import compute_satellite_data
 from .timefn import julian_date_array_from_date, jday2datetime
-from .schemas import Overpass, Location, Satellite, OverpassResult, Point
-from .models import Sun, RhoVector, Sat, SatPredictData, PassType
-from .tle import get_TLE, get_most_recent_tle
+from .schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType
+from .models import SatPredictData
+from .tle import get_most_recent_tle
 from .constants import RAD2DEG, DAY_S
 from ._rotations import ecef2sez
 from .topocentric import site_ECEF
@@ -67,23 +64,7 @@ class RhoVector:
             range=round(self.rng[idx], 3)
         )
         return p
-    
-
-def find_overpasses(
-    sats: List[Sat],
-    **kw
-) -> List[Overpass]:
-    """
-    Real-time computation for finding satellite overpasses of a topographic location.
-    Can support multiple satellites over a single location
-    """
-    store_sat_id = True if len(sats) > 1 else False
-    overpasses = []
-    for sat in sats:
-        sat_overpasses = compute_single_satellite_overpasses(sat, store_sat_id=store_sat_id, **kw)    
-        overpasses += sat_overpasses
-    return overpasses
-
+  
 
 def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECEF=None, min_elevation=10.0, visible_only=False, store_sat_id=True, sunset_el=-8.0):
     r_site_ECEF = site_ECEF(location.lat, location.lon, location.height)[np.newaxis, :]

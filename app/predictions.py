@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import List, Callable
-import time
 
 from astropy.time import Time
 from numpy import ndarray
