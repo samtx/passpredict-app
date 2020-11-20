@@ -19,14 +19,13 @@ from app.overpass import (
 from app.schemas import Location, Satellite, Tle, Point, Overpass
 from app.models import SpaceObject, RhoVector, Sun, Sat, SatPredictData
 from app.timefn import julian_date_array_from_date
+from app._solar import sun_pos_ecef
 
 class Predict:
     """
     An example benchmark that times the performance of various kinds
     of iterating over dictionaries in Python.
     """
-
-    # SECONDS_PER_DAY = 3600*24*7
 
     params = [1, 5, 10, 20, 30, 60, 120]
     param_names = ['dt_seconds']
@@ -46,19 +45,18 @@ class Predict:
         # self.sun = {}
         # for dt in dt_seconds:
         jd = julian_date_array_from_date(date_start, date_end, dt_seconds)
-        t = Time(jd, format='jd')
-        sun = compute_sun_data(t)
-        sat = compute_satellite_data(tle, t, sun)
+        sun_rECEF = sun_pos_ecef(jd)
+        sat = compute_satellite_data(tle, jd, sun_rECEF)
         self.sat = sat
-        self.jd = t.jd
-        self.sun = sun
+        self.jd = jd
+        self.sun = sun_rECEF
         
         
     def time_compute_single_satellite_overpasses(self, dt):
         compute_single_satellite_overpasses(
-            self.sat[dt],
-            jd=self.jd[dt],
-            # sun_rECEF=self.sun[dt],
+            self.sat,
+            jd=self.jd,
+            sun_rECEF=self.sun,
             location=self.location,
             min_elevation=10,
             visible_only=False,
@@ -68,14 +66,23 @@ class Predict:
 
     def peakmem_compute_single_satellite_overpasses(self, dt):
         compute_single_satellite_overpasses(
-            self.sat[dt],
-            jd=self.jd[dt],
-            sun_rECEF=self.sun[dt],
+            self.sat,
+            jd=self.jd,
+            sun_rECEF=self.sun,
             location=self.location,
             min_elevation=10,
             visible_only=False,
             store_sat_id=False,
         )
+
+
+    def track_sat_cache_data_kilobytes(self, dt):
+        nbytes = self.sat.rECEF.nbytes
+        nbytes += self.sat.sun_sat_dist.nbytes
+        nbytes += self.sat.illuminated.nbytes
+        nbytes += sys.getsizeof(self.sat.intrinsic_mag)
+        nkilobytes = nbytes/1000
+        return nkilobytes
 
 # class RhoVectorBenchmark:
 

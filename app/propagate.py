@@ -49,14 +49,6 @@ def compute_satellite_data(tle: Tle, jd: np.ndarray, sun_rECEF: np.ndarray = Non
     """
     rTEME, _ = propagate_satellite(tle.tle1, tle.tle2, jd)
     rECEF = teme2ecef(jd, rTEME)
-    # Use the TEME reference frame from astropy
-    # teme = TEME(CartesianRepresentation(r * u.km), obstime=t)
-    # ecef = teme.transform_to(ITRS(obstime=t))
-    # rECEF = ecef.data.xyz.value.astype(np.float32)  # extract numpy array from astropy object
-    # sat.subpoint = ecef.earth_location
-    # sat.latitude = sat.subpoint.lat.value
-    # sat.longitude = sat.subpoint.lon.value
-    
     if sun_rECEF is not None:
         sun_sat_dist = sun_sat_illumination_distance(rECEF, sun_rECEF)
         illuminated = sun_sat_dist > 0

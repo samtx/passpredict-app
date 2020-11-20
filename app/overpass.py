@@ -29,7 +29,7 @@ from .utils import get_visible_satellites
 
 VISIBLE_SATS = get_visible_satellites()
 
-DT_SECONDS = 120
+DT_SECONDS = 1
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert DAY_S % DT_SECONDS == 0 
 NUM_TIMESTEPS_PER_DAY = int(DAY_S / DT_SECONDS)
@@ -89,13 +89,7 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
     r_site_ECEF = site_ECEF(location.lat, location.lon, location.height)[np.newaxis, :]
     rho_ECEF = sat.rECEF - r_site_ECEF
     rSEZ = ecef2sez(rho_ECEF, location.lat, location.lon)
-    # use cubic splines to interpolate the 
-    n = jd.size
-    rSEZ_interp = np.empty(((n-1)*DT_SECONDS, 3), dtype=np.float64) 
-    jd_interp = np.linspace(jd[0], jd[n-1], (n-1)*DT_SECONDS, endpoint=True)
-    fn = interp1d(jd, rSEZ, axis=0, kind='cubic', fill_value='extrapolate', assume_sorted=True)
-    rSEZ_interp = fn(jd_interp)
-    rho = RhoVector(jd_interp, rSEZ_interp)
+    rho = RhoVector(jd, rSEZ)
     start_idx, end_idx = _start_end_index(rho.el - min_elevation)
     num_overpasses = min(start_idx.size, end_idx.size)       # Iterate over start/end indecies and gather inbetween indecies
     if start_idx.size < end_idx.size:
@@ -110,43 +104,40 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         max_pt = rho.point(idx0 + idxmax)
         end_pt = rho.point(idxf)
         # Find visible start and end times
-        # if sun_rECEF is not None:
-        #     sun_rho_ECEF = sun_rECEF[idx0:idxf+1] - r_site_ECEF
-        #     sat_rho_ECEF_fn = interp1d(
-        #         jd[idx0:idxf+1], rho_ECEF[idx0:idxf+1], kind='cubic', fill_value='extrapolate', assume_sorted=True
-        #     )
-        #     sat_rho_ECEF = sat_rho_ECEF_fn()
-        #     sun_sez = ecef2sez(sun_rho_ECEF, location.lat, location.lon)
-        #     sun_rng = np.linalg.norm(sun_sez, axis=0)
-        #     sun_el = np.arcsin(sun_sez[2] / sun_rng) * RAD2DEG
-        #     site_in_sunset = sun_el - sunset_el < 0
-        #     site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
-        #     if site_in_sunset_idx.size == 0:
-        #         passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
-        #     else:
-        #         # get satellite illumination values for this overpass
-        #         sat_visible = (sat.illuminated[idx0:idxf+1] * site_in_sunset)
-        #         if np.any(sat_visible):
-        #             passtype = PassType.visible # site in night, sat is illuminated
-        #             sat_visible_idx = np.nonzero(sat_visible)[0]
-        #             sat_visible_start_idx = sat_visible_idx.min()
-        #             sat_visible_end_idx = sat_visible_idx.max()
-        #             vis_start_pt = point(idx0 + sat_visible_start_idx)
-        #             vis_end_pt = rho.point(idx0 + sat_visible_end_idx)
-        #             brightness_idx = np.argmax(rho.el[idx0 + sat_visible_start_idx: idx0 + sat_visible_end_idx + 1])
-        #             sat_rho = rho_ECEF[idx0 + sat_visible_start_idx + brightness_idx]
-        #             sat_rng = rho.rng[idx0 + sat_visible_start_idx + brightness_idx]
-        #             sun_rho_b = sun_rho[sat_visible_start_idx + brightness_idx]
-        #             sun_rng_b = sun_rng[sat_visible_start_idx + brightness_idx]
-        #             sat_site_sun_angle = math.acos(  
-        #                 np.dot(sat_rho, sun_rho_b) / (sat_rng * sun_rng_b)
-        #             )
-        #             beta = math.pi - sat_site_sun_angle  # phase angle: site -- sat -- sun angle
-        #             brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rng) - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
-        #         else:
-        #             passtype = PassType.unlit  # nighttime, not illuminated (radio night)
-        # else:
-        #     passtype = None
+        if sun_rECEF is not None:
+            sun_rho = sun_rECEF[idx0:idxf+1] - r_site_ECEF
+            # sat_ECEF = sat.rECEF[idx0:idxf+1]
+            sun_sez = ecef2sez(sun_rho, location.lat, location.lon)
+            sun_rng = np.linalg.norm(sun_sez, axis=1)
+            sun_el = np.arcsin(sun_sez[:, 2] / sun_rng) * RAD2DEG
+            site_in_sunset = sun_el - sunset_el < 0
+            site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
+            if site_in_sunset_idx.size == 0:
+                passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
+            else:
+                # get satellite illumination values for this overpass
+                sat_visible = (sat.illuminated[idx0:idxf+1] * site_in_sunset)
+                if np.any(sat_visible):
+                    passtype = PassType.visible # site in night, sat is illuminated
+                    sat_visible_idx = np.nonzero(sat_visible)[0]
+                    sat_visible_start_idx = sat_visible_idx.min()
+                    sat_visible_end_idx = sat_visible_idx.max()
+                    vis_start_pt = rho.point(idx0 + sat_visible_start_idx)
+                    vis_end_pt = rho.point(idx0 + sat_visible_end_idx)
+                    brightness_idx = np.argmax(rho.el[idx0 + sat_visible_start_idx: idx0 + sat_visible_end_idx + 1])
+                    sat_rho = rho_ECEF[idx0 + sat_visible_start_idx + brightness_idx]
+                    sat_rng = rho.rng[idx0 + sat_visible_start_idx + brightness_idx]
+                    sun_rho_b = sun_rho[sat_visible_start_idx + brightness_idx]
+                    sun_rng_b = sun_rng[sat_visible_start_idx + brightness_idx]
+                    sat_site_sun_angle = math.acos(  
+                        np.dot(sat_rho, sun_rho_b) / (sat_rng * sun_rng_b)
+                    )
+                    beta = math.pi - sat_site_sun_angle  # phase angle: site -- sat -- sun angle
+                    brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rng) - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
+                else:
+                    passtype = PassType.unlit  # nighttime, not illuminated (radio night)
+        else:
+            passtype = None
         passtype = None
 
         if visible_only and passtype != PassType.visible:
