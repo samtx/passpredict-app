@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 
-from .. import timefn
-from .. import solar
-from ..constants import DEG2RAD, RAD2DEG, AU_KM
+from app import timefn
+from app import solar
+from app.constants import DEG2RAD, RAD2DEG, AU_KM
 
 
 def test_sun_pos():

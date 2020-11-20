@@ -5,10 +5,10 @@ import pytest
 import numpy as np
 from astropy.time import Time
 
-from ..schemas import Location, Satellite, Tle
-from ..timefn import julian_date_array_from_date
-from ..propagate import compute_satellite_data
-from .._solar import sun_pos_ecef
+from app.schemas import Location, Satellite, Tle
+from app.timefn import julian_date_array_from_date
+from app.propagate import compute_satellite_data
+from app._solar import sun_pos_ecef
 
 @pytest.fixture(scope='session')
 def init_find_overpasses() -> Tuple['np.ndarray', 'Location', 'SunPredictData', 'SatPredictData']:

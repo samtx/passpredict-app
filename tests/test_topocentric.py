@@ -2,7 +2,7 @@
 from numpy.testing import assert_allclose, assert_almost_equal
 import numpy as np
 
-from .. import topocentric
+from app import topocentric
 
 def test_site_declination_and_K():
     """

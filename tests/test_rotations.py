@@ -5,11 +5,11 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 import pytest
 
-from .. import _rotations
-from .. import rotations
-from .. import topocentric
-from ..constants import ASEC2RAD
-from ..models import RhoVector
+from app import _rotations
+from app import rotations
+from app import topocentric
+from app.constants import ASEC2RAD
+from app.models import RhoVector
 
 
 def test_ecef2sez():

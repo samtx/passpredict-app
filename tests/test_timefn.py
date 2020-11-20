@@ -5,7 +5,7 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal, assert_equal
 import pytest
 
-from .. import timefn
+from app import timefn
 
 jd_params = [
     pytest.param(1996, 10, 26, 14, 20,         0, 2450383.09722222,   8, id='Vallado, eg.3-4'),

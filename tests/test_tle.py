@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from ..schemas import Tle
+from app.schemas import Tle
 
 def test_Tle_from_string():
     """

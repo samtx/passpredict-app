@@ -2,7 +2,7 @@
 import pytest
 import numpy as np
 
-from .. import models
+from app import models
 
 
 def test_find_overpasses_visible_only(init_find_overpasses):

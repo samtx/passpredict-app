@@ -1,9 +1,10 @@
 # Test passpredict/schemas.py
-
-from .. import schemas
-from ..utils import epoch_from_tle
 import datetime
+
 import pytest
+
+from app import schemas
+from app.utils import epoch_from_tle
 
 
 def test_Satellite():
