@@ -9,11 +9,6 @@ client = TestClient(app)
 redis_noproc = factories.redis_noproc(host=REDIS_HOST, port=6379)
 redisdb = factories.redisdb('redis_noproc')
 
-def test_hello_world():
-    response = client.get("/hello")
-    assert response.status_code == 200
-    assert response.json() == {"msg": "Hello World"}
-
 
 def test_passes_ISS(redisdb):
     satid = 25544  # Int. Space Station

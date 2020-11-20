@@ -2,6 +2,7 @@ import datetime
 import os
 
 import numpy as np
+import pytest
 
 from app import propagate
 from app.timefn import julian_date_array_from_datetime, jday2datetime_array
@@ -25,6 +26,7 @@ def compute_skyfield_ecef_position(tle1, tle2, jd):
     return rECEF
 
 
+@pytest.mark.slow
 def test_propagate_iss():
     """
     Compare results of propagate() with skyfield EarthSatellite.at()
