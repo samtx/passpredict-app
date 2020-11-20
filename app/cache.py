@@ -49,9 +49,7 @@ def set_sat_cache(sat_key: str, sat: SatPredictData, pipe: Pipeline, ttl: int=86
     sat_rECEF = sat.rECEF
     data = {
         'n': sat_rECEF.shape[0],
-        'dtype': str(sat_rECEF.dtype),
         'rECEF': sat_rECEF.tobytes(),
-        'illuminated': sat.illuminated.tobytes(),
         'sun_sat_dist': sat.sun_sat_dist.tobytes()
     }
     pipe.hset(sat_key, mapping=data)
@@ -61,8 +59,6 @@ def set_sat_cache(sat_key: str, sat: SatPredictData, pipe: Pipeline, ttl: int=86
 
 def get_sat_cache(sat: bytes, satid: int):
     n = int(sat[b'n'])
-    dtype = sat[b'dtype'].decode()
-    rECEF = np.frombuffer(sat[b'rECEF'], dtype=dtype).reshape((n, 3))
-    illuminated = np.frombuffer(sat[b'illuminated'], dtype=bool)
-    sun_sat_dist = np.frombuffer(sat[b'sun_sat_dist'], dtype=dtype)
-    return SatPredictData(id=satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
+    rECEF = np.frombuffer(sat[b'rECEF'], dtype=np.float64).reshape((n, 3))
+    sun_sat_dist = np.frombuffer(sat[b'sun_sat_dist'], dtype=np.float64)
+    return SatPredictData(id=satid, rECEF=rECEF, sun_sat_dist=sun_sat_dist)

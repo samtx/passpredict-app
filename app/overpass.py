@@ -97,7 +97,8 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
                 passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
             else:
                 # get satellite illumination values for this overpass
-                sat_visible = (sat.illuminated[idx0:idxf+1] * site_in_sunset)
+                sat_illuminated = sat.sun_sat_dist[idx0:idxf+1] > 0
+                sat_visible = (sat_illuminated * site_in_sunset)
                 if np.any(sat_visible):
                     passtype = PassType.visible # site in night, sat is illuminated
                     sat_visible_idx = np.nonzero(sat_visible)[0]

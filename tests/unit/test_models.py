@@ -21,13 +21,13 @@ def test_SatPredictModel_slice():
     sat = models.SatPredictData(
         id=25544,
         rECEF=np.linspace(0, n*3, n*3).reshape((3, n)),
-        illuminated=np.ones(n, dtype=bool)
+        sun_sat_dist=np.ones(n, dtype=np.float64)
     )
     slc = slice(10)
     sat2 = sat[slc]
     assert sat2.id == sat.id
     assert np.array_equal(sat2.rECEF, sat.rECEF[:, slc])
-    assert np.array_equal(sat2.illuminated, sat.illuminated[slc])
+    assert np.array_equal(sat2.sun_sat_dist, sat.sun_sat_dist[slc])
 
 
 def test_SatPredictModel_slice_array_view():
@@ -35,15 +35,15 @@ def test_SatPredictModel_slice_array_view():
     sat = models.SatPredictData(
         id=25544,
         rECEF=np.linspace(0, n*3, n*3).reshape((3, n)),
-        illuminated=np.ones(n, dtype=bool)
+        sun_sat_dist=np.ones(n, dtype=np.float64)
     )
     slc = slice(10)
     sat2 = sat[slc]
     assert id(sat2.id) == id(sat.id)
     assert np.may_share_memory(sat2.rECEF, sat.rECEF[:, slc])
     assert np.may_share_memory(sat2.rECEF, sat.rECEF)
-    assert np.may_share_memory(sat2.illuminated, sat.illuminated[slc])
-    assert np.may_share_memory(sat2.illuminated, sat.illuminated)
+    assert np.may_share_memory(sat2.sun_sat_dist, sat.sun_sat_dist[slc])
+    assert np.may_share_memory(sat2.sun_sat_dist, sat.sun_sat_dist)
 
 
 if __name__ == "__main__":

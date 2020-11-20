@@ -49,9 +49,8 @@ def compute_satellite_data(tle: Tle, jd: np.ndarray, sun_rECEF: np.ndarray = Non
     rECEF = teme2ecef(jd, rTEME)
     if sun_rECEF is not None:
         sun_sat_dist = sun_sat_illumination_distance(rECEF, sun_rECEF)
-        illuminated = sun_sat_dist > 0
         satpredictdata = SatPredictData(
-            id=tle.satid, rECEF=rECEF, illuminated=illuminated, sun_sat_dist=sun_sat_dist)
+            id=tle.satid, rECEF=rECEF, sun_sat_dist=sun_sat_dist)
     else:
         satpredictdata = SatPredictData(id=tle.satid, rECEF=rECEF)
     return satpredictdata
