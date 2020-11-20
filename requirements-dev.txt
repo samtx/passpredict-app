@@ -1,4 +1,6 @@
 -r requirements.txt
 pytest
+pytest-randomly
+pytest-mock
 pip-tools
 
