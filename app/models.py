@@ -62,7 +62,7 @@ class SatPredictData:
             rECEF=self.rECEF[:, slc],
             illuminated=self.illuminated[slc],
             sun_sat_dist=self.sun_sat_dist[slc],
-            intrinsic_mag=self.intrinsinc_mag
+            intrinsic_mag=self.intrinsic_mag
         )
 
 

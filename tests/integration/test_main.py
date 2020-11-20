@@ -10,7 +10,7 @@ client = TestClient(app)
 # redisdb = factories.redisdb('redis_noproc')
 
 def test_passes_ISS(mocker):
-    cache_mock = mocker.patch('app.main.cache', spec=True)  # mock the cache
+    cache_mock = mocker.patch('app.main.cache', spec=True)
     cache_mock.get.return_value = None
     db_mock = mocker.patch('app.tle.engine')
     db_mock.connect.return_value.__enter__.return_value.execute.return_value.fetchone.return_value = {
