@@ -1,30 +1,23 @@
-from datetime import datetime, timedelta, timezone
-from functools import cached_property
+from datetime import datetime
 import json
-from typing import Dict, Set, Union, List, Tuple, Sequence
+from typing import Set, Union, Sequence
+import logging
 
 import requests
-import numpy as np
-from pydantic import BaseModel, Field
 from sqlalchemy.sql import select
 from sqlalchemy import and_
 from fastapi import HTTPException
 
-from .utils import grouper, satid_from_tle, epoch_from_tle, parse_tle
+from .utils import grouper, parse_tle
 from .schemas import Tle
 from .database import engine
 from .dbmodels import tle as tledb
 from .cache import cache
 
 
+logger = logging.getLogger(__file__)
+logger.setLevel(logging.INFO)
 
-# class TleDB(BaseModel):
-#     id: int
-#     tle1: str
-#     tle2: str
-#     epoch: datetime.datetime
-#     satellite_id: int
-#     created: datetime.datetime
 
 def download_common_tles_from_celestrak() -> Set:
     """
@@ -57,8 +50,8 @@ def import_tle_data_to_database(tle_data: Set) -> None:
             # if not then insert record, otherwise skip
             stmt = select([tledb]).where(
                 and_(
-                    tledb.c.satellite_id==tle.satid,
-                    tledb.c.epoch==tle.epoch
+                    tledb.c.satellite_id == tle.satid,
+                    tledb.c.epoch == tle.epoch
                 )
             )
             res = conn.execute(stmt).fetchone()
@@ -74,7 +67,6 @@ def import_tle_data_to_database(tle_data: Set) -> None:
                 print(f'Inserted sat {tle.satid} for epoch {tle.epoch} in db.')
             else:
                 print(f'sat {tle.satid} for epoch {tle.epoch} already exists in db. skipping...')
-
 
 
 def get_orbit_data_from_celestrak(satellite_id):
@@ -98,7 +90,7 @@ def get_orbit_data_from_celestrak(satellite_id):
 
     https://celestrak.com/NORAD/elements/supplemental/starlink.txt
     https://celestrak.com/NORAD/elements/supplemental/iss.txt
-    
+
     """
     query = {
         'CATNR': satellite_id,
@@ -112,7 +104,7 @@ def get_orbit_data_from_celestrak(satellite_id):
 def parse_tles_from_celestrak(satellite_id=None):
     """
     Download current TLEs from Celestrak and save them to a JSON file
-    
+
     """
     if satellite_id is None:
         url = 'https://celestrak.com/NORAD/elements/stations.txt'
@@ -142,28 +134,30 @@ def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=Tru
 
     # Check TLE in cache first
 
-
-
     # Get TLE from database
-    with engine.connect() as conn:
-        stmt = select([tledb]).where(
-            tledb.c.satellite_id == satid
-        ).order_by(
-            tledb.c.epoch.desc()
-        )
-        res = conn.execute(stmt).fetchone()
-        if res:
-            tle = Tle.from_string(
-                tle1=res['tle1'],
-                tle2=res['tle2']
+    try:
+        with engine.connect() as conn:
+            stmt = select([tledb]).where(
+                tledb.c.satellite_id == satid
+            ).order_by(
+                tledb.c.epoch.desc()
             )
-            return tle
-        else:
-            if raise_404:
-                # satellite tle not found
-                raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
-            pass
+            res = conn.execute(stmt).fetchone()
+            if res:
+                tle = Tle.from_string(
+                    tle1=res['tle1'],
+                    tle2=res['tle2']
+                )
+                return tle
+            else:
+                if raise_404:
+                    # satellite tle not found
+                    raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
+                pass
+    except Exception:
+        logger.exception("Error in get_most_recent_tle")
     return
+
 
 def save_TLE_data(url=None):
     tle_data = parse_tles_from_celestrak(url)
