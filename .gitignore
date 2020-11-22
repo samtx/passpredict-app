@@ -1,4 +1,14 @@
 
+# data files
+*.csv
+*.csv.gz
+*.tsv
+*.xls
+
+# sqlite databases
+*.db
+*.sqlite
+
 .ipynb_checkpoints
 
 # benchmarks
