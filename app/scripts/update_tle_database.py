@@ -12,11 +12,11 @@ from app.database import engine
 from app.dbmodels import tle as tledb
 
 logger = logging.getLogger(__file__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 # Create handlers
 fh = logging.FileHandler('app-update-tle.log')
-fh.setLevel(logging.INFO)
+fh.setLevel(logging.DEBUG)
 logger.addHandler(fh)
 
 
@@ -58,8 +58,8 @@ for r in url_responses:
 num_inserted = 0
 num_skipped = 0
 created_at = datetime.utcnow()
+conn = engine.connect()
 try:
-    conn = engine.connect()
     for tle in tles:
         # Check if there is a tle for the datetime, 
         # if not then insert record, otherwise skip

@@ -20,6 +20,7 @@ cython==0.29.21           # via -r requirements.in
 fastapi==0.61.1           # via -r requirements.in
 gunicorn==20.0.4          # via -r requirements.in
 h11==0.10.0               # via uvicorn
+httptools==0.1.1          # via uvicorn
 idna==2.10                # via requests, yarl
 mako==1.1.3               # via alembic
 markupsafe==1.1.1         # via mako
@@ -29,8 +30,9 @@ pycares==3.1.1            # via aiodns
 pycparser==2.20           # via cffi
 pydantic==1.6.1           # via fastapi
 python-dateutil==2.8.1    # via alembic
-python-dotenv==0.14.0     # via -r requirements.in
+python-dotenv==0.14.0     # via -r requirements.in, uvicorn
 python-editor==1.0.4      # via alembic
+pyyaml==5.3.1             # via uvicorn
 redis==3.5.3              # via -r requirements.in
 requests==2.24.0          # via -r requirements.in
 scipy==1.5.4              # via -r requirements.in
@@ -40,7 +42,10 @@ sqlalchemy==1.3.20        # via -r requirements.in, alembic
 starlette==0.13.6         # via fastapi
 typing-extensions==3.7.4.3  # via aiohttp
 urllib3==1.25.10          # via requests
-uvicorn==0.12.1           # via -r requirements.in
+uvicorn[standard]==0.12.1  # via -r requirements.in
+uvloop==0.14.0            # via uvicorn
+watchgod==0.6             # via uvicorn
+websockets==8.1           # via uvicorn
 yarl==1.6.2               # via aiohttp
 
 # The following packages are considered to be unsafe in a requirements file:

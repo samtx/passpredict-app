@@ -4,7 +4,10 @@ import dotenv
 
 dotenv.load_dotenv()
 
-database_uri = 'sqlite:///passpredict.db'
+database_uri = os.getenv('DATABASE_URI', 'sqlite:///passpredict.sqlite')
+
+# Echo sqlalchemy commands to stdout, default false
+db_echo = os.getenv('DB_ECHO', False)
 
 HERE_API_KEY = os.getenv('HERE_API_KEY')
 

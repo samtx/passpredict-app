@@ -5,14 +5,15 @@ import logging
 
 import requests
 from sqlalchemy.sql import select
+from sqlalchemy.engine import Connection
 from sqlalchemy import and_
 from fastapi import HTTPException
 
-from .utils import grouper, parse_tle
-from .schemas import Tle
-from .database import engine
-from .dbmodels import tle as tledb
-from .cache import cache
+from app.utils import grouper, parse_tle
+from app.schemas import Tle
+from app.dbmodels import tle as tledb
+
+# from app.main import app
 
 
 logger = logging.getLogger(__file__)
@@ -127,7 +128,7 @@ def get_TLE(satid: int, tle_data=None) -> Tle:
     return tle
 
 
-def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=True) -> Union[Tle, Sequence[Tle]]:
+def get_most_recent_tle(db_conn: Connection, satid: Union[int, Sequence[int]], *, raise_404: bool=True) -> Union[Tle, Sequence[Tle]]:
     """
     Queries database for most recent tle for satellite
     """
@@ -136,27 +137,28 @@ def get_most_recent_tle(satid: Union[int, Sequence[int]], *, raise_404: bool=Tru
 
     # Get TLE from database
     try:
-        with engine.connect() as conn:
-            stmt = select([tledb]).where(
-                tledb.c.satellite_id == satid
-            ).order_by(
-                tledb.c.epoch.desc()
+        stmt = select([tledb]).where(
+            tledb.c.satellite_id == satid
+        ).order_by(
+            tledb.c.epoch.desc()
+        )
+        res = db_conn.execute(stmt).fetchone()
+        if res:
+            tle = Tle.from_string(
+                tle1=res['tle1'],
+                tle2=res['tle2']
             )
-            res = conn.execute(stmt).fetchone()
-            if res:
-                tle = Tle.from_string(
-                    tle1=res['tle1'],
-                    tle2=res['tle2']
-                )
-                return tle
-            else:
-                if raise_404:
-                    # satellite tle not found
-                    raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
-                pass
+            return tle
+        else:
+            if raise_404:
+                # satellite tle not found
+                raise HTTPException(status_code=404, detail=f"Satellite {satid} not found")
+            pass
+    except HTTPException:
+        raise
     except Exception:
-        logger.exception("Error in get_most_recent_tle")
-    return
+        logger.exception(f"Error in get_most_recent_tle with satid={satid}")
+        raise
 
 
 def save_TLE_data(url=None):

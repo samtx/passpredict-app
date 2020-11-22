@@ -6,22 +6,22 @@ import math
 # from astropy.time import Time
 from numpy import ndarray
 import numpy as np
+from fastapi import HTTPException
 # from scipy.interpolate import interp1d
 
 from . import _overpass
 from ._solar import sun_pos_ecef
 # from .dbmodels import tle as tledb
-from .propagate import compute_satellite_data
-from .timefn import julian_date_array_from_date, jday2datetime
-from .schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType
-from .models import SatPredictData
-from .tle import get_most_recent_tle
-from .constants import RAD2DEG, DAY_S
-from ._rotations import ecef2sez
-from .topocentric import site_ECEF
-from .settings import MAX_DAYS
-from .cache import cache, set_sat_cache, set_sun_cache, get_sat_cache, get_sun_cache
-from .utils import get_visible_satellites
+from app.propagate import compute_satellite_data
+from app.timefn import julian_date_array_from_date, jday2datetime
+from app.schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType
+from app.models import SatPredictData
+from app.tle import get_most_recent_tle
+from app.constants import RAD2DEG, DAY_S
+from app._rotations import ecef2sez
+from app.topocentric import site_ECEF
+from app.settings import MAX_DAYS
+from app.utils import get_visible_satellites
 
 
 VISIBLE_SATS = get_visible_satellites()
@@ -100,7 +100,7 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
                 sat_illuminated = sat.sun_sat_dist[idx0:idxf+1] > 0
                 sat_visible = (sat_illuminated * site_in_sunset)
                 if np.any(sat_visible):
-                    passtype = PassType.visible # site in night, sat is illuminated
+                    passtype = PassType.visible  # site in night, sat is illuminated
                     sat_visible_idx = np.nonzero(sat_visible)[0]
                     sat_visible_start_idx = sat_visible_idx.min()
                     sat_visible_end_idx = sat_visible_idx.max()
@@ -154,7 +154,9 @@ def predict_single_satellite_overpasses(
     days: int = 10,
     min_elevation: float = 10.0,
     visible_only: bool = False,
-    h: float = 0.0   # Altitude [m]
+    h: float = 0.0,   # Altitude [m]
+    db: None,  # database connection
+    cache: None,   # cache connection
 ) -> OverpassResult:
     """
     Full prediction algorithm:
@@ -169,20 +171,19 @@ def predict_single_satellite_overpasses(
         satellite: Satellite object
             satellite ID number in Celestrak, ISS is 25544
     """
+    tle = get_most_recent_tle(db, satid, raise_404=True)
     if date_start is None:
         date_start = date.today()
-    date_end = date_start + timedelta(days=days)  
-    satellite = Satellite(id=satid)
+    date_end = date_start + timedelta(days=days)
     location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)
-    tle = get_most_recent_tle(satellite.id)
     sat = compute_satellite_data(tle, jd, sun_rECEF)
     overpasses = compute_single_satellite_overpasses(
         sat,
-        jd=jd, 
-        location=location, 
-        sun_rECEF=sun_rECEF, 
+        jd=jd,
+        location=location,
+        sun_rECEF=sun_rECEF,
         min_elevation=min_elevation,
         visible_only=visible_only,
         store_sat_id=False
@@ -258,3 +259,54 @@ def _start_end_index(x):
     start_idx = np.nonzero(x_change_sign & (x0 < x1))[0]  # Find the start of an overpass
     end_idx = np.nonzero(x_change_sign & (x0 > x1))[0]    # Find the end of an overpass
     return start_idx, end_idx
+
+
+def set_sun_cache(
+    sun_key: str,
+    rECEF: np.ndarray,
+    pipe: Pipeline,
+    ttl: int = 86400
+):
+    """
+    Add sun hashdata to redis pipeline
+    """
+    rECEF_value = {
+        'n': rECEF.shape[0],
+        'dtype': str(rECEF.dtype),
+        'array': rECEF.tobytes()
+    }
+    pipe.hset(sun_key, mapping=rECEF_value)
+    pipe.expire(sun_key, ttl)
+    return pipe
+
+
+def get_sun_cache(sun: bytes):
+    """
+    Get numpy array from Redis bytes
+    """
+    n = int(sun[b'n'])
+    dtype = sun[b'dtype'].decode()
+    arr = np.frombuffer(sun[b'array'], dtype=dtype).reshape((n, 3))
+    return arr
+
+
+def set_sat_cache(sat_key: str, sat: SatPredictData, pipe: Pipeline, ttl: int=86400):
+    """
+    Set satellite hashtable cache data to pipeline
+    """
+    sat_rECEF = sat.rECEF
+    data = {
+        'n': sat_rECEF.shape[0],
+        'rECEF': sat_rECEF.tobytes(),
+        'sun_sat_dist': sat.sun_sat_dist.tobytes()
+    }
+    pipe.hset(sat_key, mapping=data)
+    pipe.expire(sat_key, ttl)
+    return pipe
+
+
+def get_sat_cache(sat: bytes, satid: int):
+    n = int(sat[b'n'])
+    rECEF = np.frombuffer(sat[b'rECEF'], dtype=np.float64).reshape((n, 3))
+    sun_sat_dist = np.frombuffer(sat[b'sun_sat_dist'], dtype=np.float64)
+    return SatPredictData(id=satid, rECEF=rECEF, sun_sat_dist=sun_sat_dist)

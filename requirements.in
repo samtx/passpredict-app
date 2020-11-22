@@ -1,7 +1,7 @@
 astropy==4.1rc1
 sgp4==2.12
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 gunicorn
 redis

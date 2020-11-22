@@ -39,5 +39,5 @@ RUN service cron start
 EXPOSE 80
 EXPOSE 8000
 
-# CMD [ "gunicorn", "main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
+# CMD [ "gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
