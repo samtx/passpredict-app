@@ -18,9 +18,9 @@ deploy:
 	docker run -d --name passpredict-api \
 		-p 8000:8000 \
 		-e REDIS_HOST=redis \
+		-e DT_SECONDS=5 \
+		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
 		--link=redis:redis \
 		-v passpredict-api-db:/db \
-		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-		-e DT_SECONDS=5 \ 
 		passpredict-api:latest
 
