@@ -9,14 +9,18 @@ build:
 	docker build -t $(LOCAL_TAG) .
 
 
+# create initial docker volume. see link: https://github.com/moby/moby/issues/25245#issuecomment-365970076
+# docker create volume passpredict-api
+
 deploy:
 	-docker container stop passpredict-api
 	-docker container rm passpredict-api
 	docker run -d --name passpredict-api \
 		-p 8000:8000 \
 		-e REDIS_HOST=redis \
-		-e DATABASE_URI=sqlite:////app/passpredict.sqlite \
 		--link=redis:redis \
-		-v passpredict-db:/home/sam/code/passpredict-api/passpredict.sqlite:/app/passpredict.sqlite \
+		-v passpredict-api-db:/db \
+		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+		-e DT_SECONDS=5 \ 
 		passpredict-api:latest
 

@@ -1,3 +1,4 @@
+import os
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -28,6 +29,15 @@ target_metadata = dbmodels.metadata
 # ... etc.
 
 
+def get_url():
+    # user = os.getenv("POSTGRES_USER", "postgres")
+    # password = os.getenv("POSTGRES_PASSWORD", "")
+    # server = os.getenv("POSTGRES_SERVER", "db")
+    # db = os.getenv("POSTGRES_DB", "app")
+    # return f"postgresql://{user}:{password}@{server}/{db}"
+    db_uri = os.getenv("DATABASE_URI", 'sqlite///passpredict.sqlite')
+    return db_uri
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -42,7 +52,7 @@ def run_migrations_offline():
     """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
-        url=url,
+        url=get_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},

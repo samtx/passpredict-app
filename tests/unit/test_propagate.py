@@ -7,7 +7,7 @@ import pytest
 from app import propagate
 from app.timefn import julian_date_array_from_datetime, jday2datetime_array
 from app.schemas import Satellite, Tle
-from app.tle import epoch_from_tle
+from app.utils import epoch_from_tle
 
 tz_utc = datetime.timezone.utc
 
