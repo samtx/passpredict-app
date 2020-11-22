@@ -20,10 +20,10 @@ from app.cache import cache
 app = FastAPI()
 
 logging.basicConfig(
-    filename='app.log',
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+logger = logging.getLogger(__name__)
 
 
 class OverpassResult(BaseModel):
@@ -100,6 +100,7 @@ def passes(
     db = Depends(get_db),
     cache = Depends(get_cache)
 ):
+    logger.info(f'route /passes/{satid}')
     # Create cache key
     today = datetime.date.today()
     main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.isoformat()}'

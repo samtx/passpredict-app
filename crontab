@@ -8,5 +8,6 @@
 # * * * * * 
 
 # Update TLE database every 8 hours
-17 */8 * * * /usr/bin/python /app/scripts/update_tle_database.py
+17 */8 * * * /usr/bin/python /app/app/scripts/update_tle_database.py
+
 #

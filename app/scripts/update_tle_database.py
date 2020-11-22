@@ -14,10 +14,10 @@ from app.dbmodels import tle as tledb
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
 
-# Create handlers
-fh = logging.FileHandler('app-update-tle.log')
-fh.setLevel(logging.DEBUG)
-logger.addHandler(fh)
+# # Create handlers
+# fh = logging.FileHandler('app-update-tle.log')
+# fh.setLevel(logging.DEBUG)
+# logger.addHandler(fh)
 
 
 #  Download common tle data from celestrak
@@ -50,7 +50,7 @@ for r in url_responses:
         for tle_strings in grouper(r.text.splitlines(), 3):
             tle = Tle.from_string(tle_strings[1], tle_strings[2])
             tles.add(tle)
-    except Exception:
+    except:
         logger.exception(f'Error parsing tles from url {r.url}')
 
 
