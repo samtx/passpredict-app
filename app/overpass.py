@@ -20,13 +20,12 @@ from app.tle import get_most_recent_tle
 from app.constants import RAD2DEG, DAY_S
 from app._rotations import ecef2sez
 from app.topocentric import site_ECEF
-from app.settings import MAX_DAYS
+from app.settings import MAX_DAYS, DT_SECONDS
 from app.utils import get_visible_satellites
 
 
 VISIBLE_SATS = get_visible_satellites()
 
-DT_SECONDS = 1
 # Make sure that dt_seconds evenly divides into number of seconds per day
 assert DAY_S % DT_SECONDS == 0 
 NUM_TIMESTEPS_PER_DAY = int(DAY_S / DT_SECONDS)
