@@ -44,18 +44,6 @@ def get_cache():
     return cache
 
 
-# @app.on_event('startup')
-# def db_connect():
-#     app.state.db = engine.connect()
-#     # make cache connection
-
-
-# @app.on_event('shutdown')
-# def db_disconnect():
-#     app.state.db.close()
-#     # close cache connection
-
-
 @app.get('/hello/')
 def read_root():
     return {"msg": "Hello World"}
@@ -66,6 +54,8 @@ def all_passes(
     lat: float = Query(..., title="Location latitude North in decimals"),
     lon: float = Query(..., title="Location longitude East in decimals"),
     h: float = Query(0.0, title="Location elevation above WGS84 ellipsoid in meters"),
+    db = Depends(get_db),
+    cache = Depends(get_cache)
 ):
     """
     Compute passes for top 100 visible satellites for 24 hours
@@ -77,16 +67,17 @@ def all_passes(
     if result:
         overpass_result = pickle.loads(result)
         return overpass_result
+    location = Location(lat=lat, lon=lon, h=h)
     overpass_result = predict_all_visible_satellite_overpasses(
-        lat,
-        lon, 
+        location,
         date_start=today, 
-        h=h, 
         min_elevation=10.0,
-        visible_only=True
+        visible_only=True,
+        db=db,
+        cache=cache
     )
-    # cache results for 5 minutes
-    cache.set(main_key, pickle.dumps(overpass_result), ex=300)
+    # cache results for 30 minutes
+    cache.set(main_key, pickle.dumps(overpass_result), ex=1800)
     return overpass_result
 
 
@@ -109,9 +100,17 @@ def passes(
     if result:
         overpass_result = pickle.loads(result)
         return overpass_result
-    overpass_result = predict_single_satellite_overpasses(satid, lat, lon, date_start=today, days=days, h=h, db=db, cache=cache)
-    # cache results for 5 minutes
-    cache.set(main_key, pickle.dumps(overpass_result), ex=300)  
+    location = Location(lat=lat, lon=lon, h=h)
+    overpass_result = predict_single_satellite_overpasses(
+        satid,
+        location,
+        date_start=today,
+        days=days,
+        db=db,
+        cache=cache
+    )
+    # cache results for 30 minutes
+    cache.set(main_key, pickle.dumps(overpass_result), ex=1800)  
     return overpass_result
 
 
