@@ -30,7 +30,7 @@ def mod2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim=
     """
     cdef int n = jd.shape[0]
     cdef double[::1] jd_view = jd
-    cdef double[::1] r_view = r.copy().ravel()
+    cdef double[::1] r_view = r.flatten()
     
     c_mod2ecef(&jd_view[0], &r_view[0], n)
     r_view_array = np.asarray(r_view)
@@ -57,11 +57,11 @@ def teme2ecef(np.ndarray[np.float64_t, ndim=1] jd, np.ndarray[np.float64_t, ndim
     """
     cdef int n = jd.shape[0]
     cdef double[::1] jd_view = jd
-    cdef double[::1] r_view = r.copy().ravel()
+    cdef double[::1] r_view = r.flatten(order='C')
     
     c_teme2ecef(&jd_view[0], &r_view[0], n)
     r_view_array = np.asarray(r_view, dtype=np.float64)
-    r = r_view_array.reshape((n, 3))
+    r = r_view_array.reshape((n, 3), order='C')
     return r
 
 
@@ -79,7 +79,7 @@ def ecef2sez(np.ndarray[np.float64_t, ndim=2] r, double phi, double lmda):
 
     """
     cdef int n = r.shape[0]
-    cdef double[::1] r_view = r.copy().ravel()
+    cdef double[::1] r_view = r.flatten()
     
     c_ecef2sez(&r_view[0], phi, lmda, n)
     r_view_array = np.asarray(r_view)

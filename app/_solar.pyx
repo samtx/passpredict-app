@@ -61,8 +61,8 @@ def sun_sat_illumination_distance(np.ndarray[DTYPE_f64_t, ndim=2] rsat, np.ndarr
     Find illumination distance of satellite
     """
     cdef int n = rsat.shape[0]
-    cdef double[::1] rsat_view = rsat.ravel()
-    cdef double[::1] rsun_view = rsun.ravel()
+    cdef double[::1] rsat_view = rsat.flatten()
+    cdef double[::1] rsun_view = rsun.flatten()
     cdef np.ndarray[np.float64_t, ndim=1] illum_dist_array
     cdef double[::1] illum_dist_view = np.zeros(n, dtype=np.float64)
 

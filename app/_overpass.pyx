@@ -16,7 +16,7 @@ def compute_range_and_elevation(np.ndarray[DTYPE_f64_t, ndim=2] r):
     Compute range and elevation vectors from SEZ position vector
     """
     cdef int n = r.shape[0]
-    cdef double[::1] r_view = r.ravel()
+    cdef double[::1] r_view = r.flatten()
     cdef np.ndarray[DTYPE_f64_t, ndim=1] rng
     cdef np.ndarray[DTYPE_f64_t, ndim=1] el
     cdef double[::1] el_view
