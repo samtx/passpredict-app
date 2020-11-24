@@ -7,7 +7,7 @@ ENV SOFA_INSTALL_DIR=/usr/local/
 RUN apt-get update \
 && apt-get install gcc -y \
 && apt-get install build-essential -y \
-&& apt-get install cron -y
+&& apt-get install cron -y 
 
 WORKDIR /app
 
@@ -35,7 +35,6 @@ RUN python setup.py install
 COPY crontab /etc/cron.d/passpredict
 RUN chmod 0644 /etc/cron.d/passpredict
 
-EXPOSE 80
 EXPOSE 8000
 
 COPY ./docker-entrypoint.sh .
