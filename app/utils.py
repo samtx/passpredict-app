@@ -41,7 +41,7 @@ def get_visible_satellites():
     p = Path(__file__).parent / 'visible.txt'
     with open(p, 'r') as f:
         sat_id_strings = f.readlines()
-        print(f'{len(sat_id_strings)} visible satellites found')
+        logger.info(f'{len(sat_id_strings)} visible satellites found')
         visible_sat_ids = [int(sat) for sat in sat_id_strings]
     return visible_sat_ids
 

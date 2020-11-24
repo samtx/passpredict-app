@@ -14,7 +14,7 @@ from ._solar import sun_pos_ecef
 # from .dbmodels import tle as tledb
 from app.propagate import compute_satellite_data
 from app.timefn import julian_date_array_from_date, jday2datetime
-from app.schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType
+from app.schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType, Tle
 from app.models import SatPredictData
 from app.tle import get_most_recent_tle
 from app.constants import RAD2DEG, DAY_S
@@ -146,16 +146,14 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
 
 def predict_single_satellite_overpasses(
     satid: int,
-    lat: float,
-    lon: float,
+    location: Location,
     *,
     date_start: date = None,
     days: int = 10,
     min_elevation: float = 10.0,
     visible_only: bool = False,
-    h: float = 0.0,   # Altitude [m]
-    db: None,  # database connection
-    cache: None,   # cache connection
+    db: Connection = None,  # database connection
+    cache: Redis.client = None,   # cache connection
 ) -> OverpassResult:
     """
     Full prediction algorithm:
@@ -170,14 +168,56 @@ def predict_single_satellite_overpasses(
         satellite: Satellite object
             satellite ID number in Celestrak, ISS is 25544
     """
-    tle = get_most_recent_tle(db, satid, raise_404=True)
     if date_start is None:
         date_start = date.today()
+
+    # Get TLE data
+    tle_key = f"tle:{satid}:{date_start.strftime('%Y%m%d')}"
+    result = cache.hgetall(tle_key)
+    if result:
+        tle1 = result[b'tle1'].decode()
+        tle2 = result[b'tle2'].decode()
+        tle = Tle.from_string(tle1=tle1, tle2=tle2)
+        tle_is_new = False
+    else:
+        tle = get_most_recent_tle(db, satid, raise_404=True)
+        data = {
+            'tle1': tle.tle1,
+            'tle2': tle.tle2
+        }
+        cache.hset(tle_key, mapping=data)
+        cache.expire(tle_key, 28800)  # save tle in cache for 8 hours
+        tle_is_new = True
+
     date_end = date_start + timedelta(days=days)
-    location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    sun_rECEF = sun_pos_ecef(jd)
-    sat = compute_satellite_data(tle, jd, sun_rECEF)
+    n = jd.size
+    time_key = f"time:{date_start.strftime('%Y%m%d')}:{date_end.strftime('%Y%m%d')}:{DT_SECONDS}"
+
+    # Get Sun position data
+    sun_key = f'sun:{time_key}'
+    result = cache.get(sun_key)
+    if result:
+        sun_rECEF = np.frombuffer(result, dtype=np.float64).reshape((n, 3))
+    else:
+        sun_rECEF = sun_pos_ecef(jd)
+        cache.set(sun_key, sun_rECEF.tobytes(), ex=86400)
+
+    sat_key = f'sat:{satid}:{time_key}'
+    if (not tle_is_new) and (result := cache.hgetall(sat_key)):
+        sat_rECEF = np.frombuffer(result[b'rECEF'], dtype=np.float64).reshape((n, 3))
+        sun_sat_dist = np.frombuffer(result[b'sun_sat_dist'], dtype=np.float64)
+        sat = SatPredictData(id=satid, rECEF=sat_rECEF, sun_sat_dist=sun_sat_dist)
+    else:
+        # if we got a new TLE, then always recompute
+        sat = compute_satellite_data(tle, jd, sun_rECEF)
+        data = {
+            'rECEF': sat.rECEF.tobytes(),
+            'sun_sat_dist': sat.sun_sat_dist.tobytes()
+        }
+        cache.hset(sat_key, mapping=data)
+        cache.expire(sat_key, 86400)
+
     overpasses = compute_single_satellite_overpasses(
         sat,
         jd=jd,
@@ -196,17 +236,16 @@ def predict_single_satellite_overpasses(
 
 
 def predict_all_visible_satellite_overpasses(
-    lat: float,
-    lon: float,
+    location: Location,
     *,
     date_start: date = None,
-    h: float = 0.0,
     min_elevation: float = 10.0,
+    db: Connection = None,
+    cache: Redis.Client = None
 ):
     if date_start is None:
         date_start = date.today()
     date_end = date_start + timedelta(days=1)
-    location = Location(lat=lat, lon=lon, h=h)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)    
 

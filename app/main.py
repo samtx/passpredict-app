@@ -72,7 +72,6 @@ def all_passes(
         location,
         date_start=today, 
         min_elevation=10.0,
-        visible_only=True,
         db=db,
         cache=cache
     )
