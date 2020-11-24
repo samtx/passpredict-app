@@ -51,7 +51,7 @@ def test_c_ecef2sez():
     #     assert_almost_equal(rSEZ[i], rSEZ_true[i], decimal=0, verbose=True)
 
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_teme2ecef():
     """
     Vallado matlab files, exsgp4_teme.m
@@ -77,17 +77,30 @@ diff in teme      0.0000000      0.0000000      0.0000000      0.0000000
 
 
     """
-    sec = 28.386009
-    d_ut1 = -0.439962
-    jd = julian_date(2004, 4, 6, 7, 51, sec + d_ut1)
-    jd = np.array([jd])
+    jdut1 = 2453101.50000000000
+    jd = np.array([jdut1])
     rTEME = np.array([[5094.1801072, 6127.6447052, 6380.3445327]])
     rECEF = np.array([[-1033.4793830, 7901.2952754, 6380.3565958]])
     rECEF_2 = _rotations.teme2ecef(jd, rTEME)
     assert_allclose(rECEF_2, rECEF)
 
 
-@pytest.mark.xfail
+def test_teme2ecef_shape():
+    """
+    test that teme2ecef() returns vectors in the correct shape
+    """
+    sec = 28.386009
+    d_ut1 = -0.439962
+    jd = julian_date(2004, 4, 6, 7, 51, sec + d_ut1)
+    jd = np.array([jd])
+    rTEME = np.array([[5094.1801072, 6127.6447052, 6380.3445327]])
+    jd = np.tile(jd, 10)
+    rTEME = np.tile(rTEME, (10, 1))
+    r2 = _rotations.teme2ecef(jd, rTEME)
+    assert r2.shape == rTEME.shape
+
+
+# @pytest.mark.xfail
 def test_appendix_c_conversion_from_TEME_to_ITRF_UTC1():
     """Test TEME to ITRF conversion
 
@@ -110,7 +123,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF_UTC1():
     xp = -0.140682 * ASEC2RAD # arcseconds
     yp = 0.333309 * ASEC2RAD # arcseconds
     rITRF = _rotations.teme2ecef(jd, rTEME) #, xp, yp)
-
+    rITRF = rITRF[0]
     print(rITRF)
     assert_almost_equal(rITRF[0], -1033.47938300, decimal=4)
     assert_almost_equal(rITRF[1], 7901.29527540, decimal=4)

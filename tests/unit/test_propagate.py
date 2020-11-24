@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 
 from app import propagate
-from app.timefn import julian_date_array_from_datetime, jday2datetime_array
+from app.timefn import julian_date_array_from_datetime, jday2datetime_us_array
 from app.schemas import Satellite, Tle
 from app.utils import epoch_from_tle
 
@@ -19,7 +19,7 @@ def compute_skyfield_ecef_position(tle1, tle2, jd):
     from skyfield.sgp4lib import TEME_to_ITRF
     ts = load.timescale()
     sat = EarthSatellite(tle1, tle2, ts=ts)
-    datetimes = jday2datetime_array(jd)
+    datetimes = jday2datetime_us_array(jd)
     t = ts.from_datetimes(datetimes)
     rTEME, vTEME, _ = sat._position_and_velocity_TEME_km(t)
     rECEF, _ = TEME_to_ITRF(jd, rTEME, vTEME)
@@ -42,13 +42,8 @@ def test_propagate_iss():
     tle2 = "2 25544  51.6443  60.8122 0001995  12.6931 347.4269 15.49438452 29742"
     datetime_start = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=tz_utc)
     datetime_end = datetime.datetime(2020, 6, 11, 0, 0, 0, tzinfo=tz_utc)
-    dt_sec = 5
-    tle = Tle(
-        tle1=tle1,
-        tle2=tle2,
-        epoch=epoch_from_tle(tle1),
-        satid=satellite.id
-    )
+    dt_sec = 30
+    tle = Tle.from_string(tle1, tle2)
     jd = julian_date_array_from_datetime(datetime_start, datetime_end, dt_sec)
     skyfield_rECEF = compute_skyfield_ecef_position(tle.tle1, tle.tle2, jd)
     sat = propagate.compute_satellite_data(tle, jd)
