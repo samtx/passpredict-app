@@ -5,6 +5,7 @@ import pickle
 import logging
 
 from fastapi import FastAPI, Query, Path, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from app.schemas import Location, Overpass
@@ -17,14 +18,21 @@ from app.database import engine
 from app.cache import cache
 
 
-app = FastAPI()
-
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
+app = FastAPI()
+
+origins = ['*']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_headers=['*']
+)
 
 class OverpassResult(BaseModel):
     location: Location
