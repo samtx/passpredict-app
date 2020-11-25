@@ -19,7 +19,7 @@ build:
   services:
     - docker:dind
   script:
-    - build -t $IMAGE_TAG .
+    - docker build -t $IMAGE_TAG .
 
 # Push docker image to container registry
 push:

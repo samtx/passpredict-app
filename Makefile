@@ -3,7 +3,7 @@
 
 # Use Gitlab CI/CD environment variables
 CI_COMMIT_SHORT_SHA?=latest
-CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx/passpredict-api
+CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx
 LOCAL_TAG=passpredict-api:$(CI_COMMIT_SHORT_SHA)
 REMOTE_TAG=$(CI_REGISTRY_IMAGE)/$(LOCAL_TAG)
 CONTAINER_NAME=passpredict-api
