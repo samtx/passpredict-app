@@ -31,15 +31,12 @@ COPY app app
 RUN python setup.py build_ext --inplace
 RUN python setup.py install
 
-# set up cron jobs to update TLE database
-COPY crontab /etc/cron.d/passpredict
-RUN chmod 0644 /etc/cron.d/passpredict
-
 EXPOSE 8000
 
-COPY ./docker-entrypoint.sh .
-RUN chmod +x docker-entrypoint.sh
+# COPY crontab.txt .
+# COPY ./docker-entrypoint.sh .
+# RUN chmod +x docker-entrypoint.sh
 
 # CMD [ "gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
-ENTRYPOINT ["./docker-entrypoint.sh"]
+# ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
