@@ -9,8 +9,8 @@ import numpy as np
 from fastapi import HTTPException
 # from scipy.interpolate import interp1d
 
-from . import _overpass
-from ._solar import sun_pos_ecef
+from app import _overpass
+from app._solar import sun_pos_ecef
 # from .dbmodels import tle as tledb
 from app.propagate import compute_satellite_data
 from app.timefn import julian_date_array_from_date, jday2datetime

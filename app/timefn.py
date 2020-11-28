@@ -3,7 +3,7 @@ import datetime
 import numpy as np
 from astropy.time import Time
 
-from .constants import DAY_S, J2000
+from app.constants import DAY_S, J2000
 
 tz_utc = datetime.timezone.utc
 

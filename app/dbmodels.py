@@ -9,7 +9,7 @@ from sqlalchemy import (
 )
 import numpy as np
 
-from .database import Base, engine
+from app.database import Base, engine
 
 metadata = MetaData()
 

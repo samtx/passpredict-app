@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from .constants import DEG2RAD
+from app.constants import DEG2RAD
 
 
 def rot1(a):

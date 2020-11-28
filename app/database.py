@@ -3,7 +3,7 @@
 import sqlalchemy
 import sqlalchemy.ext.declarative
 
-from .settings import database_uri, db_echo
+from app.settings import database_uri, db_echo
 
 SQLALCHEMY_DATABASE_URL = database_uri
 

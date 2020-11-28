@@ -1,11 +1,11 @@
 import numpy as np
 from sgp4.api import Satrec, WGS84
 
-from ._rotations import teme2ecef
-from ._solar import sun_sat_illumination_distance
+from app._rotations import teme2ecef
+from app._solar import sun_sat_illumination_distance
 # from .solar import is_sat_illuminated, sat_illumination_distance
-from .schemas import Tle
-from .models import SatPredictData
+from app.schemas import Tle
+from app.models import SatPredictData
 
 # import debugpy
 # debugpy.debug_this_thread()

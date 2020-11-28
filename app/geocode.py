@@ -3,8 +3,8 @@ from typing import Dict
 import requests
 import aiohttp
 
-from .settings import HERE_API_KEY
-from .schemas import LocationResult
+from app.settings import HERE_API_KEY
+from app.schemas import LocationResult
 
 
 HERE_URL_BASE = 'https://geocode.search.hereapi.com/v1/geocode'

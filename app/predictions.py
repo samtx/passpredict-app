@@ -4,12 +4,12 @@ from typing import List, Callable
 from astropy.time import Time
 from numpy import ndarray
 
-from .solar import compute_sun_data
-from .propagate import compute_satellite_data
-from .timefn import julian_date_array_from_date
-from .schemas import Overpass, Location, Satellite
-from .models import Sun, RhoVector, Sat
-from .tle import get_TLE
+from app.solar import compute_sun_data
+from app.propagate import compute_satellite_data
+from app.timefn import julian_date_array_from_date
+from app.schemas import Overpass, Location, Satellite
+from app.models import Sun, RhoVector, Sat
+from app.tle import get_TLE
 
 
 def find_overpasses(

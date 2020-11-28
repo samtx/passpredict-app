@@ -7,8 +7,8 @@ from math import floor
 import numpy as np
 from pydantic import BaseModel, Field
 
-from .timefn import jday2datetime
-from .utils import epoch_from_tle, satid_from_tle
+from app.timefn import jday2datetime
+from app.utils import epoch_from_tle, satid_from_tle
 
 COORDINATES = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
 

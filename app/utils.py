@@ -6,7 +6,7 @@ from pathlib import Path
 
 import requests
 
-from .dbmodels import location, satellite
+from app.dbmodels import location, satellite
 
 
 logger = logging.getLogger(__name__)
