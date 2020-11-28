@@ -19,6 +19,7 @@ from app.cache import cache
 
 
 logging.basicConfig(
+    filename='app.log',
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
@@ -54,6 +55,7 @@ def get_cache():
 
 @app.get('/hello/')
 def read_root():
+    logger.info(f'route /hello/')
     return {"msg": "Hello World"}
 
 
@@ -68,6 +70,7 @@ def all_passes(
     """
     Compute passes for top 100 visible satellites for 24 hours
     """
+    logger.info(f'route /passes/ lat={lat},lon={lon},h={h}')
     # Check cache with input string
     today = datetime.date.today()
     main_key = f'all_passes:lat{lat}:lon{lon}:h{h}:start{today.isoformat()}'
@@ -98,7 +101,7 @@ def passes(
     db = Depends(get_db),
     cache = Depends(get_cache)
 ):
-    logger.info(f'route /passes/{satid}')
+    logger.info(f'route /passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
     today = datetime.date.today()
     main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.isoformat()}'

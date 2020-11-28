@@ -16,8 +16,7 @@ from app.dbmodels import tle as tledb
 # from app.main import app
 
 
-logger = logging.getLogger(__file__)
-logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def download_common_tles_from_celestrak() -> Set:

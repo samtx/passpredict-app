@@ -11,8 +11,12 @@ from app.schemas import Tle
 from app.database import engine
 from app.dbmodels import tle as tledb
 
-logger = logging.getLogger(__file__)
-logger.setLevel(logging.INFO)
+logging.basicConfig(
+    filename='update-tle.log',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 # # Create handlers
 # fh = logging.FileHandler('app-update-tle.log')
