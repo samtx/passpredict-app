@@ -25,6 +25,32 @@ push:
 	docker tag $(LOCAL_TAG) $(REMOTE_TAG)
 	docker push $(REMOTE_TAG)
 
+build-push-cron:
+	docker build -t passpredict-cron -f cron.dockerfile .
+	docker tag passpredict-cron registry.gitlab.com/samtx/passpredict-api/passpredict-cron
+	docker push registry.gitlab.com/samtx/passpredict-api/passpredict-cron
+
+deploy-cron:
+	@echo "Login to container registry on server..."
+	$(MAKE) ssh-cmd CMD='docker login \
+		-u $(PASSPREDICTAPI_GITLAB_DEPLOY_USER) \
+		-p $(PASSPREDICTAPI_GITLAB_DEPLOY_PASSWORD) \
+		registry.gitlab.com \
+		'
+	@echo "pulling new cron container image..."
+	$(MAKE) ssh-cmd CMD='docker pull registry.gitlab.com/samtx/passpredict-api/passpredict-cron'
+	@echo "Removing old cron container..."
+	-$(MAKE) ssh-cmd CMD='docker container stop passpredict-cron'
+	-$(MAKE) ssh-cmd CMD='docker container rm passpredict-cron'
+	@echo "starting new container..."
+	@$(MAKE) ssh-cmd CMD='\
+		docker run -d --name passpredict-cron \
+			--restart=unless-stopped \
+			-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+			-v passpredict-api-db:/db \
+			registry.gitlab.com/samtx/passpredict-api/passpredict-cron \
+			'
+
 # create initial docker volume. see link: https://github.com/moby/moby/issues/25245#issuecomment-365970076
 # docker create volume passpredict-api
 
@@ -66,4 +92,4 @@ deploy:
 			-v passpredict-api-db:/db \
 			$(REMOTE_TAG) \
 			'
-
+# gunicorn -b 127.0.0.1:8000 -w 2 -k uvicorn.workers.UvicornWorker app.main:app \

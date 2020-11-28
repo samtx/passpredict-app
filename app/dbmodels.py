@@ -7,7 +7,6 @@ from sqlalchemy import (
     MetaData, Table, Column, Integer, String, Boolean, Date, Float, Text,
     ForeignKey, Unicode, DateTime
 )
-import numpy as np
 
 from app.database import Base, engine
 

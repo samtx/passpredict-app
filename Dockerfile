@@ -27,11 +27,11 @@ RUN pip install wheel
 RUN pip wheel --wheel-dir=wheels -r requirements.txt
 RUN pip install --no-index --find-links=wheels -r requirements.txt
 
-# create python wheels for app
-COPY setup.py .
-COPY app app
-RUN python setup.py build_ext --inplace
-RUN pip wheel --wheel-dir=wheels .
+# # create python wheels for app
+# COPY setup.py .
+# COPY app app
+# RUN python setup.py build_ext --inplace
+# RUN pip wheel --wheel-dir=wheels .
 
 
 # Multistage build
@@ -61,5 +61,5 @@ RUN python setup.py install
 
 EXPOSE 8000
 
-# CMD [ "gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
+# CMD [ "gunicorn", "app.main:app", "-b", "127.0.0.1:8000", "-w", "4", "-k", "uvicorn.workers.UvicornWorker" ]
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
