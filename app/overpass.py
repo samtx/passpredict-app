@@ -265,7 +265,7 @@ def predict_all_visible_satellite_overpasses(
 
     overpasses = []
     for satid in VISIBLE_SATS:        
-        tle = get_most_recent_tle(satid, raise_404=False)
+        tle = get_most_recent_tle(db, satid, raise_404=False)
         if not tle:
             # no TLE data for satellite
             continue

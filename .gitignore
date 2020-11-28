@@ -1,4 +1,7 @@
 
+# cython generated c files
+app/_*.c
+
 # data files
 *.csv
 *.csv.gz
