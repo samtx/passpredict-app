@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    root_path='/api'
+    # root_path='/api'
 )
 
 
@@ -55,8 +55,14 @@ def get_cache():
     return cache
 
 
-@app.get('/hello/')
+@app.get('/')
 def read_root():
+    logger.info(f'route /')
+    return {"msg": "Hello from API root"}
+
+
+@app.get('/hello/')
+def read_hello():
     logger.info(f'route /hello/')
     return {"msg": "Hello World"}
 
