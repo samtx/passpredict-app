@@ -26,7 +26,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    # root_path='/api'
+    root_path='/api'
 )
 
 
