@@ -29,13 +29,13 @@ app = FastAPI(
     root_path='/api'
 )
 
-origins = ['*']
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_headers=['*']
+    allow_origins=['passpredict.com', 'www.passpredict.com'],
+    allow_headers=['GET']
 )
+
 
 class OverpassResult(BaseModel):
     location: Location
