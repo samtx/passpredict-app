@@ -3,10 +3,10 @@
 
 # Use Gitlab CI/CD environment variables
 CI_COMMIT_SHORT_SHA?=latest
-CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx
-LOCAL_TAG=passpredict-api:$(CI_COMMIT_SHORT_SHA)
+CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx/passpredict-api
+LOCAL_TAG=api:$(CI_COMMIT_SHORT_SHA)
 REMOTE_TAG=$(CI_REGISTRY_IMAGE)/$(LOCAL_TAG)
-CONTAINER_NAME=passpredict-api
+CONTAINER_NAME=api
 
 #"$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME" "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
 #    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
@@ -27,8 +27,8 @@ push:
 
 build-push-cron:
 	docker build -t passpredict-cron -f cron.dockerfile .
-	docker tag passpredict-cron registry.gitlab.com/samtx/passpredict-api/passpredict-cron
-	docker push registry.gitlab.com/samtx/passpredict-api/passpredict-cron
+	docker tag passpredict-cron registry.gitlab.com/samtx/passpredict-api/cron
+	docker push registry.gitlab.com/samtx/passpredict-api/cron
 
 deploy-cron:
 	@echo "Login to container registry on server..."
@@ -38,17 +38,17 @@ deploy-cron:
 		registry.gitlab.com \
 		'
 	@echo "pulling new cron container image..."
-	$(MAKE) ssh-cmd CMD='docker pull registry.gitlab.com/samtx/passpredict-api/passpredict-cron'
+	$(MAKE) ssh-cmd CMD='docker pull registry.gitlab.com/samtx/passpredict-api/cron'
 	@echo "Removing old cron container..."
-	-$(MAKE) ssh-cmd CMD='docker container stop passpredict-cron'
-	-$(MAKE) ssh-cmd CMD='docker container rm passpredict-cron'
+	-$(MAKE) ssh-cmd CMD='docker container stop cron'
+	-$(MAKE) ssh-cmd CMD='docker container rm cron'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
-		docker run -d --name passpredict-cron \
+		docker run -d --name cron \
 			--restart=unless-stopped \
 			-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
 			-v passpredict-api-db:/db \
-			registry.gitlab.com/samtx/passpredict-api/passpredict-cron \
+			registry.gitlab.com/samtx/passpredict-api/cron \
 			'
 
 # create initial docker volume. see link: https://github.com/moby/moby/issues/25245#issuecomment-365970076
@@ -59,7 +59,7 @@ deploy-local:
 	-docker container stop $(CONTAINER_NAME)
 	-docker container rm $(CONTAINER_NAME)
 	@echo "starting new container..."
-	docker run -d --name passpredict-api \
+	docker run -d --name api \
 		-p 8000:8000 \
 		-e REDIS_HOST=redis \
 		-e DT_SECONDS=5 \
@@ -82,7 +82,7 @@ deploy:
 	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
-		docker run -d --name passpredict-api \
+		docker run -d --name api \
 			--restart=unless-stopped \
 			-p 8000:8000 \
 			-e REDIS_HOST=redis \

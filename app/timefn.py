@@ -1,7 +1,7 @@
+from __future__ import annotations
 import datetime
 
 import numpy as np
-from astropy.time import Time
 
 from app.constants import DAY_S, J2000
 
@@ -252,23 +252,23 @@ def jday2datetime_us_array(jdt_array):
     return dt_array
 
 
-def compute_time_array(dt_start: datetime.datetime, dt_end: datetime.datetime, dt_seconds: float) -> Time:
-    """
-    Create astropy Time object
-    """
-    jdt0 = julian_date(dt_start)
-    jdtf = julian_date(dt_end)
-    dt_days = dt_seconds/(24*60*60.0)
-    jd_array = np.arange(jdt0, jdtf, dt_days, dtype=float)
-    return Time(jd_array, format='jd')
+# def compute_time_array(dt_start: datetime.datetime, dt_end: datetime.datetime, dt_seconds: float) -> Time:
+#     """
+#     Create astropy Time object
+#     """
+#     jdt0 = julian_date(dt_start)
+#     jdtf = julian_date(dt_end)
+#     dt_days = dt_seconds/(24*60*60.0)
+#     jd_array = np.arange(jdt0, jdtf, dt_days, dtype=float)
+#     return Time(jd_array, format='jd')
 
 
-def compute_time_array_from_date(date_start: datetime.date, date_end: datetime.date, dt_seconds: float) -> Time:
-    """
-    Create astropy Time object from python date
-    """
-    jd_array = julian_date_array_from_date(date_start, date_end, dt_seconds)
-    return Time(jd_array, format='jd')
+# def compute_time_array_from_date(date_start: datetime.date, date_end: datetime.date, dt_seconds: float) -> Time:
+#     """
+#     Create astropy Time object from python date
+#     """
+#     jd_array = julian_date_array_from_date(date_start, date_end, dt_seconds)
+#     return Time(jd_array, format='jd')
 
 
 def julian_date_array_from_date(date_start: datetime.date, date_end: datetime.date, dt_seconds: float) -> np.ndarray:

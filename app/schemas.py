@@ -4,7 +4,6 @@ from enum import Enum
 from functools import cached_property
 from math import floor
 
-import numpy as np
 from pydantic import BaseModel, Field
 
 from app.timefn import jday2datetime
