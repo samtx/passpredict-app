@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 
 import requests
-from sqlalchemy.sql import select, delete
 from sqlalchemy import and_
 
 # import os, sys
@@ -31,19 +30,6 @@ logger = logging.getLogger(__name__)
 # fh.setLevel(logging.DEBUG)
 # logger.addHandler(fh)
 
-st = 'Remove old TLEs from database'
-logger.info(st)
-print(st)
-date_limit = datetime.utcnow() - timedelta(days=7)
-tles_deleted = 0
-with engine.connect() as conn:
-    stmt = tledb.delete().where(
-        tledb.c.epoch < date_limit
-    )
-    res = conn.execute(stmt)
-    tles_deleted = res.rowcount
-    print('done')
-print(f'Number TLEs deleted: {tles_deleted}')
 
 #  Download common tle data from celestrak
 st = 'Download TLEs from Celestrak'
@@ -87,7 +73,7 @@ for url in urls:
         try:
             # Check if there is a tle for the datetime, 
             # if not then insert record, otherwise skip
-            stmt = select([tledb]).where(
+            stmt = tledb.select().where(
                 and_(
                     tledb.c.satellite_id == tle.satid,
                     tledb.c.epoch == tle.epoch
@@ -114,20 +100,26 @@ for url in urls:
             logger.exception('Exception trying to update database with new TLEs', exc_info=e)
             print('exception here!!', e, tle)
     conn.close()
+    st = f'Url: {url}, inserted {num_inserted}, skipped {num_skipped}'
+    logger.info(st)
+    print(st)
     time.sleep(2)   # wait 2 seconds to avoid hitting celestrak server too much
 
 logger.info(f'Finished updating TLE database.')
 print(f'Finished updating TLE database.')
 
-# # remove TLEs from database which have epochs older than 7 days from today
-# st = 'Remove old TLEs from database'
-# logger.info(st)
-# print(st)
-# date_limit = datetime.utcnow() - timedelta(days=7)
-# tles_deleted = 0
-# with engine.connect() as conn:
-#     stmt = tledb.delete().where(
-#         tledb.c.epoch < date_limit
-#     )
-#     res = conn.execute(stmt)
 
+# Remove old TLEs
+st = 'Remove old TLEs from database'
+logger.info(st)
+print(st)
+date_limit = datetime.utcnow() - timedelta(days=7)
+tles_deleted = 0
+with engine.connect() as conn:
+    stmt = tledb.delete().where(
+        tledb.c.epoch < date_limit
+    )
+    res = conn.execute(stmt)
+    tles_deleted = res.rowcount
+    print('done')
+print(f'Number TLEs deleted: {tles_deleted}')
