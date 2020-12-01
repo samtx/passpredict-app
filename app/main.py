@@ -61,13 +61,13 @@ def read_root():
     return {"msg": "Hello from API root"}
 
 
-@app.get('/hello/')
+@app.get('/hello')
 def read_hello():
     logger.info(f'route /hello/')
     return {"msg": "Hello World"}
 
 
-@app.get("/passes/", response_model=OverpassResult, response_model_exclude_unset=True)
+@app.get("/passes", response_model=OverpassResult, response_model_exclude_unset=True)
 def all_passes(
     lat: float = Query(..., title="Location latitude North in decimals"),
     lon: float = Query(..., title="Location longitude East in decimals"),
