@@ -121,7 +121,6 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
                     passtype = PassType.unlit  # nighttime, not illuminated (radio night)
         else:
             passtype = None
-        passtype = None
 
         if visible_only and passtype != PassType.visible:
             continue
