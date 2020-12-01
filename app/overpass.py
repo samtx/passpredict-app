@@ -67,6 +67,49 @@ class RhoVector:
         return p
   
 
+def compute_satellite_visibility(
+    sun_rECEF: np.ndarray,
+    r_site_ECEF: np.ndarray,
+    location: Location,
+    sunset_el: float,
+    sat: SatPredictData
+):
+    """
+    Function to compute whether the satellite is visible to the observer
+    """
+    sun_rho = sun_rECEF[idx0:idxf+1] - r_site_ECEF
+    # sat_ECEF = sat.rECEF[idx0:idxf+1]
+    sun_sez = ecef2sez(sun_rho, location.lat, location.lon)
+    sun_rng = np.linalg.norm(sun_sez, axis=1)
+    sun_el = np.arcsin(sun_sez[:, 2] / sun_rng) * RAD2DEG
+    site_in_sunset = sun_el - sunset_el < 0
+    site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
+    if site_in_sunset_idx.size == 0:
+        passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
+    else:
+        # get satellite illumination values for this overpass
+        sat_illuminated = sat.sun_sat_dist[idx0:idxf+1] > 0
+        sat_visible = (sat_illuminated * site_in_sunset)
+        if np.any(sat_visible):
+            passtype = PassType.visible  # site in night, sat is illuminated
+            sat_visible_idx = np.nonzero(sat_visible)[0]
+            sat_visible_start_idx = sat_visible_idx.min()
+            sat_visible_end_idx = sat_visible_idx.max()
+            vis_start_pt = rho.point(idx0 + sat_visible_start_idx)
+            vis_end_pt = rho.point(idx0 + sat_visible_end_idx)
+            brightness_idx = np.argmax(rho.el[idx0 + sat_visible_start_idx: idx0 + sat_visible_end_idx + 1])
+            sat_rho = rho_ECEF[idx0 + sat_visible_start_idx + brightness_idx]
+            sat_rng = rho.rng[idx0 + sat_visible_start_idx + brightness_idx]
+            sun_rho_b = sun_rho[sat_visible_start_idx + brightness_idx]
+            sun_rng_b = sun_rng[sat_visible_start_idx + brightness_idx]
+            sat_site_sun_angle = math.acos(  
+                np.dot(sat_rho, sun_rho_b) / (sat_rng * sun_rng_b)
+            )
+            beta = math.pi - sat_site_sun_angle  # phase angle: site -- sat -- sun angle
+            brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rng) - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
+        else:
+            passtype = PassType.unlit  # nighttime, not illuminated (radio night)
+
 def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECEF=None, min_elevation=10.0, visible_only=False, store_sat_id=True, sunset_el=-8.0):
     r_site_ECEF = site_ECEF(location.lat, location.lon, location.height)[np.newaxis, :]
     rho_ECEF = sat.rECEF - r_site_ECEF
@@ -87,38 +130,7 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         end_pt = rho.point(idxf)
         # Find visible start and end times
         if sun_rECEF is not None:
-            sun_rho = sun_rECEF[idx0:idxf+1] - r_site_ECEF
-            # sat_ECEF = sat.rECEF[idx0:idxf+1]
-            sun_sez = ecef2sez(sun_rho, location.lat, location.lon)
-            sun_rng = np.linalg.norm(sun_sez, axis=1)
-            sun_el = np.arcsin(sun_sez[:, 2] / sun_rng) * RAD2DEG
-            site_in_sunset = sun_el - sunset_el < 0
-            site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
-            if site_in_sunset_idx.size == 0:
-                passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
-            else:
-                # get satellite illumination values for this overpass
-                sat_illuminated = sat.sun_sat_dist[idx0:idxf+1] > 0
-                sat_visible = (sat_illuminated * site_in_sunset)
-                if np.any(sat_visible):
-                    passtype = PassType.visible  # site in night, sat is illuminated
-                    sat_visible_idx = np.nonzero(sat_visible)[0]
-                    sat_visible_start_idx = sat_visible_idx.min()
-                    sat_visible_end_idx = sat_visible_idx.max()
-                    vis_start_pt = rho.point(idx0 + sat_visible_start_idx)
-                    vis_end_pt = rho.point(idx0 + sat_visible_end_idx)
-                    brightness_idx = np.argmax(rho.el[idx0 + sat_visible_start_idx: idx0 + sat_visible_end_idx + 1])
-                    sat_rho = rho_ECEF[idx0 + sat_visible_start_idx + brightness_idx]
-                    sat_rng = rho.rng[idx0 + sat_visible_start_idx + brightness_idx]
-                    sun_rho_b = sun_rho[sat_visible_start_idx + brightness_idx]
-                    sun_rng_b = sun_rng[sat_visible_start_idx + brightness_idx]
-                    sat_site_sun_angle = math.acos(  
-                        np.dot(sat_rho, sun_rho_b) / (sat_rng * sun_rng_b)
-                    )
-                    beta = math.pi - sat_site_sun_angle  # phase angle: site -- sat -- sun angle
-                    brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rng) - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
-                else:
-                    passtype = PassType.unlit  # nighttime, not illuminated (radio night)
+            
         else:
             passtype = None
 
