@@ -56,8 +56,10 @@ class RhoVector:
         return az
 
     def point(self, idx):
+        dt = jday2datetime(self.jd[idx])
         p = Point.construct(
-            datetime=jday2datetime(self.jd[idx]),
+            datetime=dt,
+            timestamp=dt.timestamp(),
             azimuth=round(self._azimuth_from_idx(idx), 2),
             elevation=round(self.el[idx], 2),
             range=round(self.rng[idx], 3)

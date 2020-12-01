@@ -86,6 +86,7 @@ class Tle(BaseModel):
 class Point(BaseModel):
     # __slots__ = ['datetime', 'azimuth', 'elevation', 'range', 'declination', 'right_ascension']
     datetime: datetime.datetime
+    timestamp: float = Field(..., title='Unix timestamp in seconds since Jan 1 1970')
     azimuth: float
     elevation: float
     range: float
