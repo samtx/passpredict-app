@@ -90,7 +90,7 @@ def test_Location():
     austin = schemas.Location(lat=lat, lon=lon, h=h, name=name)
     assert austin.lat == lat
     assert austin.lon == lon
-    assert austin.height == h
+    assert austin.h == h
     assert austin.name == name
 
 

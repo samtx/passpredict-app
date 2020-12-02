@@ -1,4 +1,5 @@
 import math
+from functools import lru_cache
 
 import numpy as np
 
@@ -20,6 +21,7 @@ def site_declination_and_K(phi_gd, h_ellp):
     return (r_delta, r_K)
 
 
+@lru_cache(maxsize=10)
 def site_ECEF(phi_gd, lmda, h_ellp):
     """Compute ECEF coordinates for tracking site on Earth
 

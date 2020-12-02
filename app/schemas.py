@@ -36,13 +36,13 @@ class LocationResult(BaseModel):
     """
     Location result from geocoder
     """
-    lat: float
-    lon: float
+    lat: float = Field(..., title='latitude, \u0b00N')
+    lon: float = Field(..., title='longitude, \u0b00E')
     name: str = None
     
 
 class Location(LocationResult):
-    height: float = Field(0.0, alias='h')
+    h: float = Field(0.0, title='height, [m] above WGS84 ellipsoid')
 
 
 class LocationInDB(Location):

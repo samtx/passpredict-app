@@ -1,9 +1,8 @@
 from __future__ import annotations
 from datetime import timedelta, date
-from typing import List
+from typing import List, NamedTuple
 import math
 
-# from astropy.time import Time
 from numpy import ndarray
 import numpy as np
 from fastapi import HTTPException
@@ -33,16 +32,13 @@ TIME_KEY_SUFFIX = ':' + str(MAX_DAYS) + ':' + str(DT_SECONDS)
 
 
 class RhoVector:
-    def __init__(self, jd, rSEZ):
+    def __init__(self, jd: np.ndarray, object_rECEF: np.ndarray, location: Location):
         self.jd = jd
-        self.rSEZ = rSEZ      
+        self.location = location
+        self.site_ECEF = site_ECEF(location.lat, location.lon, location.h)[np.newaxis, :]
+        self.rECEF = object_rECEF - self.site_ECEF
+        self.rSEZ = ecef2sez(self.rECEF, location.lat, location.lon)
         self.rng, self.el = self._compute_range_and_elevation()
-
-    # def _compute_range(self):
-    #     return np.linalg.norm(self.rSEZ, axis=1)
-
-    # def _compute_elevation(self):
-    #     return np.arcsin(self.rSEZ[:,2] / self.rng) * RAD2DEG
 
     def _compute_range_and_elevation(self):
         return _overpass.compute_range_and_elevation(self.rSEZ)
@@ -65,58 +61,84 @@ class RhoVector:
             range=round(self.rng[idx], 3)
         )
         return p
-  
+
+    def __getitem__(self, slc):
+        return RhoVector(
+            jd=self.jd[slc],
+            object_rECEF=self.rECEF[slc, :],
+            location=self.location,
+        )
+
+
+class SatelliteVisibility(NamedTuple):
+    passtype: PassType
+    vis_start_pt: Point = None
+    vis_end_pt: Point = None
+    brightness: float = None
+
 
 def compute_satellite_visibility(
-    sun_rECEF: np.ndarray,
-    r_site_ECEF: np.ndarray,
-    location: Location,
+    sun_rho: RhoVector,
+    sat_rho: RhoVector,
     sunset_el: float,
     sat: SatPredictData
-):
+) -> SatelliteVisibility:
     """
     Function to compute whether the satellite is visible to the observer
     """
-    sun_rho = sun_rECEF[idx0:idxf+1] - r_site_ECEF
-    # sat_ECEF = sat.rECEF[idx0:idxf+1]
-    sun_sez = ecef2sez(sun_rho, location.lat, location.lon)
-    sun_rng = np.linalg.norm(sun_sez, axis=1)
-    sun_el = np.arcsin(sun_sez[:, 2] / sun_rng) * RAD2DEG
-    site_in_sunset = sun_el - sunset_el < 0
+    assert sun_rho.location == sat_rho.location
+    assert sun_rho.rECEF.shape == sat_rho.rECEF.shape
+    assert sun_rho.rSEZ.shape == sat_rho.rSEZ.shape
+    np.testing.assert_allclose(sun_rho.jd, sat_rho.jd)
+    site_in_sunset = sun_rho.el - sunset_el < 0
     site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
     if site_in_sunset_idx.size == 0:
         passtype = PassType.daylight # site is always sunlit, so overpass is in daylight
     else:
         # get satellite illumination values for this overpass
-        sat_illuminated = sat.sun_sat_dist[idx0:idxf+1] > 0
+        sat_illuminated = sat.sun_sat_dist > 0
         sat_visible = (sat_illuminated * site_in_sunset)
         if np.any(sat_visible):
             passtype = PassType.visible  # site in night, sat is illuminated
             sat_visible_idx = np.nonzero(sat_visible)[0]
             sat_visible_start_idx = sat_visible_idx.min()
             sat_visible_end_idx = sat_visible_idx.max()
-            vis_start_pt = rho.point(idx0 + sat_visible_start_idx)
-            vis_end_pt = rho.point(idx0 + sat_visible_end_idx)
-            brightness_idx = np.argmax(rho.el[idx0 + sat_visible_start_idx: idx0 + sat_visible_end_idx + 1])
-            sat_rho = rho_ECEF[idx0 + sat_visible_start_idx + brightness_idx]
-            sat_rng = rho.rng[idx0 + sat_visible_start_idx + brightness_idx]
-            sun_rho_b = sun_rho[sat_visible_start_idx + brightness_idx]
-            sun_rng_b = sun_rng[sat_visible_start_idx + brightness_idx]
+            sat_rho_vis = sat_rho[sat_visible_start_idx:sat_visible_end_idx + 1]
+            sun_rho_vis = sun_rho[sat_visible_start_idx:sat_visible_end_idx + 1]
+            vis_start_pt = sat_rho_vis.point(0)
+            vis_end_pt = sat_rho_vis.point(-1)
+            brightness_idx = np.argmax(sat_rho_vis.el)
             sat_site_sun_angle = math.acos(  
-                np.dot(sat_rho, sun_rho_b) / (sat_rng * sun_rng_b)
+                np.dot(sat_rho_vis.rSEZ[brightness_idx,:], sun_rho_vis.rSEZ[brightness_idx,:]) \
+                / (sat_rho_vis.rng[brightness_idx] * sun_rho_vis.rng[brightness_idx])
             )
             beta = math.pi - sat_site_sun_angle  # phase angle: site -- sat -- sun angle
-            brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rng) - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
+            brightness = sat.intrinsic_mag - 15 + 5*math.log10(sat_rho_vis.rng[brightness_idx]) \
+                - 2.5*math.log10(math.sin(beta) + (math.pi - beta)*math.cos(beta))
         else:
             passtype = PassType.unlit  # nighttime, not illuminated (radio night)
+    if passtype != PassType.visible:
+        vis_start_pt = vis_end_pt = brightness = None
+    satellite_visitbility = SatelliteVisibility(
+        passtype=passtype, vis_start_pt=vis_start_pt, vis_end_pt=vis_end_pt, brightness=brightness
+    )
+    return satellite_visitbility
 
-def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECEF=None, min_elevation=10.0, visible_only=False, store_sat_id=True, sunset_el=-8.0):
-    r_site_ECEF = site_ECEF(location.lat, location.lon, location.height)[np.newaxis, :]
-    rho_ECEF = sat.rECEF - r_site_ECEF
-    rSEZ = ecef2sez(rho_ECEF, location.lat, location.lon)
-    rho = RhoVector(jd, rSEZ)
+
+def compute_single_satellite_overpasses(
+    sat,
+    *,
+    jd=None,
+    location=None,
+    sun_rECEF=None,
+    min_elevation=10.0,
+    visible_only=False,
+    store_sat_id=True,
+    sunset_el=-8.0
+) -> List[Overpass]:
+    rho = RhoVector(jd, sat.rECEF, location)
     start_idx, end_idx = _start_end_index(rho.el - min_elevation)
-    num_overpasses = min(start_idx.size, end_idx.size)       # Iterate over start/end indecies and gather inbetween indecies
+    num_overpasses = min(start_idx.size, end_idx.size)
     if start_idx.size < end_idx.size:
         end_idx = end_idx[1:]
     overpasses = [None]*num_overpasses if not visible_only else []
@@ -130,13 +152,20 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         end_pt = rho.point(idxf)
         # Find visible start and end times
         if sun_rECEF is not None:
-            
+            sun_rho = RhoVector(
+                jd=jd[idx0:idxf+1],
+                object_rECEF=sun_rECEF[idx0:idxf+1],
+                location=location
+            )
+            satellite_visibility = compute_satellite_visibility(
+                sun_rho=sun_rho, sat_rho=rho[idx0:idxf+1],
+                sunset_el=sunset_el, sat=sat[idx0:idxf+1]
+            )
+            passtype = satellite_visibility.passtype
         else:
             passtype = None
-
         if visible_only and passtype != PassType.visible:
             continue
-
         overpass_dict = {
             'start_pt': start_pt,
             'max_pt': max_pt,
@@ -145,9 +174,9 @@ def compute_single_satellite_overpasses(sat, *, jd=None, location=None, sun_rECE
         if store_sat_id:
             overpass_dict['satellite_id'] = sat.id
         if (passtype is not None) and (passtype == PassType.visible):
-            overpass_dict['vis_start_pt'] = vis_start_pt
-            overpass_dict['vis_end_pt'] = vis_end_pt
-            overpass_dict['brightness'] = round(brightness, 2)
+            overpass_dict['vis_start_pt'] = satellite_visibility.vis_start_pt
+            overpass_dict['vis_end_pt'] = satellite_visibility.vis_end_pt
+            overpass_dict['brightness'] = round(satellite_visibility.brightness, 2)
         overpass_dict['type'] = passtype
         overpass = Overpass.construct(**overpass_dict)
         if not visible_only:
