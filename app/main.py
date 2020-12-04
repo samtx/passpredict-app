@@ -13,7 +13,7 @@ from app.overpass import (
     predict_all_visible_satellite_overpasses,
     predict_single_satellite_overpasses
 )
-from app.settings import MAX_DAYS
+from app.settings import MAX_DAYS, CORS_ORIGINS
 from app.database import engine
 from app.cache import cache
 
@@ -32,7 +32,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['passpredict.com', 'www.passpredict.com'],
+    allow_origins=CORS_ORIGINS,
     allow_headers=['GET']
 )
 

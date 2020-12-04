@@ -291,19 +291,19 @@ def predict_all_visible_satellite_overpasses(
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
     sun_rECEF = sun_pos_ecef(jd)    
 
-    # # Query TLEs for visible satellites
-    # try:
-    #     conn = engine.connect()
-    #     s = select(
-    #         [tledb.c.satellite_id, tledb.c.tle1, tledb.c.tle2]) \
-    #         .where(tledb.c.satellite_id.in_(VISIBLE_SATS))
-    #     )
-    #     res = conn.execute(s)
+    # Query TLEs for visible satellites
+    try:
+        conn = engine.connect()
+        s = select(
+            [tledb.c.satellite_id, tledb.c.tle1, tledb.c.tle2]) \
+            .where(tledb.c.satellite_id.in_(VISIBLE_SATS))
+        )
+        res = conn.execute(s)
 
-    # except:
-    #     print("Error quering TLEs")
-    # finally:
-    #     conn.close()
+    except:
+        print("Error quering TLEs")
+    finally:
+        conn.close()
 
     overpasses = []
     for satid in VISIBLE_SATS:        

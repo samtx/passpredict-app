@@ -64,6 +64,7 @@ deploy-local:
 		-e REDIS_HOST=redis \
 		-e DT_SECONDS=5 \
 		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+		-e CORS_ORIGINS=* \
 		--link=redis:redis \
 		-v passpredict-api-db:/db \
 		$(LOCAL_TAG)
@@ -88,6 +89,7 @@ deploy:
 			-e REDIS_HOST=redis \
 			-e DT_SECONDS=5 \
 			-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+			-e CORS_ORIGINS=* \
 			--link=redis:redis \
 			-v passpredict-api-db:/db \
 			$(REMOTE_TAG) \

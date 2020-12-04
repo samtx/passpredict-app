@@ -19,5 +19,8 @@ DT_SECONDS = int(os.getenv('DT_SECONDS', 1))
 
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
 
+cors_origins_string = os.getenv('CORS_ORIGINS', '*')
+CORS_ORIGINS = cors_origins_string.split(',')
+
 
 
