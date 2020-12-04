@@ -51,7 +51,7 @@ def test_c_ecef2sez():
     #     assert_almost_equal(rSEZ[i], rSEZ_true[i], decimal=0, verbose=True)
 
 
-# @pytest.mark.xfail
+@pytest.mark.xfail
 def test_teme2ecef():
     """
     Vallado matlab files, exsgp4_teme.m
@@ -100,7 +100,7 @@ def test_teme2ecef_shape():
     assert r2.shape == rTEME.shape
 
 
-# @pytest.mark.xfail
+@pytest.mark.xfail
 def test_appendix_c_conversion_from_TEME_to_ITRF_UTC1():
     """Test TEME to ITRF conversion
 

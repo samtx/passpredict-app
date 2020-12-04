@@ -10,8 +10,6 @@ variables:
     IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
 
 
-
-
 # Build docker image
 build:
   image: docker:latest
@@ -20,6 +18,28 @@ build:
     - docker:dind
   script:
     - docker build -t $IMAGE_TAG .
+  tags:
+    - api
+
+# Test docker image
+test:
+  image: docker:latest
+  stage: test
+  services:
+    - docker:dind
+    - redis
+  tags:
+    - api
+  script:
+    - docker run \
+      -e REDIS_HOST=redis \
+      -e DT_SECONDS=5 \
+      -e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+      -e CORS_ORIGINS=* \
+      --link=redis:redis \
+      -v passpredict-api-db:/db \
+      $(REMOTE_TAG) \
+      /bin/bash -c "pip install pytest pytest-randomly pytest-mock && pytest"
 
 # Push docker image to container registry
 push:
@@ -33,6 +53,8 @@ push:
     - docker push $IMAGE_TAG
   only:
     - main
+  tags:
+    - api
 
 # Deploy docker image to server and run it
 # Deploy to DigitalOcean Droplet at passpredict.com
