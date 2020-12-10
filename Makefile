@@ -1,8 +1,15 @@
 .PHONY: all build test clean
 
+# get-git-commit:
+# 	COMMIT_SHORT_SHA=$(git log -1 --pretty=format:"%h")
+
+# use short commit sha
+# ifndef CI_COMMIT_SHORT_SHA
+
+
 
 # Use Gitlab CI/CD environment variables
-CI_COMMIT_SHORT_SHA?=latest
+CI_COMMIT_SHORT_SHA?=$(shell git log -1 --pretty=format:"%h")
 CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx/passpredict-api
 LOCAL_TAG=api:$(CI_COMMIT_SHORT_SHA)
 REMOTE_TAG=$(CI_REGISTRY_IMAGE)/$(LOCAL_TAG)
@@ -19,8 +26,21 @@ ssh-cmd:
 	ssh sam@passpredict.com "$(CMD)"
 
 build:
+	# CI_COMMIT_SHA := $(shell git log -1 --pretty=format:"%h")
+	# @echo CI_COMMIT_SHA
+	# @echo "CI_COMMIT_SHORT_SHA $(CI_COMMIT_SHORT_SHA)"
 	docker build -t $(LOCAL_TAG) .
 
+test:
+	docker run \
+        -e REDIS_HOST=redis \
+        -e DT_SECONDS=5 \
+        -e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+        -e CORS_ORIGINS=* \
+        --link=redis:redis \
+        -v passpredict-api-db:/db \
+        $(LOCAL_TAG) \
+        /bin/bash -c "pip install pytest pytest-randomly pytest-redis pytest-mock && pytest -v"
 push:
 	docker tag $(LOCAL_TAG) $(REMOTE_TAG)
 	docker push $(REMOTE_TAG)

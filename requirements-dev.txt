@@ -1,6 +1,7 @@
 -r requirements.txt
 pytest
 pytest-randomly
+pytest-redis
 pytest-mock
 pip-tools
 
