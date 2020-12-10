@@ -294,10 +294,8 @@ def predict_all_visible_satellite_overpasses(
     # Query TLEs for visible satellites
     try:
         conn = engine.connect()
-        s = select(
-            [tledb.c.satellite_id, tledb.c.tle1, tledb.c.tle2]) \
+        s = select([tledb.c.satellite_id, tledb.c.tle1, tledb.c.tle2]) \
             .where(tledb.c.satellite_id.in_(VISIBLE_SATS))
-        )
         res = conn.execute(s)
 
     except:
