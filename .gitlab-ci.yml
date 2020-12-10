@@ -6,8 +6,9 @@ stages:
   - deploy
 
 variables:
-    LOCAL_IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
-    DEPLOY_IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    LOCAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
+    DEPLOY_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_REF_NAME
+    # CI_DEBUG_TRACE: "true"
     # DOCKER_HOST: tcp://docker:2376
     # DOCKER_TLS_CERTDIR: "/certs"
     # DOCKER_TLS_VERIFY: 1
@@ -48,13 +49,19 @@ test:
 # Push docker image to container registry
 push:
   stage: push
+  before_script:
+    - echo "CI_COMMIT_BRANCH $CI_COMMIT_BRANCH"
+    - echo "CI_COMMIT_REF_PROTECTED $CI_COMMIT_REF_PROTECTED"
   script:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker tag $LOCAL_IMAGE_TAG $DEPLOY_IMAGE_TAG
     - docker push $DEPLOY_IMAGE_TAG
-  only:
-    - main
-    - tags
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "push"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED'
   tags:
     - shell
     - api
@@ -63,6 +70,9 @@ push:
 # Deploy to DigitalOcean Droplet at passpredict.com
 deploy:
   stage: deploy
+  before_script:
+    - echo "CI_COMMIT_BRANCH $CI_COMMIT_BRANCH"
+    - echo "CI_COMMIT_REF_PROTECTED $CI_COMMIT_REF_PROTECTED"
   script:
     - echo "Stopping old container named 'api'..."
     - docker container ls -a | grep "\sapi$" | awk '{print $NF}' | xargs docker container stop || true
@@ -80,11 +90,13 @@ deploy:
         --link=redis:redis \
         -v passpredict-api-db:/db \
         $DEPLOY_IMAGE_TAG
-  when: manual
+  rules:
+    - if: '$CI_COMMIT_BRANCH'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE != "push"'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED'
+      when: manual
   tags:
     - shell
     - api
-  only:
-    - main
-    - tags
-
