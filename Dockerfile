@@ -58,6 +58,8 @@ COPY setup.py .
 COPY app app
 RUN python setup.py build_ext --inplace
 RUN python setup.py install
+COPY tests tests
+COPY pytest.ini pytest.ini
 
 EXPOSE 8000
 

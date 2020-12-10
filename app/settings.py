@@ -18,7 +18,7 @@ MAX_DAYS = int(os.getenv('MAX_DAYS', 10))
 DT_SECONDS = int(os.getenv('DT_SECONDS', 1))
 
 REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-
+REDIS_URL = os.getenv('REDIS_URL')
 cors_origins_string = os.getenv('CORS_ORIGINS', '*')
 CORS_ORIGINS = cors_origins_string.split(',')
 
