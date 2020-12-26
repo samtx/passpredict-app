@@ -8,6 +8,7 @@ stages:
 variables:
     LOCAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
     DEPLOY_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_REF_NAME
+    LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:latest
     # CI_DEBUG_TRACE: "true"
     # DOCKER_HOST: tcp://docker:2376
     # DOCKER_TLS_CERTDIR: "/certs"
@@ -56,6 +57,8 @@ push:
     - echo $CI_REGISTRY_PASSWORD | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - docker tag $LOCAL_IMAGE_TAG $DEPLOY_IMAGE_TAG
     - docker push $DEPLOY_IMAGE_TAG
+    - docker tag $DEPLOY_IMAGE_TAG $LATEST_IMAGE_TAG
+    - docker push $LATEST_IMAGE_TAG
   rules:
     - if: '$CI_COMMIT_BRANCH'
       when: never
