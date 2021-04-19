@@ -8,6 +8,7 @@ from typing import List, Optional
 from flask import Flask, flash, redirect, render_template, request, url_for
 from app.resources import cache, db
 from app.passes.routes import passes
+from app.api.routes import api
 
 
 logging.basicConfig(
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 app.register_blueprint(passes, url_prefix='/passes')
+app.register_blueprint(api, url_prefix='/api')
 
 
 @app.route('/')
