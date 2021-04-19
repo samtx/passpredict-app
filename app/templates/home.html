@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="container is-max-desktop px-3 pt-2">
+
+    <header>
+        <h1 class="title has-text-centered">
+            Pass Predict
+        </h1>
+        <h3 class="subtitle has-text-centered">
+            See a Satellite!
+        </h3>
+    </header>
+
+    <form id="passes-form" autocomplete="off" method="GET" on:submit|preventDefault={goToPasses}>
+        <div class="field">
+            <label for="locationSearch" class="label">Location Search</label>
+            <div class="control">
+                <Autocomplete searchFunction={getLocations} labelFieldName="name" bind:selectedItem={selectedLocation}
+                    minCharactersToSearch="3" name="locationSearch" inputId="locationSearch" inputClassName="input"
+                    hideArrow="true" />
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="satid" class="label">Select satellite</label>
+            <div class="control">
+                <div class="select mt-0">
+                    <select name="satid" bind:value={selectedSatId}>
+                        {#each satellites as sat}
+                        <option value={sat.id}>{sat.name}</option>
+                        {/each}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="buttons">
+            <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
+            <button id="reset" type="reset" class="button is-info">Reset</button>
+        </div>
+    </form>
+
+    <footer class="footer-container">
+        <div class="footer-item">
+            <a href="/about">About</a>
+        </div>
+    </footer>
+
+</div>
+{% endblock content %}

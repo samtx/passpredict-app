@@ -32,7 +32,7 @@ def get_all_passes():
     lat = request.args.get('lat')
     lon = request.args.get('lon')
     h = request.args.get('h', 0.0)
-    logger.info(f'route /passes/ lat={lat},lon={lon},h={h}')
+    logger.info(f'route api/passes/ lat={lat},lon={lon},h={h}')
     # Check cache with input string
     today = datetime.date.today()
     main_key = f'all_passes:lat{lat}:lon{lon}:h{h}:start{today.isoformat()}'
@@ -69,7 +69,7 @@ def get_passes(satid):
     lon = request.args.get('lon')
     h = request.args.get('h', 0.0)
     days = request.args.get('days', 10)
-    logger.info(f'route /passes/{satid},lat={lat},lon={lon},h={h},days={days}')
+    logger.info(f'route api/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
     today = datetime.date.today()
     main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.isoformat()}'

@@ -27,7 +27,7 @@ def get_all_passes():
 #     h: float = Query(0.0, title="Location elevation above WGS84 ellipsoid in meters"),
 # ):
     """
-    Compute passes for top 100 visible satellites for 24 hours
+    Render template for all passes page
     """
     lat = request.args.get('lat')
     lon = request.args.get('lon')
@@ -58,13 +58,9 @@ def get_all_passes():
 
 @passes.route("/<int:satid>")
 def get_passes(satid):
-    # satid: int = Path(..., title="Satellite NORAD ID number"),
-    # lat: float = Query(..., title="Location latitude North in decimals"),
-    # lon: float = Query(..., title="Location longitude East in decimals"),
-    # h: float = Query(0.0, title="Location elevation above WGS84 ellipsoid in meters"),
-    # days: int = Query(10, title="Future days to predict", le=MAX_DAYS),
-    # db = Depends(get_db),
-    # cache = Depends(get_cache)
+    """
+    Render template for satellite passes for one satellite
+    """
     lat = request.args.get('lat')
     lon = request.args.get('lon')
     h = request.args.get('h', 0.0)
