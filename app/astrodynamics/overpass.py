@@ -6,27 +6,25 @@ import math
 from numpy import ndarray
 import numpy as np
 from fastapi import HTTPException
-# from scipy.interpolate import interp1d
 
-from app import _overpass
-from app._solar import sun_pos_ecef
-# from .dbmodels import tle as tledb
-from app.propagate import compute_satellite_data
-from app.timefn import julian_date_array_from_date, jday2datetime
 from app.schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType, Tle
 from app.models import SatPredictData
-from app.tle import get_most_recent_tle
-from app.constants import RAD2DEG, DAY_S
-from app._rotations import ecef2sez
-from app.topocentric import site_ECEF
 from app.settings import MAX_DAYS, DT_SECONDS
 from app.utils import get_visible_satellites
+from app.tle import get_most_recent_tle
+from app.astrodynamics import _overpass
+from app.astrodynamics._solar import sun_pos_ecef
+from app.astrodynamics.propagate import compute_satellite_data
+from app.astrodynamics.timefn import julian_date_array_from_date, jday2datetime
+from app.astrodynamics.constants import RAD2DEG, DAY_S
+from app.astrodynamics._rotations import ecef2sez
+from app.astrodynamics.topocentric import site_ECEF
 
 
 VISIBLE_SATS = get_visible_satellites()
 
 # Make sure that dt_seconds evenly divides into number of seconds per day
-assert DAY_S % DT_SECONDS == 0 
+assert DAY_S % DT_SECONDS == 0
 NUM_TIMESTEPS_PER_DAY = int(DAY_S / DT_SECONDS)
 TIME_KEY_SUFFIX = ':' + str(MAX_DAYS) + ':' + str(DT_SECONDS)
 
@@ -48,7 +46,7 @@ class RhoVector:
         tmp = np.arctan2(rS, rE)
         az = (tmp + math.pi * 0.5) * RAD2DEG
         if rS < 0 and rE < 0:
-            az %= 360 
+            az %= 360
         return az
 
     def point(self, idx):
@@ -108,7 +106,7 @@ def compute_satellite_visibility(
             vis_start_pt = sat_rho_vis.point(0)
             vis_end_pt = sat_rho_vis.point(-1)
             brightness_idx = np.argmax(sat_rho_vis.el)
-            sat_site_sun_angle = math.acos(  
+            sat_site_sun_angle = math.acos(
                 np.dot(sat_rho_vis.rSEZ[brightness_idx,:], sun_rho_vis.rSEZ[brightness_idx,:]) \
                 / (sat_rho_vis.rng[brightness_idx] * sun_rho_vis.rng[brightness_idx])
             )
@@ -289,7 +287,7 @@ def predict_all_visible_satellite_overpasses(
         date_start = date.today()
     date_end = date_start + timedelta(days=1)
     jd = julian_date_array_from_date(date_start, date_end, DT_SECONDS)
-    sun_rECEF = sun_pos_ecef(jd)    
+    sun_rECEF = sun_pos_ecef(jd)
 
     # Query TLEs for visible satellites
     try:
@@ -304,7 +302,7 @@ def predict_all_visible_satellite_overpasses(
         conn.close()
 
     overpasses = []
-    for satid in VISIBLE_SATS:        
+    for satid in VISIBLE_SATS:
         tle = get_most_recent_tle(db, satid, raise_404=False)
         if not tle:
             # no TLE data for satellite
@@ -312,9 +310,9 @@ def predict_all_visible_satellite_overpasses(
         sat = compute_satellite_data(tle, jd, sun_rECEF)
         sat_overpasses = compute_single_satellite_overpasses(
             sat,
-            jd=jd, 
-            location=location, 
-            sun_rECEF=sun_rECEF, 
+            jd=jd,
+            location=location,
+            sun_rECEF=sun_rECEF,
             min_elevation=min_elevation,
             visible_only=True,
             store_sat_id=True
@@ -333,7 +331,7 @@ def _start_end_index(x):
     """
     x0 = x[:-1]
     x1 = x[1:]
-    x_change_sign = (x0*x1 < 0)   
+    x_change_sign = (x0*x1 < 0)
     start_idx = np.nonzero(x_change_sign & (x0 < x1))[0]  # Find the start of an overpass
     end_idx = np.nonzero(x_change_sign & (x0 > x1))[0]    # Find the end of an overpass
     return start_idx, end_idx

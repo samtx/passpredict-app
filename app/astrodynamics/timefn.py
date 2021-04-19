@@ -3,7 +3,7 @@ import datetime
 
 import numpy as np
 
-from app.constants import DAY_S, J2000
+from app.astrodynamics.constants import DAY_S, J2000
 
 tz_utc = datetime.timezone.utc
 
@@ -173,9 +173,9 @@ def jday2datetime(jdt: float) -> datetime.datetime:
     yr, mo, date, hr, mn, sec = datetuple
     sec = round(sec)
     if sec == 60:
-        return datetime.datetime(yr, mo, date, hr, mn, 59, tzinfo=tz_utc) + datetime.timedelta(seconds=1) 
+        return datetime.datetime(yr, mo, date, hr, mn, 59, tzinfo=tz_utc) + datetime.timedelta(seconds=1)
     return datetime.datetime(yr, mo, date, hr, mn, sec, tzinfo=tz_utc)
-    
+
 
 def jday2datetime_us(jdt: float) -> datetime.datetime:
     """Turn julian day into datetime object to nearest microsecond"""
@@ -287,19 +287,19 @@ def julian_date_array_from_datetime(datetime_start: datetime.datetime, datetime_
     """
     jdt0 = julian_date(
         datetime_start.year,
-        datetime_start.month, 
-        datetime_start.day, 
-        datetime_start.hour, 
-        datetime_start.minute, 
+        datetime_start.month,
+        datetime_start.day,
+        datetime_start.hour,
+        datetime_start.minute,
         datetime_start.second,
         datetime_start.microsecond
     )
     jdtf = julian_date(
         datetime_end.year,
-        datetime_end.month, 
-        datetime_end.day, 
-        datetime_end.hour, 
-        datetime_end.minute, 
+        datetime_end.month,
+        datetime_end.day,
+        datetime_end.hour,
+        datetime_end.minute,
         datetime_end.second,
         datetime_end.microsecond
     )

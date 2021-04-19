@@ -1,9 +1,8 @@
 import numpy as np
 from sgp4.api import Satrec, WGS84
 
-from app._rotations import teme2ecef
-from app._solar import sun_sat_illumination_distance
-# from .solar import is_sat_illuminated, sat_illumination_distance
+from app.astrodynamics._rotations import teme2ecef
+from app.astrodynamics._solar import sun_sat_illumination_distance
 from app.schemas import Tle
 from app.models import SatPredictData
 

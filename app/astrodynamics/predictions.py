@@ -4,20 +4,20 @@ from typing import List, Callable
 from astropy.time import Time
 from numpy import ndarray
 
-from app.solar import compute_sun_data
-from app.propagate import compute_satellite_data
-from app.timefn import julian_date_array_from_date
-from app.schemas import Overpass, Location, Satellite
-from app.models import Sun, RhoVector, Sat
-from app.tle import get_TLE
+from app.astrodynamics.solar import compute_sun_data
+from app.astrodynamics.propagate import compute_satellite_data
+from app.astrodynamics.timefn import julian_date_array_from_date
+from app.astrodynamics.schemas import Overpass, Location, Satellite
+from app.astrodynamics.models import Sun, RhoVector, Sat
+from app.astrodynamics.tle import get_TLE
 
 
 def find_overpasses(
-    jd: ndarray, 
-    location: Location, 
-    sats: List[Sat], 
-    sun: Sun, 
-    min_elevation: float = 10.0, 
+    jd: ndarray,
+    location: Location,
+    sats: List[Sat],
+    sun: Sun,
+    min_elevation: float = 10.0,
     visible_only: bool =False
 ) -> List[Overpass]:
     """
@@ -41,9 +41,9 @@ def predict(
     dt_seconds: int = 1,
     min_elevation: float = 10.0,
     cache: 'Cache' = None,
-    verbose: bool = False, 
-    store_sat_id: bool = False, 
-    print_fn: Callable = print, 
+    verbose: bool = False,
+    store_sat_id: bool = False,
+    print_fn: Callable = print,
     visible_only: bool = False
 ):
     """

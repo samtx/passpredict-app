@@ -4,7 +4,7 @@ import math
 import numpy as np
 from numpy.linalg import norm
 
-from app.constants import DEG2RAD, AU_KM, R_EARTH
+from app.astrodynamics.constants import DEG2RAD, AU_KM, R_EARTH
 
 
 def sun_pos(t):

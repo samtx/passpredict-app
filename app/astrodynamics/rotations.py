@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from app.constants import DEG2RAD
+from app.astrodynamics.constants import DEG2RAD
 
 
 def rot1(a):
@@ -27,13 +27,13 @@ def rot1(a):
 
 def rot2(a):
     """Compute Euler angle rotation matrix, second angle
-    
+
     Params:
         a : float (n)
 
     Returns:
-        float (3, 3, n)    
-    
+        float (3, 3, n)
+
     References:
         Vallado, Eq. 3-15
         skyfield.functions.rot_y
@@ -53,7 +53,7 @@ def rot3(a):
 
     Returns:
         float (3, 3, n)
-        
+
     References:
         Vallado, Eq. 3-15
         skyfield.functions.rot_z
@@ -67,7 +67,7 @@ def rot3(a):
 
 def mxm(M1, M2):
     """Matrix times matrix: multiply two NxN matrices.
-    
+
     Reference:
         skyfield.functions
     """
@@ -76,7 +76,7 @@ def mxm(M1, M2):
 
 def mxmxm(M1, M2, M3):
     """Matrix times matrix times matrix: multiply 3 NxN matrices together.
-    
+
     Reference:
         skyfield.functions
     """

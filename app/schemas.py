@@ -6,7 +6,7 @@ from math import floor
 
 from pydantic import BaseModel, Field
 
-from app.timefn import jday2datetime
+from app.astrodynamics.timefn import jday2datetime
 from app.utils import epoch_from_tle, satid_from_tle
 
 COORDINATES = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
@@ -39,7 +39,7 @@ class LocationResult(BaseModel):
     lat: float = Field(..., title='latitude, \u0b00N')
     lon: float = Field(..., title='longitude, \u0b00E')
     name: str = None
-    
+
 
 class Location(LocationResult):
     h: float = Field(0.0, title='height, [m] above WGS84 ellipsoid')
@@ -64,7 +64,7 @@ class Tle(BaseModel):
     epoch: datetime.datetime
     satid: int
 
-    @classmethod    
+    @classmethod
     def from_string(cls, tle1: str, tle2: str):
         epoch = epoch_from_tle(tle1)
         satid = satid_from_tle(tle1)
@@ -78,7 +78,7 @@ class Tle(BaseModel):
     def __hash__(self):
         hash_str = str(self.satid) + self.tle1 + self.tle2
         return hash(hash_str)
-    
+
     class Config:
         title = 'TLE'
 
@@ -101,7 +101,7 @@ class Point(BaseModel):
         n = floor((azm-start)/mod)
         direction = COORDINATES[n]
         return direction
-    
+
     @classmethod
     def from_rho(cls, rho, idx):
         """Create a Point object directly from the rho vector and index without validation"""
@@ -158,7 +158,7 @@ class Overpass(BaseModel):
     vis_start_pt: Point = None
     vis_end_pt: Point = None
     brightness: float = None
-    
+
 
 class OverpassResult(BaseModel):
     location: Location

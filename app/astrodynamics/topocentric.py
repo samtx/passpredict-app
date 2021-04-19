@@ -3,7 +3,7 @@ from functools import lru_cache
 
 import numpy as np
 
-from app.constants import DEG2RAD, R_EARTH, e2_EARTH
+from app.astrodynamics.constants import DEG2RAD, R_EARTH, e2_EARTH
 
 
 def site_declination_and_K(phi_gd, h_ellp):
