@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container is-max-desktop px-3 pt-2">
+
+        <header>
+            <h1 class="title has-text-centered">
+                About
+            </h1>
+        </header>
+
+        <p>This site was created by Sam Friedman.</p>
+
+        <p>
+            It is built with a Python backend using FastAPI and a frontend written
+            in Svelte, all hosted on a Digital Ocean virtual private server. It uses
+            Redis for caching API calls and intermediate orbit propagation values.
+            Orbit and satellite data is gathered from Celestrak and stored in a
+            Sqlite database.
+        </p>
+
+        <p>
+            The pass prediction algorithm uses python-sgp4 for orbit propagation and
+            custom C functions based on IAU SOFA library for the coordinate frame
+            rotations and timescales.
+        </p>
+
+        <footer class="footer-container">
+            <div class="footer-item">
+                <a href="/">Home</a>
+            </div>
+        </footer>
+
+</div>
+
+{% endblock content %}

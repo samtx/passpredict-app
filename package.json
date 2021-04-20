@@ -39,6 +39,8 @@
         "dev": "gulp watch"
     },
     "dependencies": {
+        "@tarekraafat/autocomplete.js": "^9.0.3",
+        "autocompleter": "^6.1.0",
         "package.json": "^2.0.1"
     }
 }

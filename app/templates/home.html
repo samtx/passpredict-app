@@ -14,13 +14,17 @@
         </h3>
     </header>
 
-    <form id="passes-form" autocomplete="off" method="GET" on:submit|preventDefault={goToPasses}>
+    <form id="passes-form" autocomplete="off" method="GET" action="/passes">
         <div class="field">
             <label for="locationSearch" class="label">Location Search</label>
             <div class="control">
-                <Autocomplete searchFunction={getLocations} labelFieldName="name" bind:selectedItem={selectedLocation}
-                    minCharactersToSearch="3" name="locationSearch" inputId="locationSearch" inputClassName="input"
-                    hideArrow="true" />
+                <input type="text" name="locationSearch" id="locationSearch" class="input">
+                <ul id="locationSuggestions">
+                </ul>
+<!--
+    <Autocomplete searchFunction={getLocations} labelFieldName="name" bind:selectedItem={selectedLocation}
+        minCharactersToSearch="3" name="locationSearch" inputId="locationSearch" inputClassName="input"
+        hideArrow="true" /> -->
             </div>
         </div>
 
@@ -28,10 +32,10 @@
             <label for="satid" class="label">Select satellite</label>
             <div class="control">
                 <div class="select mt-0">
-                    <select name="satid" bind:value={selectedSatId}>
-                        {#each satellites as sat}
-                        <option value={sat.id}>{sat.name}</option>
-                        {/each}
+                    <select name="satid">
+                        {% for satellite in satellites %}
+                            <option value={{ satellite.id }}>{{ satellite.name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
             </div>
@@ -51,3 +55,7 @@
 
 </div>
 {% endblock content %}
+
+{% block javascript %}
+<script src="public/home.js"></script>
+{% endblock javascript %}

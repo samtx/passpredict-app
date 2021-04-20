@@ -5,7 +5,11 @@ import logging
 import pickle
 from typing import List, Optional
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import (
+    Flask, flash, redirect, render_template,
+    request, url_for, make_response
+)
+from app.tle import get_satellite_norad_ids
 from app.resources import cache, db
 from app.passes.routes import passes
 from app.api.routes import api
@@ -26,7 +30,14 @@ app.register_blueprint(api, url_prefix='/api')
 @app.route('/')
 def home():
     logger.info(f'route /')
-    return {"msg": "Hello from the home page"}
+    satellites = get_satellite_norad_ids()
+    return render_template('home.html', satellites=satellites)
+
+
+@app.route('/about')
+def about():
+    logger.info(f'route /about')
+    return render_template('about.html')
 
 
 # @atexit.register

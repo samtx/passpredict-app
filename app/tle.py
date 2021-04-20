@@ -2,6 +2,8 @@ from datetime import datetime
 import json
 from typing import Set, Union, Sequence
 import logging
+from dataclasses import dataclass
+from functools import lru_cache
 
 import requests
 from sqlalchemy.sql import select
@@ -46,7 +48,7 @@ def import_tle_data_to_database(tle_data: Set) -> None:
     created_at = datetime.utcnow()
     with engine.connect() as conn:
         for tle in tle_data:
-            # Check if there is a tle for the datetime, 
+            # Check if there is a tle for the datetime,
             # if not then insert record, otherwise skip
             stmt = select([tledb]).where(
                 and_(
@@ -164,3 +166,28 @@ def save_TLE_data(url=None):
     tle_data = parse_tles_from_celestrak(url)
     with open('tle_data.json', 'w') as file:
         json.dump(tle_data, file)
+
+
+@dataclass
+class Satellite:
+    id: int
+    name: str
+
+
+@lru_cache(maxsize=1)
+def get_satellite_norad_ids():
+    """
+    Return list of satellites with their names and norad ids
+    """
+    satellites = [
+        Satellite(25544, "International Space Station"),
+        Satellite(20580, "Hubble Space Telescope"),
+        Satellite(25338, "NOAA-15"),
+        Satellite(28654, "NOAA-18"),
+        Satellite(33591, "NOAA-19"),
+        Satellite(44420, "Lightsail 2"),
+        Satellite(29155, "GOES 13"),
+        Satellite(25994, "TERRA"),
+        Satellite(40069, "METEOR M2"),
+    ]
+    return satellites
