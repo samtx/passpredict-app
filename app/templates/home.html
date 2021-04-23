@@ -16,15 +16,14 @@
 
     <form id="passes-form" autocomplete="off" method="GET" action="/passes">
         <div class="field">
-            <label for="locationSearch" class="label">Location Search</label>
+            <label for="locationSearch" class="label">Location</label>
             <div class="control">
-                <input type="text" name="locationSearch" id="locationSearch" class="input">
-                <ul id="locationSuggestions">
-                </ul>
-<!--
-    <Autocomplete searchFunction={getLocations} labelFieldName="name" bind:selectedItem={selectedLocation}
-        minCharactersToSearch="3" name="locationSearch" inputId="locationSearch" inputClassName="input"
-        hideArrow="true" /> -->
+            <label for="locationLatitude">Latitude</label>
+                <input type="number" name="locationLatitude" class="input" min="-90.0" max="90.0">
+            </div>
+            <div class="control">
+                <label for="locationLatitude">Longitude</label>
+                <input type="number" name="locationLongitude" class="input" min="-180.0" max="180.0">
             </div>
         </div>
 
