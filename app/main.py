@@ -27,14 +27,20 @@ app.register_blueprint(passes, url_prefix='/passes')
 app.register_blueprint(api, url_prefix='/api')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def home():
+    if request.method == 'POST':
+        satid = request.form.get('satid')
+        lat = request.form.get('lat')
+        lon = request.form.get('lon')
+        url = url_for('passes.get_passes', satid=satid, lat=lat, lon=lon)
+        return redirect(url)
     logger.info(f'route /')
     satellites = get_satellite_norad_ids()
     return render_template('home.html', satellites=satellites)
 
 
-@app.route('/about')
+@app.route('/about', methods=['GET'])
 def about():
     logger.info(f'route /about')
     return render_template('about.html')
