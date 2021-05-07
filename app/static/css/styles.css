@@ -1,5 +1,38 @@
 .footer-container {
-  margin-top: 3em;
-  display: flex;
-  align-items: center;
-  justify-content: center; }
+    margin-top: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.results-header-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+label[for="visibleOnly"] {
+    padding-left: 1.5em;
+}
+
+article.message {
+    /* max-width: 600px; */
+    margin-right: 1.5em;
+    margin-left: 1.5em;
+}
+
+#passList {
+    display: flex;
+    flex-direction: column;
+    margin: 1.5em 1.5em;
+}
+
+.pass-list-item {
+    margin-top: 0.5em;
+}

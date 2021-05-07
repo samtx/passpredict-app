@@ -61,31 +61,18 @@ def get_passes(satid):
     """
     Render template for satellite passes for one satellite
     """
+    location_name = request.args.get('name')
+    satellite_name = request.args.get('satname')
     lat = request.args.get('lat')
     lon = request.args.get('lon')
     h = request.args.get('h', 0.0)
     days = request.args.get('days', 10)
-    logger.info(f'route /passes/{satid},lat={lat},lon={lon},h={h},days={days}')
-    # Create cache key
-    today = datetime.date.today()
-    main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.isoformat()}'
-    # Check cache
-    result = cache.get(main_key)
-    if result:
-        response_data = pickle.loads(result)
-    else:
-        location = Location(lat=lat, lon=lon, h=h)
-        overpass_result = predict_single_satellite_overpasses(
-            satid,
-            location,
-            date_start=today,
-            days=days,
-            db=db,
-            cache=cache
-        )
-        # cache results for 30 minutes
-        response_data = overpass_result.json()
-        cache.set(main_key, pickle.dumps(response_data), ex=1800)
-    response = make_response(response_data)
-    response.mimetype = 'application/json'
-    return response
+    context = {
+        'location_name': location_name,
+        'satellite_name': satellite_name,
+        'lat': lat,
+        'lon': lon,
+        'h': h,
+        'days': days,
+    }
+    return render_template('passes.html', **context)

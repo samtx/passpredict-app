@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %} Passes {% endblock title %}
+
+{% block content %}
+<div class="container is-max-desktop px-3 pt-2">
+
+    <header>
+        <h1 class="title has-text-centered">
+            Passes
+        </h1>
+    </header>
+
+    <div class="results-header">
+        <div id="results-header-left" class="mx-5">
+            <p>
+                <span class="has-text-weight-semibold">Location:</span>{{ locationName }}
+            </p>
+            <p>
+                <span class="has-text-weight-semibold">
+                    Satellite:
+                </span>{{ satname }}<span id="satellite" />
+            </p>
+        </div>
+        <div class="results-header-right">
+            <a class="button is-info m-3" href="{{ url_for('home') }}">Search Again</a>
+
+            <label for="visibleOnly" class="checkbox">
+                <input id="visibleOnly" type="checkbox" checked />
+                Visible Only
+            </label>
+        </div>
+    </div>
+
+    <div id="passList" class="mt-5">
+    <p class="is-size-5 has-text-centered mt-6 mb-4">
+        Getting passes...
+        <progress class="progress is-primary">50%</progress>
+    </p>
+
+
+            <!-- if filteredPasses.length > 0 -->
+                <!-- for each pass in filteredPasses -->
+                    <div class="pass-list-item">
+                        <PassListItem {pass} on:click={goToPassDetail(pass)} />
+                    </div>
+            <!-- else -->
+                <p class="is-size-5 has-text-centered mt-6">
+                    No passes found
+                </p>
+                <!-- if error -->
+                <p class="is-size-5 has-text-centered has-text-danger mt-6">
+                    Error getting passes
+                </p>
+                <p class="is-size-6 has-text-centered has-text-danger mt-6">{err}</p>
+            </div>
+
+    <footer class="footer-container">
+        <div class="footer-item">
+            <a href="{{ url_for('about') }}">About</a>
+        </div>
+    </footer>
+
+</div>
+{% endblock content %}
+
+{% block javascript %}
+<script src="public/passes.js"></script>
+{% endblock javascript %}

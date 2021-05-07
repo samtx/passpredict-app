@@ -86,3 +86,50 @@ const goToPasses = (event) => {
         new URLSearchParams(params).toString();
     router.goto(url);
 };
+
+export const passMonthDay = (point_dt) => {
+    const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(
+        point_dt
+    );
+    const dateString = d.split("/").slice(0, 2).join("/");
+    return dateString;
+};
+
+export const passPointTimeMinutes = (point_dt) => {
+    const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(
+        point_dt
+    );
+    return t;
+};
+
+export const passPointTime = (point_dt) => {
+    const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(
+        point_dt
+    );
+    return t;
+};
+
+export const passPointElevation = (point) => {
+    const e = Math.round(point.elevation);
+    return e;
+};
+
+export const passBrightness = (brightness) => {
+    const b = brightness ? brightness : "";
+    return b;
+};
+
+export const getPassQuality = (pass) => {
+    if (pass.type !== 'visible') {
+        return 0
+    }
+    if (pass.max_pt.elevation > 70) {
+        return 1
+    }
+    if (pass.max_pt.elevation > 45) {
+        return 2
+    }
+    if (pass.max_pt.elevation > 10) {
+        return 3
+    }
+}
