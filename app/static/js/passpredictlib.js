@@ -9,18 +9,18 @@ class Point {
         this.brightness = obj.brightness;
     }
 
-    get monthDay() {
+    get getMonthDay() {
         const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(this.date);
         const dateString = d.split("/").slice(0, 2).join("/");
         return dateString;
     }
 
-    get timeMinutes() {
+    get getTimeMinutes() {
         const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(this.date);
         return t;
     }
 
-    get time() {
+    get getTime() {
         const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(this.date);
         return t;
     }
