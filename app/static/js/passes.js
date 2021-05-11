@@ -44,12 +44,12 @@ const showPassList = (passes) => {
     }
     else {
         let html = '';
-        for (let pass of passes) {
-            let { start_pt, max_pt, end_pt, type: passType, brightness } = pass;
-
-            const start_dt = new Date(start_pt.datetime);
-            const max_dt = new Date(max_pt.datetime);
-            const end_dt = new Date(end_pt.datetime);
+        for (const pass of passes) {
+            const start_pt = new Point(pass.start_pt);
+            const max_pt = new Point(pass.max_pt);
+            const end_pt = new Point(pass.end_pt);
+            const type = pass.type;
+            const brightness = pass.brightness;
             html += `
 
             `

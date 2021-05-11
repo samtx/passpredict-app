@@ -1,30 +1,41 @@
 // module for passpredict javascript functions
 
 class Point {
-    constructor(datetime, azimuth, elevation, range, brightness) {
-        this.datetime = datetime;
-        this.azimuth = azimuth;
-        this.elevation = elevation;
-        this.range = range;
-        this.brightness = brightness;
+    constructor(obj) {
+        this.date = new Date(obj.datetime);  // datetime string
+        this.azimuth = obj.azimuth;
+        this.elevation = obj.elevation;
+        this.range = obj.range;
+        this.brightness = obj.brightness;
     }
 
     get monthDay() {
-        const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(this.datetime);
+        const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(this.date);
         const dateString = d.split("/").slice(0, 2).join("/");
         return dateString;
     }
 
     get timeMinutes() {
-        const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(this.datetime);
+        const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(this.date);
         return t;
     }
 
     get time() {
-        const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(this.datetime);
+        const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(this.date);
         return t;
     }
 }
+
+
+// class Pass {
+//     constructor(obj) {
+//         this.start_pt = obj.start_pt;
+//         this.max_pt = obj.max_pt;
+//         this.end_pt = obj.end_pt;
+//         this.type = obj.type;
+//         this.brightness = obj.brightness;
+//     }
+// }
 
 
 const getPassQuality = (pass) => {
