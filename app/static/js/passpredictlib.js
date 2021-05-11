@@ -1,26 +1,46 @@
 // module for passpredict javascript functions
 
-let selectedLocation;
-let selectedSatId;
-
-const Satellite = class {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
+class Point {
+    constructor(datetime, azimuth, elevation, range, brightness) {
+        this.datetime = datetime;
+        this.azimuth = azimuth;
+        this.elevation = elevation;
+        this.range = range;
+        this.brightness = brightness;
     }
-};
 
-let satellites = [
-    new Satellite(25544, "International Space Station"),
-    new Satellite(20580, "Hubble Space Telescope"),
-    new Satellite(25338, "NOAA-15"),
-    new Satellite(28654, "NOAA-18"),
-    new Satellite(33591, "NOAA-19"),
-    new Satellite(44420, "Lightsail 2"),
-    new Satellite(29155, "GOES 13"),
-    new Satellite(25994, "TERRA"),
-    new Satellite(40069, "METEOR M2"),
-];
+    get monthDay() {
+        const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(this.datetime);
+        const dateString = d.split("/").slice(0, 2).join("/");
+        return dateString;
+    }
+
+    get timeMinutes() {
+        const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(this.datetime);
+        return t;
+    }
+
+    get time() {
+        const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(this.datetime);
+        return t;
+    }
+}
+
+
+const getPassQuality = (pass) => {
+    if (pass.type !== 'visible') {
+        return 0
+    }
+    if (pass.max_pt.elevation > 70) {
+        return 1
+    }
+    if (pass.max_pt.elevation > 45) {
+        return 2
+    }
+    if (pass.max_pt.elevation > 10) {
+        return 3
+    }
+}
 
 async function searchLocation(search_text) {
     const params = {
@@ -70,66 +90,4 @@ const getLocations = async (keyword) => {
     return parsedLocations;
 };
 
-const goToPasses = (event) => {
-    // get satellite name
-    const sel = document.querySelector("select[name=satid]");
-    const satname = sel.options[sel.selectedIndex].text;
-
-    const params = {
-        name: selectedLocation.name,
-        lat: selectedLocation.lat,
-        lon: selectedLocation.lon,
-        satname: satname,
-    };
-    const url =
-        `/passes/${selectedSatId}?` +
-        new URLSearchParams(params).toString();
-    router.goto(url);
-};
-
-export const passMonthDay = (point_dt) => {
-    const d = new Intl.DateTimeFormat([], { dateStyle: "short" }).format(
-        point_dt
-    );
-    const dateString = d.split("/").slice(0, 2).join("/");
-    return dateString;
-};
-
-export const passPointTimeMinutes = (point_dt) => {
-    const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(
-        point_dt
-    );
-    return t;
-};
-
-export const passPointTime = (point_dt) => {
-    const t = new Intl.DateTimeFormat([], { timeStyle: "medium" }).format(
-        point_dt
-    );
-    return t;
-};
-
-export const passPointElevation = (point) => {
-    const e = Math.round(point.elevation);
-    return e;
-};
-
-export const passBrightness = (brightness) => {
-    const b = brightness ? brightness : "";
-    return b;
-};
-
-export const getPassQuality = (pass) => {
-    if (pass.type !== 'visible') {
-        return 0
-    }
-    if (pass.max_pt.elevation > 70) {
-        return 1
-    }
-    if (pass.max_pt.elevation > 45) {
-        return 2
-    }
-    if (pass.max_pt.elevation > 10) {
-        return 3
-    }
-}
+export {Point, getLocations, parseLocations, searchLocation, getPassQuality}

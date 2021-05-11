@@ -1,3 +1,5 @@
+import {Point, getPassQuality} from "./passpredictlib.js";
+
 const passList = document.getElementById('passList');
 const visibleOnlyCheckbox = document.getElementById('visibleOnly');
 
@@ -44,6 +46,7 @@ const showPassList = (passes) => {
         let html = '';
         for (let pass of passes) {
             let { start_pt, max_pt, end_pt, type: passType, brightness } = pass;
+
             const start_dt = new Date(start_pt.datetime);
             const max_dt = new Date(max_pt.datetime);
             const end_dt = new Date(end_pt.datetime);
