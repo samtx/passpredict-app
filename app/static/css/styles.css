@@ -36,3 +36,17 @@ article.message {
 .pass-list-item {
     margin-top: 0.5em;
 }
+
+.pass-row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .pass-item {
+    flex-basis: 20%;
+    text-align: center;
+  }
+
+  .pass-month-day {
+    flex-basis: 10%;
+  }
