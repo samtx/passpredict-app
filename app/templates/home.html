@@ -2,7 +2,6 @@
 
 {% block content %}
 
-
 <div class="container is-max-desktop px-3 pt-2">
 
     <header>
@@ -48,7 +47,7 @@
 
     <footer class="footer-container">
         <div class="footer-item">
-            <a href="/about">About</a>
+            <a href="{{ url_for('about') }}">About</a>
         </div>
     </footer>
 
@@ -56,5 +55,5 @@
 {% endblock content %}
 
 {% block javascript %}
-<script src="public/home.js"></script>
+<script src="{{ url_for('static', filename='dist/home.js') }}"></script>
 {% endblock javascript %}

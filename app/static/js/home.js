@@ -80,7 +80,7 @@ const goToPasses = (event) => {
     router.goto(url);
 };
 
-document.addEventListener('ready', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     form.addEventListener('sumbit', function (e) {
         // modify form to send latitude and longitude
@@ -92,33 +92,33 @@ document.addEventListener('ready', function () {
     locationInput.addEventListener('input', async function (evt) {
         // https://tarekraafat.github.io/autoComplete.js/#/usage?id=demo
 
-        new autoComplete({
-            selector: "#locationSearch",
-            data: {
-                src: getLocations(),
-                key: ["name"],
-                cache: true,
-            },
-            resultItem: {
-                highlight: {
-                    render: true
-                }
-            }
+        // new autoComplete({
+        //     selector: "#locationSearch",
+        //     data: {
+        //         src: getLocations(),
+        //         key: ["name"],
+        //         cache: true,
+        //     },
+        //     resultItem: {
+        //         highlight: {
+        //             render: true
+        //         }
+        //     }
 
-        })
+        // })
 
-        // https://tarekraafat.github.io/autoComplete.js/#/configuration?id=data-required
+        // // https://tarekraafat.github.io/autoComplete.js/#/configuration?id=data-required
 
-        data: {
-        },
+        // // data: {
+        // // },
 
 
-        let inputText = evt.target.value;
-        let emptyArray = [];
-        if (inputText && inputText.length > 3) {
-            results = await getLocations(inputText);
+        // let inputText = evt.target.value;
+        // let emptyArray = [];
+        // if (inputText && inputText.length > 3) {
+        //     results = await getLocations(inputText);
 
-        };
+        // };
 
-    }
-    });
+    })
+});
