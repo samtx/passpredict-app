@@ -9,7 +9,7 @@ const getPasses = async (satid, params) => {
     );
     const passResponse = await response.json();
     const passes = passResponse.overpasses;
-    console.table(passes);
+    console.log(passes);
     return passes
 };
 
@@ -24,7 +24,7 @@ const filterVisibleOnlyPasses = (visibleOnly, passes) => {
 };
 
 
-visibleOnlyCheckbox.addEventListener('change', (event) => {
+visibleOnlyCheckbox.addEventListener('change', function(event) {
     let notVisiblePasses = document.querySelector('.not-visible');
     if (this.checked) {
         notVisiblePasses.hidden = true;

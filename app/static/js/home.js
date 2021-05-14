@@ -1,6 +1,6 @@
 // home.js
 
-import autoComplete from "@tarekraafat/autocomplete.js";
+// import autoComplete from "@tarekraafat/autocomplete.js";
 
 let selectedLocation;
 let selectedSatId;
