@@ -27,17 +27,6 @@ class Point {
 }
 
 
-// class Pass {
-//     constructor(obj) {
-//         this.start_pt = obj.start_pt;
-//         this.max_pt = obj.max_pt;
-//         this.end_pt = obj.end_pt;
-//         this.type = obj.type;
-//         this.brightness = obj.brightness;
-//     }
-// }
-
-
 const getPassQuality = (pass) => {
     if (pass.type !== 'visible') {
         return 0
