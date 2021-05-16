@@ -1,6 +1,6 @@
 // module for passpredict javascript functions
 
-class Point {
+export class Point {
     constructor(obj) {
         this.date = new Date(obj.datetime);  // datetime string
         this.azimuth = obj.azimuth;
@@ -27,7 +27,7 @@ class Point {
 }
 
 
-const getPassQuality = (pass) => {
+export const getPassQuality = (pass) => {
     if (pass.type !== 'visible') {
         return 0
     }
@@ -42,7 +42,8 @@ const getPassQuality = (pass) => {
     }
 }
 
-async function searchLocation(search_text) {
+
+async function queryLocationAPI(search_text) {
     const params = {
         access_token: MAPBOX_ACCESS_TOKEN,
         autocomplete: true,
@@ -66,6 +67,7 @@ async function searchLocation(search_text) {
     return locations;
 }
 
+
 const parseLocations = (locations) => {
     console.log(locations);
     locations = locations.map((locationObject) => {
@@ -83,11 +85,11 @@ const parseLocations = (locations) => {
     return locations;
 };
 
-const getLocations = async (keyword) => {
-    console.log(`keyword=${keyword}`);
-    const locations = await searchLocation(keyword);
+
+export const getLocations = async (query) => {
+    const locations = await queryLocationAPI(query);
     const parsedLocations = parseLocations(locations);
     return parsedLocations;
 };
 
-export {Point, getLocations, parseLocations, searchLocation, getPassQuality}
+// export {getLocations, getPassQuality, Point};

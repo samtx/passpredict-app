@@ -19,13 +19,14 @@
             <input
                 x-model="query"
                 name="locationQuery"
-                x-on:input.debounce="fetchLocations()"
+                x-on:input.debounce.100ms="fetchLocations()"
+
                 type="search"
                 class="input"
                 placeholder="New York, NY"
             />
             <ul
-                id="autocomplete-result-list"
+                class="autocomplete-result-list"
                 x-show="(data) && (data.length > 0)"
             >
                 <template x-for="item in data">

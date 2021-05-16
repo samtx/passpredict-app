@@ -20,6 +20,7 @@ export default [
         input: staticDir + 'js/home.js',
         output: {
             file:  staticDir + 'dist/home.js',
+            sourcemap: true,
             format: 'umd'
         },
         plugins: [
@@ -38,6 +39,7 @@ export default [
         input: staticDir + 'js/passes.js',
         output: {
             file: staticDir + 'dist/passes.js',
+            sourcemap: true,
             format: 'umd'
         },
         plugins: [
