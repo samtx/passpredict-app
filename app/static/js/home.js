@@ -80,6 +80,22 @@ const goToPasses = (event) => {
     router.goto(url);
 };
 
+window.locationSearch = function() {
+    // For the location search autocomplete input alpine.js component
+    return {
+        query: "",
+        data: [{lat:0, lon:0, h:0, name:""}],
+        selectedIndex: 0,
+        async fetchLocations() {
+            console.log(`query=${this.query}`);
+            const locations = await queryLocationAPI(this.query);
+            const parsedLocations = parseLocations(locations);
+            this.data = parsedLocations;
+            console.table(this.data);
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.querySelector('form');
     form.addEventListener('sumbit', function (e) {

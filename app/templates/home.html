@@ -14,16 +14,28 @@
     </header>
 
     <form id="passes-form" autocomplete="off" method="POST" action="{{ url_for('home') }}">
-        <div class="field">
-            <label for="locationSearch" class="label">Location</label>
-            <div class="control">
-            <label for="locationLatitude">Latitude</label>
-                <input type="number" name="lat" class="input" min="-90.0" max="90.0">
-            </div>
-            <div class="control">
-                <label for="locationLatitude">Longitude</label>
-                <input type="number" name="lon" class="input" min="-180.0" max="180.0">
-            </div>
+        <div x-data="locationSearch()" id="locationSearch" class="field">
+            <label for="locationSearch">Location</label>
+            <input
+                x-model="query"
+                name="locationQuery"
+                x-on:input.debounce="fetchLocations()"
+                type="search"
+                class="input"
+                placeholder="New York, NY"
+            />
+            <ul
+                id="autocomplete-result-list"
+                x-show="(data) && (data.length > 0)"
+            >
+                <template x-for="item in data">
+                    <li x-text="item.name"></li> <!-- </li> x-on:click="selectedIndex = index"> -->
+                </template>
+            </ul>
+            <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
+            <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
+            <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
+            <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
         </div>
 
         <div class="field">

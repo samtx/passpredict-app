@@ -1,7 +1,10 @@
 import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
+import replace from '@rollup/plugin-replace';
+import dotenv from 'dotenv';
 
+dotenv.config();
 
 const staticDir = 'app/static/';
 
@@ -20,6 +23,12 @@ export default [
             format: 'umd'
         },
         plugins: [
+            replace({
+                preventAssignment: true,
+                values: {
+                    MAPBOX_ACCESS_TOKEN: JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN)
+                },
+            }),
             commonjs(),
             filesize(),
             production && terser(),
