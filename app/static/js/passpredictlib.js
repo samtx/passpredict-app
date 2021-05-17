@@ -63,6 +63,7 @@ async function queryLocationAPI(search_text) {
         url + "?" + new URLSearchParams(params).toString()
     );
     const json = await response.json();
+    console.log(json);
     const { features: locations } = json;
     return locations;
 }
@@ -92,4 +93,15 @@ export const getLocations = async (query) => {
     return parsedLocations;
 };
 
-// export {getLocations, getPassQuality, Point};
+
+const regExpEscape = (s) => {
+    // From https://github.com/elcobvg/svelte-autocomplete/blob/master/src/index.html
+    return s.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&")
+  }
+
+
+export const markQuerySubstring = (query, string) => {
+    query = regExpEscape(query);
+    string = string.replace(new RegExp(query, 'gmi'), `<strong>${query}</strong>`);
+    return string
+}

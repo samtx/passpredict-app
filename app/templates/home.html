@@ -19,7 +19,7 @@
             <input
                 x-model="query"
                 name="locationQuery"
-                x-on:input.debounce.100ms="fetchLocations()"
+                @input.debounce.100ms="fetchLocations()"
 
                 type="search"
                 class="input"
@@ -28,9 +28,19 @@
             <ul
                 class="autocomplete-result-list"
                 x-show="(data) && (data.length > 0)"
+                @keydown.arrow-down.prevent="focusNextResult()"
+                @keydown.arrow-up.prevent="focusPreviousResult()"
+                @keydown.escape.prevent="closeResults()"
+                @click.away.prevent="closeResults()"
+
+
             >
-                <template x-for="item in data">
-                    <li x-text="item.name"></li> <!-- </li> x-on:click="selectedIndex = index"> -->
+                <template x-for="(item, index) in data">
+                    <li
+                        x-html="markQuerySubstring(query, item.name)"
+                        @click="selectedIndex = index"
+                    >
+                    </li>
                 </template>
             </ul>
             <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
