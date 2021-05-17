@@ -1,10 +1,79 @@
-// Example of project-name.scss
-// Define variables to override default ones
+// Spectre CSS variables
 $primary-color: #2e5bec;
 $dark-color: #3e396b;
 
-// Import full Spectre source code
-@import "../../../node_modules/spectre.css/src/spectre";
+// Import Spectre components and elements
+// @use "spectre";
+// Variables and mixins
+@import "spectre.css/src/_variables";
+@import "spectre.css/src/_mixins";
+// Reset and dependencies
+@import "spectre.css/src/normalize";
+@import "spectre.css/src/base";
+// Elements
+@import "spectre.css/src/typography";
+@import "spectre.css/src/asian";
+@import "spectre.css/src/tables";
+@import "spectre.css/src/buttons";
+@import "spectre.css/src/forms";
+@import "spectre.css/src/labels";
+@import "spectre.css/src/codes";
+@import "spectre.css/src/media";
+
+
+// Spectre responsive breakpoints (_variables.scss)
+// $size-xs: 480px !default;
+// $size-sm: 600px !default;
+// $size-md: 840px !default;
+// $size-lg: 960px !default;
+// $size-xl: 1280px !default;
+// $size-2x: 1440px !default;
+
+:root {
+    font-size: clamp(1em, 2vw, 2em);
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    // padding: 0 5px;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+}
+
+// header > * {
+//     padding: 0 auto;
+// }
+
+h1 {
+    /* Using the clamp function: https://www.youtube.com/watch?v=dg488RrpNTc */
+    font-size: clamp(40px, 5vw, 70px);
+}
+
+// p {
+//     font-size: clamp(1em, 2vw, 2em);
+// }
+
+body {
+    margin: clamp(1em, 20vw, 5em);
+}
+
+#passes-form {
+    display: flex;
+    flex-direction: column;
+    // align-items: center;
+    justify-content: center;
+    // text-align: center;
+    width: min(960px, calc(70% + 100px));
+    margin: 0 auto;
+}
+
 
 .footer-container {
     margin-top: 3em;

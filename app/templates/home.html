@@ -2,71 +2,69 @@
 
 {% block content %}
 
-<div class="container is-max-desktop px-3 pt-2">
+<div class="container">
 
     <header>
-        <h1 class="title has-text-centered">
+        <h1>
             Pass Predict
         </h1>
-        <h3 class="subtitle has-text-centered">
+        <h3>
             See a Satellite!
         </h3>
     </header>
 
-    <form id="passes-form" autocomplete="off" method="POST" action="{{ url_for('home') }}">
-        <div x-data="locationSearch()" id="locationSearch" class="field">
-            <label for="locationSearch">Location</label>
-            <input
-                x-model="query"
-                name="locationQuery"
-                @input.debounce.100ms="fetchLocations()"
+    <main>
+        <form id="passes-form" autocomplete="off" method="POST" action="{{ url_for('home') }}">
+            <div x-data="locationSearch()" id="locationSearch" class="form-group">
+                <label for="locationSearch" class="form-label">Location</label>
+                <input
+                    x-model="query"
+                    name="locationQuery"
+                    @input.debounce.100ms="fetchLocations()"
 
-                type="search"
-                class="input"
-                placeholder="New York, NY"
-            />
-            <ul
-                class="autocomplete-result-list"
-                x-show="(data) && (data.length > 0)"
-                @keydown.arrow-down.prevent="focusNextResult()"
-                @keydown.arrow-up.prevent="focusPreviousResult()"
-                @keydown.escape.prevent="closeResults()"
-                @click.away.prevent="closeResults()"
+                    type="search"
+                    class="form-input"
+                    placeholder="New York, NY"
+                />
+                <ul
+                    class="autocomplete-result-list"
+                    x-show="(data) && (data.length > 0)"
+                    @keydown.arrow-down.prevent="focusNextResult()"
+                    @keydown.arrow-up.prevent="focusPreviousResult()"
+                    @keydown.escape.prevent="closeResults()"
+                    @click.away.prevent="closeResults()"
 
 
-            >
-                <template x-for="(item, index) in data">
-                    <li
-                        x-html="markQuerySubstring(query, item.name)"
-                        @click="selectedIndex = index"
-                    >
-                    </li>
-                </template>
-            </ul>
-            <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
-            <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
-            <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
-            <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
-        </div>
-
-        <div class="field">
-            <label for="satid" class="label">Select satellite</label>
-            <div class="control">
-                <div class="select mt-0">
-                    <select name="satid">
-                        {% for satellite in satellites %}
-                            <option value={{ satellite.id }}>{{ satellite.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                >
+                    <template x-for="(item, index) in data">
+                        <li
+                            x-html="markQuerySubstring(query, item.name)"
+                            @click="selectedIndex = index"
+                        >
+                        </li>
+                    </template>
+                </ul>
+                <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
+                <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
+                <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
+                <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
             </div>
-        </div>
 
-        <div class="buttons">
-            <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
-            <button id="reset" type="reset" class="button is-info">Reset</button>
-        </div>
-    </form>
+            <div class="form-group">
+                <label for="satid" class="form-label">Select satellite</label>
+                <select class="form-select" name="satid">
+                    {% for satellite in satellites %}
+                        <option value={{ satellite.id }}>{{ satellite.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="buttons">
+                <button id="submit" type="submit" class="btn btn-primary mr-5">Submit</button>
+                <button id="reset" type="reset" class="btn">Reset</button>
+            </div>
+        </form>
+    </main>
 
     <footer class="footer-container">
         <div class="footer-item">

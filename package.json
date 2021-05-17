@@ -40,7 +40,8 @@
     "license": "ISC",
     "scripts": {
         "js:compile": "rollup --config",
-        "sass:compile": "sass --style compressed app/static/sass/styles.scss app/static/dist/styles.css",
+        "sass:compile": "sass --style compressed --load-path=node_modules app/static/sass/styles.scss app/static/dist/styles.css",
+        "sass:watch": "sass --watch --load-path=node_modules app/static/sass/styles.scss app/static/dist/styles.css",
         "compile": "npm run js:compile && npm run sass:compile",
         "build": "NODE_ENV=production npm run compile && gzipper compress -v app/static/dist",
         "dev": "npm run compile"

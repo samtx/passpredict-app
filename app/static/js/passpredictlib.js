@@ -70,7 +70,6 @@ async function queryLocationAPI(search_text) {
 
 
 const parseLocations = (locations) => {
-    console.log(locations);
     locations = locations.map((locationObject) => {
         const {
             place_name: name,
@@ -82,7 +81,6 @@ const parseLocations = (locations) => {
             lon: lonlat[0], // switch the order to lat, lon
         };
     });
-    console.log(locations);
     return locations;
 };
 
