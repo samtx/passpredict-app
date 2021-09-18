@@ -5,7 +5,7 @@ import math
 
 from numpy import ndarray
 import numpy as np
-from fastapi import HTTPException
+from starlette.exceptions import HTTPException
 
 from app.schemas import Overpass, Location, Satellite, OverpassResult, Point, PassType, Tle
 from app.models import SatPredictData

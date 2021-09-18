@@ -1,7 +1,7 @@
-astropy==4.1rc1
 sgp4==2.12
-fastapi
+starlette
 uvicorn[standard]
+uvloop
 python-dotenv
 gunicorn
 redis
@@ -9,5 +9,10 @@ requests
 Cython
 sqlalchemy
 alembic
+numpy>=1.20
 aiohttp[speedups]
+aiofiles
+httpx
+Jinja2
 scipy
+pydantic

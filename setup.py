@@ -37,6 +37,8 @@ setup(
     zip_safe = False,
     packages=['app'],
     install_requires=[
-        'flask'
+        'starlette',
+        'uvicorn',
+        'uvloop',
     ],
 )

@@ -1,5 +1,3 @@
-import numpy as np
-
 # Constants
 R_EARTH = 6378.137  # [km] Mean equatorial radius
 R2_EARTH = 40680631.59076899  # [km2] mean equat. radius sq.

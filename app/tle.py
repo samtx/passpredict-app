@@ -9,7 +9,7 @@ import requests
 from sqlalchemy.sql import select
 from sqlalchemy.engine import Connection
 from sqlalchemy import and_
-from fastapi import HTTPException
+from starlette.exceptions import HTTPException
 
 from app.utils import grouper, parse_tle
 from app.schemas import Tle

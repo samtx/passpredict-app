@@ -2,33 +2,7 @@
 
 import { getLocations, markQuerySubstring } from './passpredictlib.js';
 
-let selectedLocation;
-let selectedSatId;
-
-const Satellite = class {
-    constructor(id, name) {
-        this.id = id;
-        this.name = name;
-    }
-};
-
-const goToPasses = (event) => {
-    // get satellite name
-    const sel = document.querySelector("select[name=satid]");
-    const satname = sel.options[sel.selectedIndex].text;
-
-    const params = {
-        name: selectedLocation.name,
-        lat: selectedLocation.lat,
-        lon: selectedLocation.lon,
-        satname: satname,
-    };
-    const url =
-        `/passes/${selectedSatId}?` +
-        new URLSearchParams(params).toString();
-    router.goto(url);
-};
-
+console.log('alright then')
 
 // For the location search autocomplete input alpine.js component
 window.markQuerySubstring = markQuerySubstring;
@@ -36,20 +10,30 @@ window.markQuerySubstring = markQuerySubstring;
 window.locationSearch = function() {
     return {
         query: "",
-
         data: [{lat:0, lon:0, h:0, name:""}],
-
         selectedIndex: 0,
-
         focusedIndex: null,
-
         open: false,
+
+        init: function () {
+            // this.$watch('query', ((query_str) => {
+            //     if (!this.open || query_str < 3) return
+            // }))
+            return
+        },
 
         async fetchLocations() {
             console.log(`query=${this.query}`);
             if (this.query.length < 3) return null
+            this.open = true;
             this.data = await getLocations(this.query);
             console.log(this.data);
+        },
+
+        closeListbox() {
+            this.open = false;
+            this.focusedIndex = null;
+            this.search = '';
         },
 
         closeResults() {
@@ -67,12 +51,13 @@ window.locationSearch = function() {
         },
 
         focusNextResult () {
-            if (!this.focusedIndex) {
+            if (this.focusedIndex === null) {
                 this.focusedIndex = 0;
                 return
             }
             if (this.focusedIndex == this.data.length - 1) {
-                this.focusedIndex = null;
+                // this.focusedIndex = null;
+                return
             }
             return this.focusedIndex++;
         },
@@ -82,18 +67,19 @@ window.locationSearch = function() {
             //     this.focusedIndex = 0;
             //     return
             // }
-            if (this.focusedIndex == 0) {
+            if (this.focusedIndex == 0 || this.focusedIndex === null) {
                 this.focusedIndex = null;
+                return
             }
-            return this.focusedIndex--;
+            this.focusedIndex--;
+            return
         },
 
         selectResult() {
             if (!this.open) return this.toggleResultsVisibility();
             this.selectedIndex = this.focusedIndex;
             this.query = this.data[this.selectedIndex].name;
+            this.closeListbox();
         }
-
-
     }
 }

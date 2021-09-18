@@ -1,4 +1,7 @@
 
+# vscode
+*.code-workspace
+
 # cython generated c files
 app/_*.c
 

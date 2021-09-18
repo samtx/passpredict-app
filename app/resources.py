@@ -1,5 +1,6 @@
 import sqlalchemy
-from flask import current_app, g
+from starlette.templating import Jinja2Templates
+
 
 from app.settings import database_uri, db_echo, REDIS_HOST, REDIS_URL
 
@@ -7,6 +8,7 @@ try:
     import redis
 except ImportError:
     import fakeredis as redis
+    # Use an in-memory cache
 
 
 if not REDIS_URL:
@@ -20,6 +22,9 @@ db = sqlalchemy.create_engine(
     connect_args={'check_same_thread': False},
     echo=db_echo,
 )
+
+
+templates = Jinja2Templates(directory='app/templates')
 
 # def get_db():
 #     if 'db' not in g:

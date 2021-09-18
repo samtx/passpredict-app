@@ -13,38 +13,57 @@
         </h3>
     </header>
 
-    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti velit fugiat, dolorum assumenda doloribus modi
-        aspernatur culpa harum eaque rem minima ullam, eum incidunt reprehenderit quidem fuga minus vitae aut saepe!
-        Architecto consectetur eos veritatis ea enim. Excepturi modi molestias aliquam beatae. Modi, sunt cum. Aliquid,
-        accusamus et officia esse dolores architecto nisi itaque commodi, debitis aut quisquam dolorum deleniti, fuga
-        molestias quas nesciunt illo nobis. Hic tempora quis praesentium enim quaerat consequatur a consectetur dolorem
-        aspernatur, quae accusamus autem. Voluptatem iure dignissimos praesentium! Modi aperiam vel doloremque nostrum!
-        Eveniet laborum nam molestiae minus aliquam repellendus, quod a et corporis. Ullam, culpa. Porro molestiae
-        necessitatibus quia consequatur repellendus vel veritatis consectetur, facere debitis accusantium. Quas
-        architecto maiores facere amet eos, ab dicta asperiores eaque ratione, distinctio minima adipisci perspiciatis
-        exercitationem molestiae dolorum mollitia excepturi est alias? Ratione quaerat ex voluptatum! Adipisci possimus
-        distinctio fuga mollitia asperiores. Possimus iure saepe reprehenderit numquam. Dolores blanditiis sint
-        voluptate consectetur at, voluptas beatae perferendis cum veniam eligendi rerum placeat eaque cupiditate soluta
-        accusamus voluptates, illo ut eum reiciendis laborum temporibus recusandae! Consequuntur corporis ut repudiandae
-        quam, molestias ipsum deserunt in nesciunt temporibus tempora quos sed voluptatem sint quo asperiores facilis
-        ipsa nostrum nemo! Officia?
-    </p>
-
     <main>
         <form id="passes-form" autocomplete="off" method="POST" action="{{ url_for('home') }}">
-            <div x-data="locationSearch()" id="locationSearch" class="form-group">
+            <!-- Reference: https://github.com/danharrin/alpine-tailwind-components/blob/151fd18324f6a596ad93907e98cc87ca0dc893de/select/index.html -->
+            <div
+                id="locationSearch"
+                x-data="locationSearch()"
+                x-init="init()"
+                @click.away="closeListbox()"
+                @keydown.escape="closeListbox()"
+                class="form-group"
+            >
                 <label for="locationSearch" class="form-label">Location</label>
-                <input x-model="query" name="locationQuery" @input.debounce.100ms="fetchLocations()" type="search"
-                    class="form-input" placeholder="New York, NY" />
-                <ul class="autocomplete-result-list" x-show="(data) && (data.length > 0)"
-                    @keydown.arrow-down.prevent="focusNextResult()" @keydown.arrow-up.prevent="focusPreviousResult()"
-                    @keydown.escape.prevent="closeResults()" @click.away.prevent="closeResults()">
-                    <template x-for="(item, index) in data">
-                        <li x-html="markQuerySubstring(query, item.name)" @click="selectedIndex = index">
-                        </li>
+                <input
+                    x-model="query"
+                    name="locationQuery"
+                    @input.debounce.100ms="fetchLocations()"
+                    @focus="fetchLocations()"
+                    @keydown.arrow-down="focusNextResult()"
+                    @keydown.arrow-up="focusPreviousResult()"
+                    @keydown.enter.stop.prevent="selectResult()"
+                    type="search"
+                    class="form-input"
+                    placeholder="New York, NY"
+                />
+                <div
+                    class="autocomplete-result"
+                    x-show="open"
+                >
+                    <ul
+                    class="autocomplete-result-list"
+                    @keydown.arrow-down="focusNextResult()"
+                    @keydown.arrow-up="focusPreviousResult()"
+                    @keydown.enter.stop.prevent="selectResult()"
+                    tabindex="-1"
+                    >
+                    <template x-for="(item, index) in data" :key="index">
+                        <li
+                        :id="name + '-result-' + index"
+                        @click="selectResult()"
+                        @mouseenter="focusedIndex = index"
+                        @mouseleave="focusedIndex = null"
+                        role="option"
+                        :aria-selected="focusedIndex === index"
+                        :class="{ 'focused-result' : index === focusedIndex }"
+                        x-html="markQuerySubstring(query, item.name)"
+                        x-on= class="location-result-item"
+                        ></li>
                     </template>
-                </ul>
-                <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
+                    </ul>
+                </div>
+            <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
                 <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
                 <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
                 <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
@@ -54,7 +73,7 @@
                 <label for="satid" class="form-label">Select satellite</label>
                 <select class="form-select" name="satid">
                     {% for satellite in satellites %}
-                    <option value={{ satellite.id }}>{{ satellite.name }}</option>
+                        <option value={{ satellite.id }}>{{ satellite.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -76,5 +95,5 @@
 {% endblock content %}
 
 {% block javascript %}
-<script src="{{ url_for('static', filename='dist/home.js') }}"></script>
+<script src="{{ url_for('static', path='dist/home.js') }}"></script>
 {% endblock javascript %}

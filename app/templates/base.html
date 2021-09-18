@@ -17,10 +17,10 @@
     <script defer src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js"></script>
 
     <!-- Spectre.css -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='dist/spectre.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='dist/spectre.css') }}">
 
     <!-- <link rel="stylesheet" href="/global.css"> -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='dist/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
 
     <!-- <script defer src='/bundle.js'></script> -->
     {% block javascript_head %}
@@ -34,7 +34,6 @@
 
     {% block javascript %}
     {% endblock javascript %}
-
 
 </body>
 

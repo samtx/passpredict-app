@@ -42,6 +42,11 @@ h1 {
     width: 100%;
 }
 
+.location-result-item:hover {
+    color: var(--secondary-color);
+    background-color: var(--primary-color);
+}
+
 .footer-container {
     margin-top: 3em;
     display: flex;
@@ -102,6 +107,32 @@ article.message {
     flex-basis: 10%;
 }
 
+.autocomplete-result{
+    position: absolute;
+    width: 100%;
+}
+
 .autocomplete-result-list {
+    border-left: .05rem solid #d6d4e8;
+    border-right: .05rem solid #d6d4e8;
+    border-bottom: .05rem solid #d6d4e8;
+    border-bottom-left-radius: 0.1rem;
+    border-bottom-right-radius: 0.1rem;
+    /* box-sizing: border-box; */
+    margin: 0;
+
     list-style: none;
+    /* position: relative; */
+    z-index: 1;
+    background-color: white;
+}
+
+.autocomplete-result-list > li {
+    margin: 0;
+    padding: 0.3rem 0.4rem;
+}
+
+.focused-result {
+    background-color: black;
+    color: white;
 }

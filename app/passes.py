@@ -4,9 +4,8 @@ import pickle
 import logging
 from typing import List, Optional
 
-from flask import (
-    Blueprint, flash, redirect, render_template, request, url_for, make_response
-)
+from starlette.routing import Route
+from starlette.responses import JSONResponse
 
 from app.astrodynamics.overpass import (
     predict_all_visible_satellite_overpasses,
@@ -14,24 +13,18 @@ from app.astrodynamics.overpass import (
 from app.schemas import Location, Overpass
 from app.resources import cache, db
 from app.settings import CORS_ORIGINS, MAX_DAYS
+from app.resources import templates
 
 logger = logging.getLogger(__name__)
 
-passes = Blueprint('passes', __name__)
 
-
-@passes.route("/")
-def get_all_passes():
-#     lat: float = Query(..., title="Location latitude North in decimals"),
-#     lon: float = Query(..., title="Location longitude East in decimals"),
-#     h: float = Query(0.0, title="Location elevation above WGS84 ellipsoid in meters"),
-# ):
+def get_all_passes(request):
     """
     Render template for all passes page
     """
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
-    h = request.args.get('h', 0.0)
+    lat = request.query_params.get('lat')
+    lon = request.query_params.get('lon')
+    h = request.query_params.get('h', 0.0)
     logger.info(f'route /passes/ lat={lat},lon={lon},h={h}')
     # Check cache with input string
     today = datetime.date.today()
@@ -51,23 +44,21 @@ def get_all_passes():
         # cache results for 30 minutes
         response_data = overpass_result.json()
         cache.set(main_key, pickle.dumps(response_data), ex=1800)
-    response = make_response(response_data)
-    response.mimetype = 'application/json'
-    return response
+    return JSONResponse(response_data, status_code=200)
 
 
-@passes.route("/<int:satid>")
-def get_passes(satid):
+def get_passes(request):
     """
     Render template for satellite passes for one satellite
     """
-    location_name = request.args.get('name')
-    satellite_name = request.args.get('satname')
-    lat = request.args.get('lat')
-    lon = request.args.get('lon')
-    h = request.args.get('h', 0.0)
-    days = request.args.get('days', 10)
+    location_name = request.query_params.get('name')
+    satellite_name = request.query_params.get('satname')
+    lat = request.query_params.get('lat')
+    lon = request.query_params.get('lon')
+    h = request.query_params.get('h', 0.0)
+    days = request.query_params.get('days', MAX_DAYS)
     context = {
+        'request': request,
         'location_name': location_name,
         'satellite_name': satellite_name,
         'lat': lat,
@@ -75,4 +66,10 @@ def get_passes(satid):
         'h': h,
         'days': days,
     }
-    return render_template('passes.html', **context)
+    return templates.TemplateResponse('passes.html', context)
+
+
+routes = [
+    Route('/', get_all_passes),
+    Route('/{satid:int}', get_passes),
+]

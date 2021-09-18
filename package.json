@@ -31,7 +31,8 @@
         "rollup-plugin-sass": "^1.2.2",
         "rollup-plugin-terser": "^7.0.2",
         "sass": "^1.32.13",
-        "terser": "^5.7.0"
+        "terser": "^5.7.0",
+        "watch": "^1.0.2"
     },
     "repository": {
         "type": "git",
@@ -46,7 +47,8 @@
         "css:copy": "cp app/static/css/styles.css app/static/dist/styles.css",
         "compile": "npm run js:compile && npm run spectre:compile && npm run css:copy",
         "build": "NODE_ENV=production npm run compile && gzipper compress -v app/static/dist",
-        "dev": "npm run js:compile && npm run spectre:compile && npm run css:copy"
+        "dev": "npm run js:compile && npm run spectre:compile && npm run css:copy",
+        "watch": "watch 'npm run dev' app/static/ --ignoreDirectoryPattern=/dist/"
     },
     "dependencies": {
         "spectre.css": "^0.5.9"

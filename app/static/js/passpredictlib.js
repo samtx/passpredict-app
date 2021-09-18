@@ -63,7 +63,7 @@ async function queryLocationAPI(search_text) {
         url + "?" + new URLSearchParams(params).toString()
     );
     const json = await response.json();
-    console.log(json);
+    // console.log(json);
     const { features: locations } = json;
     return locations;
 }

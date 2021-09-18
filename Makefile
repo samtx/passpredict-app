@@ -89,6 +89,21 @@ deploy-local:
 		-v passpredict-api-db:/db \
 		$(LOCAL_TAG)
 
+deploy-local-foreground:
+	@echo "Removing old container..."
+	-docker container stop $(CONTAINER_NAME)
+	-docker container rm $(CONTAINER_NAME)
+	@echo "starting new container in foreground..."
+	docker run --name api \
+		-p 8000:8000 \
+		-e REDIS_HOST=redis \
+		-e DT_SECONDS=5 \
+		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
+		-e CORS_ORIGINS=* \
+		--link=redis:redis \
+		-v passpredict-api-db:/db \
+		$(LOCAL_TAG)
+
 deploy:
 	@echo "Login to container registry on server..."
 	$(MAKE) ssh-cmd CMD='docker login \
