@@ -57,4 +57,4 @@ routes = [
 # def shutdown():
 #     close_db()
 
-app = Starlette(debug=True, routes=routes)
+app = Starlette(routes=routes)

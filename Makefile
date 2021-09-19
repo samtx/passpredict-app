@@ -105,7 +105,7 @@ deploy-local-foreground:
 
 deploy:
 	@echo "Login to container registry on server..."
-	$(MAKE) ssh-cmd CMD='docker login \
+	@$(MAKE) ssh-cmd CMD='docker login \
 		-u $(PASSPREDICTAPI_GITLAB_DEPLOY_USER) \
 		-p $(PASSPREDICTAPI_GITLAB_DEPLOY_PASSWORD) \
 		registry.gitlab.com \
