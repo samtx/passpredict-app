@@ -14,7 +14,7 @@ from app.tle import get_satellite_norad_ids
 from app.resources import cache, db, templates
 from app import settings
 from app import passes
-from app import api
+from app.api import app as api_app
 
 
 logging.basicConfig(
@@ -55,7 +55,7 @@ routes = [
     Route('/', home, name='home', methods=['GET', 'POST']),
     Route('/about', about, name='about'),
     Mount('/passes', routes=passes.routes, name='passes'),
-    Mount('/api', routes=api.routes, name='api'),
+    Mount('/api', app=api_app, name='api'),
     Mount('/static', app=StaticFiles(directory='app/static'), name='static'),
 ]
 

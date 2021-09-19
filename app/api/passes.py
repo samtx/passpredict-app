@@ -3,8 +3,8 @@ import logging
 import pickle
 import logging
 
-from starlette.routing import Route
-from starlette.responses import JSONResponse
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 from orbit_predictor.locations import Location
 
 from app.astrodynamics import (
@@ -12,18 +12,24 @@ from app.astrodynamics import (
     predict_single_satellite_overpasses,
 )
 from app.resources import cache, db
-from app.settings import CORS_ORIGINS, MAX_DAYS
+from app import settings
 
 logger = logging.getLogger(__name__)
 
+router = APIRouter(
+    prefix="/passes"
+)
 
-def get_all_passes(request):
+
+@router.get('/')
+def get_all_passes(
+    lat: float,
+    lon:float,
+    h: float = 0.0,
+):
     """
     Compute passes for top 100 visible satellites for 24 hours
     """
-    lat = request.query_params.get('lat')
-    lon = request.query_params.get('lon')
-    h = request.query_params.get('h', 0.0)
     logger.info(f'route api/passes/ lat={lat},lon={lon},h={h}')
     # Check cache with input string
     today = datetime.date.today()
@@ -51,12 +57,14 @@ def get_all_passes(request):
     return JSONResponse(response_data)
 
 
-def get_passes(request):
-    satid = request.path_params.get('satid')
-    lat = request.query_params.get('lat')
-    lon = request.query_params.get('lon')
-    h = request.query_params.get('h', 0.0)
-    days = request.query_params.get('days', MAX_DAYS)
+@router.get('/{satid:int}')
+def get_passes(
+    satid: int,
+    lat: float,
+    lon:float,
+    h: float = 0.0,
+    days: int = settings.MAX_DAYS,
+):
     logger.info(f'route api/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
     today = datetime.date.today()
@@ -84,9 +92,3 @@ def get_passes(request):
         response_data = overpass_result.json()
         cache.set(main_key, pickle.dumps(response_data), ex=1800)
     return JSONResponse(response_data)
-
-
-routes = [
-    Route('/passes', get_all_passes, name="get_all_passes"),
-    Route('/passes/{satid:int}', get_passes, name="get_passes"),
-]
