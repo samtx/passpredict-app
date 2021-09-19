@@ -1,26 +1,29 @@
 import os
 
-import dotenv
+from starlette.config import Config
+from starlette.datastructures import URL, Secret, CommaSeparatedStrings
 
-dotenv.load_dotenv()
 
-database_uri = os.getenv('DATABASE_URI', 'sqlite:///passpredict.sqlite')
+config = Config(".env")
+
+DEBUG = config('PASSPREDICT_DEBUG', cast=bool, default=False)
+
+DATABASE_URI = config('DATABASE_URI', default='sqlite:///passpredict.sqlite')
 
 # Echo sqlalchemy commands to stdout, default false
-db_echo = bool(os.getenv('DB_ECHO', False))
+DB_ECHO = config('DB_ECHO', cast=bool, default=False)
 
-HERE_API_KEY = os.getenv('HERE_API_KEY')
+HERE_API_KEY = config('HERE_API_KEY', cast=Secret)
 
 # Maximum number of days to predict overpasses for a single satellite
-MAX_DAYS = int(os.getenv('MAX_DAYS', 10))
+MAX_DAYS = config('MAX_DAYS', cast=int, default=10)
 
 # Time steps for primary sun and satellite position computation
-DT_SECONDS = int(os.getenv('DT_SECONDS', 1))
+DT_SECONDS = config('DT_SECONDS', cast=int, default=1)
 
-REDIS_HOST = os.getenv('REDIS_HOST', 'localhost')
-REDIS_URL = os.getenv('REDIS_URL')
-cors_origins_string = os.getenv('CORS_ORIGINS', '*')
-CORS_ORIGINS = cors_origins_string.split(',')
+REDIS_HOST = config('REDIS_HOST', default='localhost')
+REDIS_URL = config('REDIS_URL', cast=URL, default=None)
+CORS_ORIGINS = config('CORS_ORIGINS', cast=CommaSeparatedStrings, default='*')
 
 
 

@@ -115,6 +115,19 @@ class Overpass(BaseModel):
     brightness: float = None
 
 
+class LocationResult(BaseModel):
+    """
+    Location result from geocoder
+    """
+    lat: float = Field(..., title='latitude, \u0b00N')
+    lon: float = Field(..., title='longitude, \u0b00E')
+    name: str = None
+
+
+class Location(LocationResult):
+    h: float = Field(0.0, title='height, [m] above WGS84 ellipsoid')
+
+
 class OverpassResult(BaseModel):
     location: Location
     overpasses: List[Overpass]

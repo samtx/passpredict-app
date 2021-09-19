@@ -40,6 +40,8 @@ click==7.1.2
     # via uvicorn
 cython==0.29.21
     # via -r requirements.in
+fastapi==0.68.1
+    # via -r requirements.in
 gunicorn==20.0.4
     # via -r requirements.in
 h11==0.12.0
@@ -82,7 +84,9 @@ pycares==3.1.1
 pycparser==2.20
     # via cffi
 pydantic==1.8.2
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   fastapi
 python-dateutil==2.8.1
     # via alembic
 python-dotenv==0.14.0
@@ -91,6 +95,8 @@ python-dotenv==0.14.0
     #   uvicorn
 python-editor==1.0.4
     # via alembic
+python-multipart==0.0.5
+    # via -r requirements.in
 pyyaml==5.3.1
     # via uvicorn
 redis==3.5.3
@@ -108,7 +114,9 @@ sgp4==2.12
     #   -r requirements.in
     #   orbit-predictor
 six==1.15.0
-    # via python-dateutil
+    # via
+    #   python-dateutil
+    #   python-multipart
 sniffio==1.2.0
     # via
     #   anyio
@@ -118,8 +126,10 @@ sqlalchemy==1.3.20
     # via
     #   -r requirements.in
     #   alembic
-starlette==0.13.6
-    # via -r requirements.in
+starlette==0.14.2
+    # via
+    #   -r requirements.in
+    #   fastapi
 typing-extensions==3.7.4.3
     # via
     #   aiohttp

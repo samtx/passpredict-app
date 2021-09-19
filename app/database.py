@@ -3,14 +3,12 @@
 import sqlalchemy
 import sqlalchemy.ext.declarative
 
-from app.settings import database_uri, db_echo
-
-SQLALCHEMY_DATABASE_URL = database_uri
+from app import settings
 
 engine = sqlalchemy.create_engine(
-    SQLALCHEMY_DATABASE_URL, 
+    settings.DATABASE_URI,
     connect_args={'check_same_thread': False},
-    echo=db_echo,
+    echo=settings.DB_ECHO,
 )
 
 Base = sqlalchemy.ext.declarative.declarative_base()

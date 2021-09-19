@@ -2,15 +2,15 @@ import datetime
 import logging
 import pickle
 import logging
-from typing import List, Optional
 
 from starlette.routing import Route
 from starlette.responses import JSONResponse
+from orbit_predictor.locations import Location
 
-from app.astrodynamics.overpass import (
+from app.astrodynamics import (
     predict_all_visible_satellite_overpasses,
-    predict_single_satellite_overpasses)
-from app.schemas import Location, Overpass
+    predict_single_satellite_overpasses,
+)
 from app.resources import cache, db
 from app.settings import CORS_ORIGINS, MAX_DAYS
 
@@ -32,7 +32,12 @@ def get_all_passes(request):
     if result:
         response_data = pickle.loads(result)
     else:
-        location = Location(lat=lat, lon=lon, h=h)
+        location = Location(
+            name="",
+            latitude_deg=lat,
+            longitude_deg=lon,
+            elevation_m=h
+        )
         overpass_result = predict_all_visible_satellite_overpasses(
             location,
             date_start=today,
@@ -61,7 +66,12 @@ def get_passes(request):
     if result:
         response_data = pickle.loads(result)
     else:
-        location = Location(lat=lat, lon=lon, h=h)
+        location = Location(
+            name="",
+            latitude_deg=lat,
+            longitude_deg=lon,
+            elevation_m=h
+        )
         overpass_result = predict_single_satellite_overpasses(
             satid,
             location,
@@ -77,6 +87,6 @@ def get_passes(request):
 
 
 routes = [
-    Route('/', get_all_passes),
-    Route('/{satid:int}', get_passes),
+    Route('/passes', get_all_passes, name="get_all_passes"),
+    Route('/passes/{satid:int}', get_passes, name="get_passes"),
 ]

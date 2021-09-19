@@ -1,8 +1,7 @@
 import sqlalchemy
 from starlette.templating import Jinja2Templates
 
-
-from app.settings import database_uri, db_echo, REDIS_HOST, REDIS_URL
+from app import settings
 
 try:
     import redis
@@ -11,16 +10,16 @@ except ImportError:
     # Use an in-memory cache
 
 
-if not REDIS_URL:
-    cache = redis.Redis(host=REDIS_HOST, port=6379)
+if not settings.REDIS_URL:
+    cache = redis.Redis(host=settings.REDIS_HOST, port=6379)
 else:
-    cache = redis.Redis.from_url(REDIS_URL)
+    cache = redis.Redis.from_url(settings.REDIS_URL)
 
 
 db = sqlalchemy.create_engine(
-    database_uri,
+    settings.DATABASE_URI,
     connect_args={'check_same_thread': False},
-    echo=db_echo,
+    echo=settings.DB_ECHO,
 )
 
 
