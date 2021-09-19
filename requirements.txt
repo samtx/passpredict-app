@@ -73,7 +73,10 @@ multidict==5.0.0
 numpy==1.21.2
     # via
     #   -r requirements.in
+    #   orbit-predictor
     #   scipy
+orbit-predictor==1.14.2
+    # via -r requirements.in
 pycares==3.1.1
     # via aiodns
 pycparser==2.20
@@ -93,13 +96,17 @@ pyyaml==5.3.1
 redis==3.5.3
     # via -r requirements.in
 requests==2.24.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   orbit-predictor
 rfc3986[idna2008]==1.5.0
     # via httpx
 scipy==1.5.4
     # via -r requirements.in
 sgp4==2.12
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   orbit-predictor
 six==1.15.0
     # via python-dateutil
 sniffio==1.2.0

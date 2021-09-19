@@ -6,7 +6,7 @@ from math import floor
 
 from pydantic import BaseModel, Field
 
-from app.astrodynamics.timefn import jday2datetime
+from app.astrodynamics import jday2datetime
 from app.utils import epoch_from_tle, satid_from_tle
 
 COORDINATES = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
@@ -30,32 +30,6 @@ class Satellite(BaseModel):
     perigee: float = None
     apogee: float = None
     inclination: float = None
-
-
-class LocationResult(BaseModel):
-    """
-    Location result from geocoder
-    """
-    lat: float = Field(..., title='latitude, \u0b00N')
-    lon: float = Field(..., title='longitude, \u0b00E')
-    name: str = None
-
-
-class Location(LocationResult):
-    h: float = Field(0.0, title='height, [m] above WGS84 ellipsoid')
-
-
-class LocationInDB(Location):
-    """
-    Location record in database
-
-    Inherited attributes:
-        name: str
-        lat: float
-        lon: float
-    """
-    id: int
-    query: str
 
 
 class Tle(BaseModel):
@@ -101,25 +75,6 @@ class Point(BaseModel):
         n = floor((azm-start)/mod)
         direction = COORDINATES[n]
         return direction
-
-    @classmethod
-    def from_rho(cls, rho, idx):
-        """Create a Point object directly from the rho vector and index without validation"""
-        return cls.construct(
-            datetime=jday2datetime(rho.time.jd[idx]),
-            azimuth=rho.az[idx],
-            elevation=rho.el[idx],
-            range=rho.rng[idx]
-        )
-
-    @classmethod
-    def from_jd_razel(jd, rng, az, el):
-        return cls.construct(
-            datetime=jday2datetime(jd),
-            azimuth=round(az, 2),
-            elevation=round(el, 2),
-            range=round(rng, 3)
-        )
 
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
