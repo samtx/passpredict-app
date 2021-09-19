@@ -82,4 +82,4 @@ EXPOSE 8000
 RUN chown 1000:1000 /app
 USER 1000
 
-CMD [ "gunicorn", "-b", "127.0.0.1:8000", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"]
+CMD [ "gunicorn", "-b", "0.0.0.0:8000", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"]

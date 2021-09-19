@@ -11,15 +11,17 @@
 # Use Gitlab CI/CD environment variables
 CI_COMMIT_SHORT_SHA?=$(shell git log -1 --pretty=format:"%h")
 CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx/passpredict-api
-LOCAL_TAG=api:$(CI_COMMIT_SHORT_SHA)
+LOCAL_TAG=passpredict:$(CI_COMMIT_SHORT_SHA)
 REMOTE_TAG=$(CI_REGISTRY_IMAGE)/$(LOCAL_TAG)
-CONTAINER_NAME=api
+CONTAINER_NAME=passpredict
+# TOKEN=$(GITLAB_TOKEN)
+TOKEN=GITLAB_PAT_PASSPREDICT_REGISTRY
 
 #"$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME" "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
 #    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
 
 login:
-	docker login -u samtx -p $(GITLAB_TOKEN) registry.gitlab.com
+	 printf '%s\n' "$$$(TOKEN)" | docker login -u samtx --password-stdin registry.gitlab.com
 
 
 ssh-cmd:
@@ -36,11 +38,10 @@ test:
         -e REDIS_HOST=redis \
         -e DT_SECONDS=5 \
         -e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-        -e CORS_ORIGINS=* \
         --link=redis:redis \
         -v passpredict-api-db:/db \
         $(LOCAL_TAG) \
-        /bin/bash -c "pip install pytest pytest-randomly pytest-redis pytest-mock && pytest -v"
+        /bin/bash -c "pip install -U pytest pytest-randomly pytest-redis pytest-mock && pytest -v"
 push:
 	docker tag $(LOCAL_TAG) $(REMOTE_TAG)
 	docker push $(REMOTE_TAG)
@@ -79,12 +80,11 @@ deploy-local:
 	-docker container stop $(CONTAINER_NAME)
 	-docker container rm $(CONTAINER_NAME)
 	@echo "starting new container..."
-	docker run -d --name api \
+	docker run -d --name $(CONTAINER_NAME) \
 		-p 8000:8000 \
 		-e REDIS_HOST=redis \
 		-e DT_SECONDS=5 \
 		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-		-e CORS_ORIGINS=* \
 		--link=redis:redis \
 		-v passpredict-api-db:/db \
 		$(LOCAL_TAG)
@@ -94,12 +94,11 @@ deploy-local-foreground:
 	-docker container stop $(CONTAINER_NAME)
 	-docker container rm $(CONTAINER_NAME)
 	@echo "starting new container in foreground..."
-	docker run --name api \
+	docker run --name $(CONTAINER_NAME) \
 		-p 8000:8000 \
 		-e REDIS_HOST=redis \
 		-e DT_SECONDS=5 \
 		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-		-e CORS_ORIGINS=* \
 		--link=redis:redis \
 		-v passpredict-api-db:/db \
 		$(LOCAL_TAG)
@@ -118,13 +117,12 @@ deploy:
 	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
-		docker run -d --name api \
+		docker run -d --name $(CONTAINER_NAME) \
 			--restart=unless-stopped \
-			-p 8000:8000 \
+			-p 8001:8000 \
 			-e REDIS_HOST=redis \
 			-e DT_SECONDS=5 \
 			-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-			-e CORS_ORIGINS=* \
 			--link=redis:redis \
 			-v passpredict-api-db:/db \
 			$(REMOTE_TAG) \
