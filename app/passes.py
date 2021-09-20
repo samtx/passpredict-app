@@ -1,16 +1,7 @@
-import datetime
 import logging
-import pickle
-import logging
-from typing import List, Optional
 
 from starlette.routing import Route
-from starlette.responses import JSONResponse
 
-from app.astrodynamics import (
-    predict_all_visible_satellite_overpasses,
-    predict_single_satellite_overpasses)
-from app.schemas import Location, Overpass
 from app.resources import cache, db
 from app.settings import CORS_ORIGINS, MAX_DAYS
 from app.resources import templates
