@@ -16,5 +16,9 @@ class SatellitePredictor(HighAccuracyTLEPredictor):
         self.tle = None
         self._propagator = None
 
+    @property
+    def sate_id(self):
+        return self.satid
+
     def set_propagator(self):
         self._propagator = self._get_propagator()
