@@ -6,6 +6,7 @@ from typing import NamedTuple, Tuple
 from orbit_predictor.sources import TLESource
 from orbit_predictor.predictors.base import Predictor
 from sqlalchemy import and_, select, func, desc
+from starlette.exceptions import HTTPException
 
 from app.resources import cache, db
 from app.dbmodels import tle as tledb
@@ -30,9 +31,10 @@ class PasspredictTLESource(TLESource):
         """
 
 
-    async def get_tle(self, satid: int, date: datetime.datetime):
+    async def get_tle_or_404(self, satid: int, date: datetime.datetime):
         """
         Get TLE from source object
+        Raise 404 error if TLE not found in database
         """
         # First check cache
         tle = await self.check_cache(satid, date)
@@ -45,7 +47,7 @@ class PasspredictTLESource(TLESource):
 
             # return tle
             return tle
-        return None
+        raise HTTPException(status_code=404, detail=f'TLE for satellite ID {satid} not found')
 
 
     def tle_cache_key(self, satid: int, date: datetime.datetime):
@@ -94,7 +96,7 @@ class PasspredictTLESource(TLESource):
         """
         Create Predictor instance with TLE data
         """
-        tle = await self.get_tle(satid, date)
+        tle = await self.get_tle_or_404(satid, date)
         predictor = SatellitePredictor(satid)
         predictor._source = self
         predictor.tle = tle

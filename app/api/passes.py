@@ -13,8 +13,9 @@ from app.astrodynamics import (
     predict_single_satellite_overpasses,
 )
 from app.astrodynamics import PasspredictTLESource
-from app.resources import cache, db
+from app.resources import cache
 from app import settings
+from app.api.serializers import single_overpass_result_serializer
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,8 @@ async def get_passes(
             days=days,
             min_elevation=10.0,
         )
+        data = single_overpass_result_serializer(overpass_result)
         # cache results for 30 minutes
-        response_data = overpass_result.json()
-        await cache.set(main_key, pickle.dumps(response_data), ex=1800)
-    return JSONResponse(response_data)
+        # maybe put this in a background task to do after returning response
+        await cache.set(main_key, pickle.dumps(data), ex=1800)
+    return JSONResponse(data)

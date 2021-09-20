@@ -2,6 +2,8 @@ import datetime
 
 from orbit_predictor.locations import Location
 
+from .sources import TLE
+
 
 def predict_all_visible_satellite_overpasses(
     tles,
@@ -22,10 +24,10 @@ def predict_all_visible_satellite_overpasses(
 
 
 def predict_single_satellite_overpasses(
-    tle,
+    tle: TLE,
     location: Location,
     date_start: datetime.date,
     days: int,
     min_elevation: float
 ):
-    pass
+    return None
