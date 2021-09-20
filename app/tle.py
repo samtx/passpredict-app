@@ -106,7 +106,6 @@ def get_orbit_data_from_celestrak(satellite_id):
 def parse_tles_from_celestrak(satellite_id=None):
     """
     Download current TLEs from Celestrak and save them to a JSON file
-
     """
     if satellite_id is None:
         url = 'https://celestrak.com/NORAD/elements/stations.txt'

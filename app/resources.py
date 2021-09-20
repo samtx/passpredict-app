@@ -1,5 +1,3 @@
-from urllib.parse import urlencode
-
 from aioredis import Redis
 from databases import Database
 from starlette.templating import Jinja2Templates

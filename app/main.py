@@ -59,8 +59,19 @@ routes = [
     Mount('/static', app=StaticFiles(directory='app/static'), name='static'),
 ]
 
-# @atexit.register
-# def shutdown():
-#     close_db()
+async def connect_to_db_and_cache():
+    await cache.initialize()
+    await db.connect()
 
-app = Starlette(debug=settings.DEBUG, routes=routes)
+
+async def disconnect_from_db_and_cache():
+    await cache.close()
+    await db.disconnect()
+
+
+app = Starlette(
+    debug=settings.DEBUG,
+    routes=routes,
+    on_startup=[connect_to_db_and_cache],
+    on_shutdown=[disconnect_from_db_and_cache],
+)

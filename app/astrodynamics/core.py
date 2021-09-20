@@ -1,21 +1,31 @@
+import datetime
+
+from orbit_predictor.locations import Location
 
 
 def predict_all_visible_satellite_overpasses(
-    location,
-    date_start,
-    min_elevation,
-    db,
-    cache
+    tles,
+    location: Location,
+    date_start: datetime.date,
+    min_elevation: float,
 ):
-    pass
+    results = []
+    for tle in tles:
+        sat_results = predict_single_satellite_overpasses(
+            tle, location,
+            date_start=date_start,
+            days=1,
+            min_elevation=min_elevation
+        )
+        results.extend(sat_results)
+    return results
 
 
 def predict_single_satellite_overpasses(
-    satid,
-    location,
-    date_start,
-    days,
-    db,
-    cache
+    tle,
+    location: Location,
+    date_start: datetime.date,
+    days: int,
+    min_elevation: float
 ):
     pass
