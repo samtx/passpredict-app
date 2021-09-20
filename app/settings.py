@@ -8,10 +8,14 @@ config = Config(".env")
 
 DEBUG = config('PASSPREDICT_DEBUG', cast=bool, default=False)
 
-DATABASE_URI = config('DATABASE_URI', default='sqlite:///passpredict.sqlite')
-
+POSTGRES_URI = config('POSTGRES_URI', cast=URL, default=None)
 # Echo sqlalchemy commands to stdout, default false
 DB_ECHO = config('DB_ECHO', cast=bool, default=False)
+POSTGRES_HOST = config('POSTGRES_HOST', default='localhost')
+POSTGRES_PORT = config('POSTGRES_PORT', cast=int, default=5432)
+POSTGRES_USER = config('POSTGRES_USER')
+POSTGRES_PASSWORD = config('POSTGRES_PASSWORD')
+POSTGRES_NAME = config('POSTGRES_NAME', default='passpredict')
 
 HERE_API_KEY = config('HERE_API_KEY', cast=Secret)
 

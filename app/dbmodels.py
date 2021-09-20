@@ -8,7 +8,7 @@ from sqlalchemy import (
     ForeignKey, Unicode, DateTime
 )
 
-from app.database import Base, engine
+# from app.database import Base, engine
 
 metadata = MetaData()
 
@@ -26,7 +26,7 @@ JSR_status_decayed = {
 }
 
 
-# Orbit type from Jonathan Space Report 
+# Orbit type from Jonathan Space Report
 # https://planet4589.org/space/gcat/web/intro/orbits.html
 # orbit_type = Table(
 #     'orbit_type', metadata,

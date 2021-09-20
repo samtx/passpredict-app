@@ -10,12 +10,16 @@ aiofiles==0.7.0
     # via -r requirements.in
 aiohttp[speedups]==3.7.2
     # via -r requirements.in
+aioredis==2.0.0
+    # via -r requirements.in
 alembic==1.4.3
     # via -r requirements.in
 anyio==3.3.1
     # via httpcore
 async-timeout==3.0.1
-    # via aiohttp
+    # via
+    #   aiohttp
+    #   aioredis
 attrs==20.2.0
     # via aiohttp
 brotlipy==0.7.0
@@ -40,8 +44,12 @@ click==7.1.2
     # via uvicorn
 cython==0.29.21
     # via -r requirements.in
+databases==0.5.2
+    # via -r requirements.in
 fastapi==0.68.1
     # via -r requirements.in
+greenlet==1.1.1
+    # via sqlalchemy
 gunicorn==20.0.4
     # via -r requirements.in
 h11==0.12.0
@@ -99,8 +107,6 @@ python-multipart==0.0.5
     # via -r requirements.in
 pyyaml==5.3.1
     # via uvicorn
-redis==3.5.3
-    # via -r requirements.in
 requests==2.24.0
     # via
     #   -r requirements.in
@@ -122,10 +128,11 @@ sniffio==1.2.0
     #   anyio
     #   httpcore
     #   httpx
-sqlalchemy==1.3.20
+sqlalchemy==1.4.23
     # via
     #   -r requirements.in
     #   alembic
+    #   databases
 starlette==0.14.2
     # via
     #   -r requirements.in
@@ -133,6 +140,7 @@ starlette==0.14.2
 typing-extensions==3.7.4.3
     # via
     #   aiohttp
+    #   aioredis
     #   pydantic
 urllib3==1.25.10
     # via requests

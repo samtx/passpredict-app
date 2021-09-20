@@ -4,7 +4,8 @@ uvicorn[standard]
 uvloop
 python-dotenv
 gunicorn
-redis
+aioredis[hiredis]
+databases[postgresql]
 requests
 Cython
 sqlalchemy

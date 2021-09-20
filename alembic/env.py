@@ -21,6 +21,10 @@ fileConfig(config.config_file_name)
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))
 from app import dbmodels
+from app import settings
+from app.resources import postgres_uri
+
+config.set_main_option('sqlalchemy.url', postgres_uri)
 target_metadata = dbmodels.metadata
 
 # other values from the config, defined by the needs of env.py,
@@ -30,13 +34,7 @@ target_metadata = dbmodels.metadata
 
 
 def get_url():
-    # user = os.getenv("POSTGRES_USER", "postgres")
-    # password = os.getenv("POSTGRES_PASSWORD", "")
-    # server = os.getenv("POSTGRES_SERVER", "db")
-    # db = os.getenv("POSTGRES_DB", "app")
-    # return f"postgresql://{user}:{password}@{server}/{db}"
-    db_uri = os.getenv("DATABASE_URI", 'sqlite///passpredict.sqlite')
-    return db_uri
+    return postgres_uri
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
