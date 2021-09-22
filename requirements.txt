@@ -10,7 +10,7 @@ aiofiles==0.7.0
     # via -r requirements.in
 aiohttp[speedups]==3.7.2
     # via -r requirements.in
-aioredis==2.0.0
+aioredis[hiredis]==2.0.0
     # via -r requirements.in
 alembic==1.4.3
     # via -r requirements.in
@@ -20,6 +20,10 @@ async-timeout==3.0.1
     # via
     #   aiohttp
     #   aioredis
+asyncpg==0.24.0
+    # via
+    #   -r requirements.in
+    #   databases
 attrs==20.2.0
     # via aiohttp
 brotlipy==0.7.0
@@ -44,7 +48,7 @@ click==7.1.2
     # via uvicorn
 cython==0.29.21
     # via -r requirements.in
-databases==0.5.2
+databases[postgresql]==0.5.2
     # via -r requirements.in
 fastapi==0.68.1
     # via -r requirements.in
@@ -56,6 +60,8 @@ h11==0.12.0
     # via
     #   httpcore
     #   uvicorn
+hiredis==2.0.0
+    # via aioredis
 httpcore==0.13.7
     # via httpx
 httptools==0.1.1

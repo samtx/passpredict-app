@@ -28,15 +28,6 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# copy and build IAU SOFA static library
-COPY cextern/sofa sofa
-RUN cd sofa \
-&& make \
-&& make install \
-&& make test \
-&& cd .. \
-&& rm -r sofa
-
 RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 COPY requirements.txt .
@@ -63,14 +54,14 @@ ENV PATH="/app/venv/bin:$PATH"
 COPY requirements.txt .
 RUN pip install wheel
 
-COPY --from=builder /usr/local/include/*sofa* /usr/local/include/
-COPY --from=builder /usr/local/lib/*sofa* /usr/local/lib/
 COPY --from=builder /app/wheels /app/wheels
 
 # install python wheels for dependencies
 RUN pip install --no-index --find-links=/app/wheels -r requirements.txt
 
 COPY ./setup.py setup.py
+COPY ./alembic alembic
+COPY ./alembic.ini alembic.ini
 COPY ./app app
 COPY ./tests tests
 COPY ./pytest.ini pytest.ini

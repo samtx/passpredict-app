@@ -20,3 +20,4 @@ pydantic
 orbit-predictor
 python-multipart
 fastapi
+asyncpg

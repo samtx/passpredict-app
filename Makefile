@@ -103,6 +103,22 @@ deploy-local-foreground:
 		-v passpredict-api-db:/db \
 		$(LOCAL_TAG)
 
+migrate:
+	@echo "Migrating production database..."
+	@$(MAKE) ssh-cmd CMD='\
+		docker run \
+			--env-file=/opt/passpredict/.env \
+			$(REMOTE_TAG) \
+			alembic upgrade head \
+			'
+	@echo "Current database revision:"
+	@$(MAKE) ssh-cmd CMD='\
+		docker run \
+			--env-file=/opt/passpredict/.env \
+			$(REMOTE_TAG) \
+			alembic current \
+			'
+
 deploy:
 	@echo "Login to container registry on server..."
 	@$(MAKE) ssh-cmd CMD='docker login \
@@ -120,11 +136,7 @@ deploy:
 		docker run -d --name $(CONTAINER_NAME) \
 			--restart=unless-stopped \
 			-p 8001:8000 \
-			-e REDIS_HOST=redis \
-			-e DT_SECONDS=5 \
-			-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-			--link=redis:redis \
-			-v passpredict-api-db:/db \
+			--env-file=/opt/passpredict/.env \
 			$(REMOTE_TAG) \
 			'
 # gunicorn -b 127.0.0.1:8000 -w 2 -k uvicorn.workers.UvicornWorker app.main:app \
