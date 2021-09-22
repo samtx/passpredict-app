@@ -103,3 +103,22 @@ export const markQuerySubstring = (query, string) => {
     string = string.replace(new RegExp(query, 'gmi'), `<strong>${query}</strong>`);
     return string
 }
+
+export const formatMinutes = (total_seconds) => {
+    // Return string of MM:SS
+    let minutes = total_seconds / 60.0
+    let seconds = total_seconds - Math.floor(minutes) * 60;
+    seconds = seconds.toFixed(0);
+    let seconds_str = padZeros(seconds, 2);
+    let s = `${minutes.toFixed(0)}:${seconds_str}`
+    return s;
+}
+
+
+const padZeros = (n, size) => {
+    let nstr = n.toString();
+    while (nstr.length < size) {
+        nstr = "0" + nstr;
+    }
+    return nstr
+}

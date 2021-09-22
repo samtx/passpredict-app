@@ -6,6 +6,7 @@ import logging
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
+# from starlette.background import BackgroundTask
 from orbit_predictor.locations import Location
 
 from app.astrodynamics import (
@@ -16,6 +17,8 @@ from app.astrodynamics import PasspredictTLESource
 from app.resources import cache
 from app import settings
 from app.api.serializers import single_overpass_result_serializer
+from app.api.schemas import SingleSatOverpassResult
+
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +67,11 @@ tle_source = PasspredictTLESource()
 #     return JSONResponse(response_data)
 
 
-@router.get('/{satid:int}')
+@router.get(
+    '/{satid:int}',
+    response_model=SingleSatOverpassResult,
+    response_model_exclude_unset=True,
+)
 async def get_passes(
     satid: int,
     lat: float,
@@ -74,12 +81,12 @@ async def get_passes(
 ):
     logger.info(f'route api/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
-    today = datetime.datetime.utcnow()
+    today = datetime.datetime.now(datetime.timezone.utc)
     main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.strftime("%Y%m%d")}'
     # Check cache
     result = await cache.get(main_key)
     if result:
-        response_data = pickle.loads(result)
+        data = pickle.loads(result)
     else:
         location = Location(
             name="",
@@ -98,8 +105,9 @@ async def get_passes(
             days=days,
             min_elevation=10.0,
         )
+
         data = single_overpass_result_serializer(overpass_result)
         # cache results for 30 minutes
         # maybe put this in a background task to do after returning response
-        await cache.set(main_key, pickle.dumps(data), ex=1800)
-    return JSONResponse(data)
+        await cache.set(main_key, pickle.dumps(data), ex=12)
+    return data

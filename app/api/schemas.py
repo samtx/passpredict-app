@@ -76,14 +76,25 @@ class PassType(str, Enum):
     visible = 'visible'
 
 
+# class Overpass(BaseModel):
+#     start_pt: Point
+#     max_pt: Point
+#     end_pt: Point
+#     satellite_id: int = None
+#     type: PassType = None
+#     vis_start_pt: Point = None
+#     vis_end_pt: Point = None
+#     brightness: float = None
+
+
 class Overpass(BaseModel):
-    start_pt: Point
-    max_pt: Point
-    end_pt: Point
+    aos_dt: dt.datetime
+    max_dt: dt.datetime
+    los_dt: dt.datetime
+    duration: float
+    max_elevation: float
     satellite_id: int = None
     type: PassType = None
-    vis_start_pt: Point = None
-    vis_end_pt: Point = None
     brightness: float = None
 
 

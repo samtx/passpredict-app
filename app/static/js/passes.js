@@ -1,4 +1,4 @@
-import {Point, getPassQuality} from "./passpredictlib.js";
+import {Point, getPassQuality, formatMinutes} from "./passpredictlib.js";
 
 const passList = document.getElementById('passList');
 const visibleOnlyCheckbox = document.getElementById('visibleOnly');
@@ -7,10 +7,9 @@ const getPasses = async (satid, params) => {
     const response = await fetch(`/api/passes/${satid}?` +
         new URLSearchParams(params).toString()
     );
-    const passResponse = await response.json();
-    const passes = passResponse.overpasses;
-    console.log(passes);
-    return passes
+    const data = await response.json();
+    console.log(data);
+    return data
 };
 
 const filterVisibleOnlyPasses = (visibleOnly, passes) => {
@@ -39,24 +38,16 @@ const passListItemHtml = (pass) => {
     const html = `
         <div class="box is-rounded p-3 mb-3 pass-row pass-quality-${pass.quality}">
             <div class="p-1 pass-item pass-month-day">
-                <p class="header">Date</p>
                 <p class="value">${pass.start_pt.getMonthDay}</p>
             </div>
             <div class="p-1 pass-item pass-time">
-                <p class="header">Time</p>
                 <p class="value">${pass.start_pt.getTimeMinutes}</p>
             </div>
+            <div class="p-1 pass-item pass-duration">
+                <p class="value">${formatMinutes(pass.duration)}</p>
+            </div>
             <div class="p-1 pass-item pass-max-el">
-                <p class="header">Max El.</p>
                 <p class="value">${Math.round(pass.max_pt.elevation)}&deg;</p>
-            </div>
-            <div class="p-1 pass-item pass-type">
-                <p class="header">Type</p>
-                <p class="value">${pass.type}</p>
-            </div>
-            <div class="p-1 pass-item pass-brightness">
-                <p class="header">Brightness</p>
-                <p class="value">${pass.brightness}</p>
             </div>
         </div>
     `;
@@ -75,9 +66,19 @@ const showPassList = (passes) => {
     else {
         let html = "";
         for (const pass of passes) {
-            const start_pt = new Point(pass.start_pt);
-            const max_pt = new Point(pass.max_pt);
-            const end_pt = new Point(pass.end_pt);
+            // Refactor pass object for orbital_predictor return values
+
+            let default_obj = {
+                azimuth: 0,
+                elevation: 0,
+                range: 0,
+                brightness: 0,
+            }
+            const start_pt = new Point({ ...default_obj, datetime: pass.aos_dt});
+            const max_pt = new Point({...default_obj, datetime: pass.max_dt, elevation: pass.max_elevation});
+            const end_pt = new Point({...default_obj, datetime: pass.los_dt});
+
+            const duration = pass.duration;
             const type = pass.type;
             const brightness = pass.brightness ? pass.brightness : "";
             const quality = getPassQuality({type: pass.type, max_pt: max_pt});
@@ -88,6 +89,7 @@ const showPassList = (passes) => {
                 type: type,
                 brightness: brightness,
                 quality: quality,
+                duration: duration,
             })
         }
         passList.innerHTML = html;
@@ -114,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // h: url.searchParams.get('h'),
     };
     getPasses(satid, params)
-        .then((passes) => showPassList(passes))
+        .then((resp) => showPassList(resp.overpasses))
         .catch(error => {
             console.error('Error getting passes: ' + error.message);
             showErrorMessage();

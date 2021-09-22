@@ -32,28 +32,26 @@
         </div>
     </div>
 
+    <div id="passListHeader" class="p-3 mb-3">
+        <p>Date</p>
+        <p>Time</p>
+        <p>Duration</p>
+        <p>Max Elevation</p>
+    </div>
     <div id="passList" class="mt-5">
-    <p class="is-size-5 has-text-centered mt-6 mb-4">
-        Getting passes...
-        <progress class="progress is-primary">50%</progress>
-    </p>
-
+        <p class="is-size-5 has-text-centered mt-6 mb-4">
+            Getting passes...
+            <progress class="progress is-primary">50%</progress>
+        </p>
 
             <!-- if filteredPasses.length > 0 -->
                 <!-- for each pass in filteredPasses -->
-                    <div class="pass-list-item">
-                        <PassListItem {pass} on:click={goToPassDetail(pass)} />
-                    </div>
+                    <div class="pass-list-item"></div>
             <!-- else -->
                 <p class="is-size-5 has-text-centered mt-6">
                     No passes found
                 </p>
-                <!-- if error -->
-                <p class="is-size-5 has-text-centered has-text-danger mt-6">
-                    Error getting passes
-                </p>
-                <p class="is-size-6 has-text-centered has-text-danger mt-6">{err}</p>
-            </div>
+    </div>
 
     <footer class="footer-container">
         <div class="footer-item">

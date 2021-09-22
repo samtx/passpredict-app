@@ -83,6 +83,12 @@ article.message {
     margin-left: 1.5em;
 }
 
+#passListHeader {
+    display: flex;
+    justify-content: space-between;
+
+}
+
 #passList {
     display: flex;
     flex-direction: column;
