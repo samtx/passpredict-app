@@ -3,10 +3,9 @@ import logging
 import pickle
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
-# from starlette.background import BackgroundTask
 from orbit_predictor.locations import Location
 
 from app.astrodynamics import (
@@ -27,6 +26,15 @@ router = APIRouter(
 )
 
 tle_source = PasspredictTLESource()
+
+
+async def set_cache_with_pickle(key, value, ttl=None):
+    """
+    Add value to cache with ttl. To be used as Background task
+    """
+    pickled_value = pickle.dumps(value)
+    await cache.set(key, pickled_value, ex=ttl)
+
 
 # @router.get('/')
 # async def get_all_passes(
@@ -73,6 +81,7 @@ tle_source = PasspredictTLESource()
     response_model_exclude_unset=True,
 )
 async def get_passes(
+    background_tasks: BackgroundTasks,
     satid: int,
     lat: float,
     lon:float,
@@ -109,5 +118,6 @@ async def get_passes(
         data = single_overpass_result_serializer(overpass_result)
         # cache results for 30 minutes
         # maybe put this in a background task to do after returning response
-        await cache.set(main_key, pickle.dumps(data), ex=12)
+        background_tasks.add_task(set_cache_with_pickle, main_key, data, ttl=12)
+        # await cache.set(main_key, pickle.dumps(data), ex=12)
     return data

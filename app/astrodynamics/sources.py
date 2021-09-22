@@ -25,11 +25,13 @@ class PasspredictTLESource(TLESource):
     for orbital elements
     """
 
-    def add_tle(self, satid, tle, epoch):
+    async def add_tle(self, satid, tle):
         """
         Add TLE to cache
         """
-
+        key = self.tle_cache_key(satid)
+        data = "\n".join(tle.lines).encode('utf-8')
+        await cache.set(key, data, ex=10)  # save for 10 seconds
 
     async def get_tle_or_404(self, satid: int, date: datetime.datetime):
         """
@@ -43,25 +45,25 @@ class PasspredictTLESource(TLESource):
         # Then check database
         tle = await self.check_db(satid, date)
         if tle:
-            # submit backround task to add TLE to cache
-
+            # Make this a background task
+            await self.add_tle(satid, tle)
             # return tle
             return tle
         raise HTTPException(status_code=404, detail=f'TLE for satellite ID {satid} not found')
 
 
-    def tle_cache_key(self, satid: int, date: datetime.datetime):
+    def tle_cache_key(self, satid: int):
         """
         Generate string to use for redis cache key
         """
-        key = f"tle:{satid}:{date.strftime('%Y%m%d')}"
+        key = f"tle:{satid}"
         return key
 
     async def check_cache(self, satid: int, date: datetime.datetime):
         """
         Check cache if TLE is already stored there
         """
-        key = self.tle_cache_key(satid, date)
+        key = self.tle_cache_key(satid)
         result = await cache.get(key)
         if result:
             lines = result.decode('utf-8').splitlines()
