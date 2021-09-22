@@ -91,6 +91,7 @@ numpy==1.21.2
     #   -r requirements.in
     #   orbit-predictor
     #   scipy
+    #   timezonefinder
 orbit-predictor==1.14.2
     # via -r requirements.in
 pycares==3.1.1
@@ -143,6 +144,8 @@ starlette==0.14.2
     # via
     #   -r requirements.in
     #   fastapi
+timezonefinder==5.2.0
+    # via -r requirements.in
 typing-extensions==3.7.4.3
     # via
     #   aiohttp
