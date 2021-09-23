@@ -9,12 +9,11 @@ dotenv.config();
 const staticDir = 'app/static/';
 
 const production = process.env.NODE_ENV == 'production';
+let mapboxToken = production ? process.env.MAPBOX_ACCESS_TOKEN : process.env.MAPBOX_ACCESS_TOKEN_DEV
 if (production) {
     console.log('Production mode')
-    const mapboxToken = JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN);
 } else {
     console.log('Development mode')
-    const mapboxToken = JSON.stringify(process.env.MAPBOX_ACCESS_TOKEN_DEV);
 }
 
 export default [
@@ -29,7 +28,7 @@ export default [
             replace({
                 preventAssignment: true,
                 values: {
-                    MAPBOX_ACCESS_TOKEN: mapboxToken
+                    MAPBOX_ACCESS_TOKEN: JSON.stringify(mapboxToken)
                 },
             }),
             commonjs(),
