@@ -11,7 +11,8 @@
 # Use Gitlab CI/CD environment variables
 CI_COMMIT_SHORT_SHA?=$(shell git log -1 --pretty=format:"%h")
 CI_REGISTRY_IMAGE?=registry.gitlab.com/samtx/passpredict-api
-LOCAL_TAG=passpredict:$(CI_COMMIT_SHORT_SHA)
+# LOCAL_TAG=passpredict:$(CI_COMMIT_SHORT_SHA)
+LOCAL_TAG=passpredict:latest
 REMOTE_TAG=$(CI_REGISTRY_IMAGE)/$(LOCAL_TAG)
 CONTAINER_NAME=passpredict
 # TOKEN=$(GITLAB_TOKEN)
@@ -133,10 +134,13 @@ deploy:
 	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
-		docker run -d --name $(CONTAINER_NAME) \
-			--restart=unless-stopped \
+		docker run --rm -d --name $(CONTAINER_NAME) \
 			-p 8001:8000 \
+			--add-host host.docker.internal:host-gateway \
 			--env-file=/opt/passpredict/.env \
+			-e COMMIT_SHA=$(CI_COMMIT_SHORT_SHA) \
 			$(REMOTE_TAG) \
 			'
+	@echo "Copying static files to local directory"
+	$(MAKE) ssh-cmd CMD='docker cp $(CONTAINER_NAME):/app/app/static/. /var/www/passpredict.com/'
 # gunicorn -b 127.0.0.1:8000 -w 2 -k uvicorn.workers.UvicornWorker app.main:app \

@@ -5,9 +5,10 @@ ENV NODE_ENV=development
 
 WORKDIR /app
 
-COPY package*.json .
+COPY package.json .
+COPY package-lock.json .
 
-RUN npm install
+RUN npm ci
 
 COPY rollup.config.js .
 COPY app/static app/static
@@ -21,10 +22,10 @@ FROM python:3.9-slim as builder
 
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 ENV PYTHONBUFFERED=1
-ENV SOFA_INSTALL_DIR=/usr/local/
+ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN apt-get update \
-&& apt-get install --no-install-recommends -y gcc build-essential
+&& apt-get install --no-install-recommends -y gcc build-essential libpq-dev
 
 WORKDIR /app
 
@@ -48,6 +49,10 @@ RUN python setup.py bdist_wheel --dist-dir=wheels
 FROM python:3.9-slim
 
 WORKDIR /app
+
+ENV PYTHONPATH "${PYTHONPATH}:/app"
+ENV PYTHONBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE 1
 
 RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
@@ -73,5 +78,5 @@ EXPOSE 8000
 RUN chown 1000:1000 /app
 USER 1000
 
-# CMD [ "gunicorn", "-b", "0.0.0.0:8000", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "app.main:app"]
-CMD ["uvicorn", "--proxy-headers", "--host", "0.0.0.0", "--port", "8001", "app.main:app"]
+CMD [ "gunicorn", "-b", "0.0.0.0:8000", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "--access-logfile=-", "app.main:app"]
+# CMD ["uvicorn", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000", "app.main:app"]

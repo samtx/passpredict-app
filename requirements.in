@@ -1,7 +1,7 @@
 sgp4==2.12
 starlette
 uvicorn[standard]
-uvloop
+uvloop>=0.16
 python-dotenv
 gunicorn
 aioredis[hiredis]

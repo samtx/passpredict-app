@@ -26,6 +26,7 @@ MAX_DAYS = config('MAX_DAYS', cast=int, default=10)
 DT_SECONDS = config('DT_SECONDS', cast=int, default=1)
 
 REDIS_HOST = config('REDIS_HOST', default='localhost')
+REDIS_PORT = config('REDIS_PORT', cast=int, default=6379)
 REDIS_URL = config('REDIS_URL', cast=URL, default=None)
 CORS_ORIGINS = config('CORS_ORIGINS', cast=CommaSeparatedStrings, default='*')
 
