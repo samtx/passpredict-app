@@ -1,18 +1,26 @@
 from aioredis import Redis
 from databases import Database
 from starlette.templating import Jinja2Templates
+from starlette.staticfiles import StaticFiles
 
 from app import settings
 
 
 if not settings.REDIS_URL:
-    redis_uri = "redis://{user}:{password}@{host}:{port}/{db}".format(
-        user=settings.REDIS_USER,
-        password=settings.REDIS_PASSWORD,
-        host=settings.REDIS_HOST,
-        port=settings.REDIS_PORT,
-        db=settings.REDIS_DB,
-    )
+    if not settings.REDIS_PASSWORD:
+        redis_uri = "redis://{host}:{port}/{db}".format(
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+        )
+    else:
+        redis_uri = "redis://{user}:{password}@{host}:{port}/{db}".format(
+            user=settings.REDIS_USER,
+            password=settings.REDIS_PASSWORD,
+            host=settings.REDIS_HOST,
+            port=settings.REDIS_PORT,
+            db=settings.REDIS_DB,
+        )
 else:
     redis_uri = settings.REDIS_URL
 
@@ -33,3 +41,5 @@ else:
 db = Database(postgres_uri)
 
 templates = Jinja2Templates(directory='app/templates')
+
+static_app = StaticFiles(directory='app/static')

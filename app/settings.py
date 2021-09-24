@@ -32,6 +32,9 @@ REDIS_PASSWORD = config('REDIS_PASSWORD', cast=Secret, default=None)
 REDIS_DB = config('REDIS_DB', cast=int, default=0)
 REDIS_URL = config('REDIS_URL', cast=URL, default=None)
 
+MAPBOX_ACCESS_TOKEN = config('MAPBOX_ACCESS_TOKEN', cast=Secret, default='')
+MAPBOX_ACCESS_TOKEN_DEV = config('MAPBOX_ACCESS_TOKEN_DEV', cast=Secret, default='')
+
 CORS_ORIGINS = config('CORS_ORIGINS', cast=CommaSeparatedStrings, default='*')
 
 

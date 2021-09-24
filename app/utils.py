@@ -7,6 +7,7 @@ from pathlib import Path
 import requests
 
 from app.dbmodels import location, satellite
+from app.resources import static_app
 
 
 logger = logging.getLogger(__name__)
@@ -14,11 +15,11 @@ logger = logging.getLogger(__name__)
 
 def shift_angle(x: float) -> float:
     """Shift angle in radians to [-pi, pi)
-    
+
     Args:
         x: float, angle in radians
 
-    Reference: 
+    Reference:
         https://stackoverflow.com/questions/15927755/opposite-of-numpy-unwrap/32266181#32266181
     """
     return (x + np.pi) % (2 * np.pi) - np.pi
@@ -116,7 +117,7 @@ def download_orbit_type_data():
             desc_array.append("inclination " + items[4].lower())
         if len(items)==6 and items[5]:
             desc_array.append("eccentricity " + items[5].lower())
-        
+
         data.append(
             {
                 'short_name': items[0].strip(),
@@ -134,7 +135,7 @@ def import_orbit_type_data():
     from sqlalchemy.sql import select
     from .dbmodels import orbit_type
     from .database import engine
-    
+
     with open('orbit_type.tsv', 'r') as f:
         data = csv.DictReader()
         # json.dump(data, f)
@@ -186,7 +187,7 @@ def load_initial_satellite_data():
                 res = conn.execute(select([exists().where(satellite.c.id == satid)])).first()[0]
                 if (not res) and (sat['Status'] not in JSR_status_decayed):
                     # Satellite is not in database and is still in orbit, so add it to database
-                    sat_data = Satellite(**{  
+                    sat_data = Satellite(**{
                         'id': satid,
                         'cospar_id': sat['COSPAR_ID'],
                         'name': sat['Name'],
@@ -256,7 +257,7 @@ def load_initial_city_data():
     from .dbmodels import engine, location
     with open('worldcities_cleaned.csv', 'r') as f:
         city_reader = csv.DictReader(f)
-        data = [city for city in city_reader]   
+        data = [city for city in city_reader]
         with engine.connect() as conn:
             conn.execute(location.insert(), data)
 
@@ -277,7 +278,7 @@ def epoch_from_tle_datetime(epoch_string: str) -> datetime:
         datetime.timedelta(days=int(epoch_day-1)) + \
         datetime.timedelta(microseconds=int(epoch_microseconds)
     )
-    
+
 
 def epoch_from_tle(tle1: str) -> datetime:
     """
@@ -285,10 +286,13 @@ def epoch_from_tle(tle1: str) -> datetime:
     """
     epoch_string = tle1[18:32]
     return epoch_from_tle_datetime(epoch_string)
-    
+
 
 def satid_from_tle(tle1: str) -> int:
     """
     Extract satellite NORAD ID as int from tle line 1
     """
     return int(tle1[2:7])
+
+
+

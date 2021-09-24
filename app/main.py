@@ -2,16 +2,16 @@
 import datetime
 import logging
 from urllib.parse import urlencode
+import pathlib
 
 from starlette.applications import Starlette
-from starlette.staticfiles import StaticFiles
 from starlette.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from starlette.requests import Request
 from starlette.routing import Route, Mount
 from starlette.status import HTTP_302_FOUND
 
 from app.tle import get_satellite_norad_ids
-from app.resources import cache, db, templates
+from app.resources import cache, db, templates, static_app
 from app import settings
 from app import passes
 from app.api import app as api_app
@@ -56,7 +56,7 @@ routes = [
     Route('/about', about, name='about'),
     Mount('/passes', routes=passes.routes, name='passes'),
     Mount('/api', app=api_app, name='api'),
-    Mount('/static', app=StaticFiles(directory='app/static'), name='static'),
+    Mount('/static', app=static_app, name='static'),
 ]
 
 async def connect_to_db_and_cache():
@@ -71,9 +71,37 @@ async def disconnect_from_db_and_cache():
     await db.disconnect()
 
 
+def find_and_replace_in_static():
+    """
+    Search static files and replace keywords
+    """
+    import re
+    if settings.DEBUG:
+        token = settings.MAPBOX_ACCESS_TOKEN_DEV
+    else:
+        token = settings.MAPBOX_ACCESS_TOKEN
+    directory = pathlib.Path(static_app.directory) / 'dist'
+    mapbox_regex = re.compile(r'MAPBOX_ACCESS_TOKEN')
+    files = list(directory.iterdir())
+    for fname in files:
+        if fname.suffix in '.gz':
+            continue
+        with open(fname, 'r') as f:
+            contents = f.read()
+        if mapbox_regex.search(contents):
+            new_contents = mapbox_regex.sub(str(token), contents)
+            with open(fname, 'w') as f:
+                f.write(new_contents)
+            print(f'Added mapbox access token to {fname}')
+
+
+
+
+
+
 app = Starlette(
     debug=settings.DEBUG,
     routes=routes,
-    on_startup=[connect_to_db_and_cache],
+    on_startup=[connect_to_db_and_cache, find_and_replace_in_static],
     on_shutdown=[disconnect_from_db_and_cache],
 )

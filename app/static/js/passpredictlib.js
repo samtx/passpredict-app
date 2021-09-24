@@ -45,7 +45,7 @@ export const getPassQuality = (pass) => {
 
 async function queryLocationAPI(search_text) {
     const params = {
-        access_token: MAPBOX_ACCESS_TOKEN,
+        access_token: "MAPBOX_ACCESS_TOKEN",
         autocomplete: true,
         types: [
             "postcode",

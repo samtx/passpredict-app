@@ -120,6 +120,16 @@ migrate:
 			alembic current \
 			'
 
+deploy-static:
+	@echo " Pull latest commit from Git repository"
+	$(MAKE) ssh-cmd CMD='cd /opt/passpredict && git checkout main && git pull origin main'
+	@echo " Generate static files "
+	$(MAKE) ssh-cmd CMD='cd /opt/passpredict && npm ci && npm run build'
+	@echo " Copy static files to serving directory "
+	$(MAKE) ssh-cmd CMD='cp -r -a /opt/passpredict/app/static/ /var/www/passpredict.com/'
+	@echo " Verify files "
+	$(MAKE) ssh-cmd CMD='ls -lt /var/www/passpredict.com/'
+
 deploy:
 	@echo "Login to container registry on server..."
 	@$(MAKE) ssh-cmd CMD='docker login \
@@ -129,9 +139,12 @@ deploy:
 		'
 	@echo "pulling new container image..."
 	$(MAKE) ssh-cmd CMD='docker pull $(REMOTE_TAG)'
-	@echo "Removing old container..."
+
+	@echo "Deploy static files"
+	$(MAKE) deploy-static
+
+	@echo "Stopping old container..."
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
-	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
 		docker run --rm -d --name $(CONTAINER_NAME) \
@@ -141,6 +154,4 @@ deploy:
 			-e COMMIT_SHA=$(CI_COMMIT_SHORT_SHA) \
 			$(REMOTE_TAG) \
 			'
-	@echo "Copying static files to local directory"
-	$(MAKE) ssh-cmd CMD='docker cp -a $(CONTAINER_NAME):/app/app/static/. /var/www/passpredict.com/'
 # gunicorn -b 127.0.0.1:8000 -w 2 -k uvicorn.workers.UvicornWorker app.main:app \

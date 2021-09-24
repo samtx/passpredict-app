@@ -46,7 +46,7 @@
         "css:minify": "cleancss -o app/static/dist/styles.css app/static/css/styles.css",
         "css:copy": "cp app/static/css/styles.css app/static/dist/styles.css",
         "compile": "npm run js:compile && npm run spectre:compile && npm run css:copy",
-        "build": "NODE_ENV=production npm run compile && gzipper compress -v app/static/dist",
+        "build": "NODE_ENV=production npm run compile",
         "dev": "npm run js:compile && npm run spectre:compile && npm run css:copy",
         "watch": "watch 'npm run dev' app/static/ --ignoreDirectoryPattern=/dist/"
     },
