@@ -78,5 +78,5 @@ EXPOSE 8000
 RUN chown 1000:1000 /app
 USER 1000
 
-CMD [ "gunicorn", "-b", "0.0.0.0:8000", "-w", "3", "-k", "uvicorn.workers.UvicornWorker", "--access-logfile=-", "app.main:app"]
+CMD [ "gunicorn", "-b", "0.0.0.0:8000", "-w", "3", "-k", "app.workers.UvicornWorker", "--access-logfile=-", "app.main:app"]
 # CMD ["uvicorn", "--proxy-headers", "--host", "0.0.0.0", "--port", "8000", "app.main:app"]
