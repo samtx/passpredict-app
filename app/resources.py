@@ -6,9 +6,15 @@ from app import settings
 
 
 if not settings.REDIS_URL:
-    cache = Redis(host=settings.REDIS_HOST, port=6379)
+    redis_uri = "redis://{host}:{port}".format(
+        host=settings.REDIS_HOST,
+        port=settings.REDIS_PORT,
+    )
 else:
-    cache = Redis.from_url(settings.REDIS_URL)
+    redis_uri = settings.REDIS_URL
+
+cache = Redis.from_url(redis_uri)
+
 
 if settings.POSTGRES_URI:
     postgres_uri = settings.POSTGRES_URI

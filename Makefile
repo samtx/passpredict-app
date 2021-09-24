@@ -137,10 +137,10 @@ deploy:
 		docker run --rm -d --name $(CONTAINER_NAME) \
 			-p 8001:8000 \
 			--add-host host.docker.internal:host-gateway \
-			--env-file=/opt/passpredict/.env \
+			--env-file=/opt/passpredict/.env-docker \
 			-e COMMIT_SHA=$(CI_COMMIT_SHORT_SHA) \
 			$(REMOTE_TAG) \
 			'
 	@echo "Copying static files to local directory"
-	$(MAKE) ssh-cmd CMD='docker cp $(CONTAINER_NAME):/app/app/static/. /var/www/passpredict.com/'
+	$(MAKE) ssh-cmd CMD='docker cp -a $(CONTAINER_NAME):/app/app/static/. /var/www/passpredict.com/'
 # gunicorn -b 127.0.0.1:8000 -w 2 -k uvicorn.workers.UvicornWorker app.main:app \
