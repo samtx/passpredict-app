@@ -6,7 +6,8 @@ git checkout main && git pull origin main
 echo "Generate static files"
 . /home/sam/.nvm/nvm.sh
 . /home/sam/.bashrc
-npm ci && npm run build
+npm install
+npm run build
 
 echo " Copy static files to serving directory "
 cp -r --preserve=mode,ownership /opt/passpredict/app/static/* /var/www/passpredict.com/

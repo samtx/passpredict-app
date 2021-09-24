@@ -130,13 +130,16 @@ deploy:
 	@echo "pulling new container image..."
 	$(MAKE) ssh-cmd CMD='docker pull $(REMOTE_TAG)'
 	@echo "Deploy static files"
-	$(MAKE) ssh-cmd CMD='/opt/passpredict/deploy-static.sh'
+	$(MAKE) ssh-cmd CMD='cd /opt/passpredict; /opt/passpredict/deploy-static.sh'
 	@echo "Stopping old container..."
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
+	@echo "Remove old container..."
+	-$(MAKE) ssh-cmd CMD='docker container rm $(CONTAINER_NAME)'
 	@echo "starting new container..."
 	@$(MAKE) ssh-cmd CMD='\
-		docker run --rm -d --name $(CONTAINER_NAME) \
+		docker run -d --name $(CONTAINER_NAME) \
 			-p 8001:8000 \
+			--restart=always \
 			--add-host host.docker.internal:host-gateway \
 			--env-file=/opt/passpredict/.env-docker \
 			-e COMMIT_SHA=$(CI_COMMIT_SHORT_SHA) \
