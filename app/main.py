@@ -60,7 +60,9 @@ routes = [
 ]
 
 async def connect_to_db_and_cache():
-    await cache.initialize()
+    ping = await cache.ping()
+    if not ping:
+        raise Exception("Can't connect to redis instance")
     await db.connect()
 
 
