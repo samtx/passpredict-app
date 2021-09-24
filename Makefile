@@ -120,16 +120,6 @@ migrate:
 			alembic current \
 			'
 
-deploy-static:
-	@echo " Pull latest commit from Git repository"
-	$(MAKE) ssh-cmd CMD='cd /opt/passpredict && git checkout main && git pull origin main'
-	@echo " Generate static files "
-	$(MAKE) ssh-cmd CMD='cd /opt/passpredict && npm ci && npm run build'
-	@echo " Copy static files to serving directory "
-	$(MAKE) ssh-cmd CMD='cp -r -a /opt/passpredict/app/static/ /var/www/passpredict.com/'
-	@echo " Verify files "
-	$(MAKE) ssh-cmd CMD='ls -lt /var/www/passpredict.com/'
-
 deploy:
 	@echo "Login to container registry on server..."
 	@$(MAKE) ssh-cmd CMD='docker login \
@@ -139,10 +129,8 @@ deploy:
 		'
 	@echo "pulling new container image..."
 	$(MAKE) ssh-cmd CMD='docker pull $(REMOTE_TAG)'
-
 	@echo "Deploy static files"
-	$(MAKE) deploy-static
-
+	$(MAKE) ssh-cmd CMD='/opt/passpredict/deploy-static.sh'
 	@echo "Stopping old container..."
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
 	@echo "starting new container..."
