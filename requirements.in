@@ -1,6 +1,6 @@
 sgp4==2.12
 starlette
-uvicorn[standard]
+uvicorn[standard]>=0.15
 uvloop>=0.16
 python-dotenv
 gunicorn

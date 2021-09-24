@@ -22,7 +22,7 @@ app/_*.c
 
 # Environment variable files
 .env
-
+.env-docker
 
 # log files
 *.log
