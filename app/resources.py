@@ -6,9 +6,12 @@ from app import settings
 
 
 if not settings.REDIS_URL:
-    redis_uri = "redis://{host}:{port}".format(
+    redis_uri = "redis://{user}:{password}@{host}:{port}/{db}".format(
+        user=settings.REDIS_USER,
+        password=settings.REDIS_PASSWORD,
         host=settings.REDIS_HOST,
         port=settings.REDIS_PORT,
+        db=settings.REDIS_DB,
     )
 else:
     redis_uri = settings.REDIS_URL
