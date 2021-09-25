@@ -5,8 +5,7 @@ git checkout main && git pull origin main
 
 echo "Generate static files"
 . /home/sam/.nvm/nvm.sh
-. /home/sam/.bashrc
-npm install
+npm ci
 npm run build
 
 echo " Copy static files to serving directory "
