@@ -1,7 +1,3 @@
-set -ex
-
-echo "Pull latest commit from Git repository"
-git checkout main && git pull origin main
 
 echo "Generate static files"
 . /home/sam/.nvm/nvm.sh
@@ -15,3 +11,5 @@ echo " Verify files "
 ls -lt /var/www/passpredict.com/
 ls -lt /var/www/passpredict.com/dist
 ls -lt /var/www/passpredict.com/css
+
+exit 0

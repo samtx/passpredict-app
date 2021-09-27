@@ -129,8 +129,10 @@ deploy:
 		'
 	@echo "pulling new container image..."
 	$(MAKE) ssh-cmd CMD='docker pull $(REMOTE_TAG)'
-	@echo "Deploy static files"
-	$(MAKE) ssh-cmd CMD='cd /opt/passpredict; /opt/passpredict/deploy-static.sh'
+	@echo "Build static files locally"
+	npm run build
+	@echo "Upload static files to remote server"
+	rsync -vzrgo --chown=root:caddy --delete app/static/ sam@passpredict.com:/var/www/passpredict.com/
 	@echo "Stopping old container..."
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
 	@echo "Remove old container..."

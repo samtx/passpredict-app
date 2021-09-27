@@ -1,20 +1,20 @@
-FROM node:15 as js-builder
+# FROM node:15 as js-builder
 
-# install dev dependencies
-ENV NODE_ENV=development
+# # install dev dependencies
+# ENV NODE_ENV=development
 
-WORKDIR /app
+# WORKDIR /app
 
-COPY package.json .
-COPY package-lock.json .
+# COPY package.json .
+# COPY package-lock.json .
 
-RUN npm ci
+# RUN npm ci
 
-COPY rollup.config.js .
-COPY app/static app/static
+# COPY rollup.config.js .
+# COPY app/static app/static
 
-# build javascript and css bundles
-RUN npm run build
+# # build javascript and css bundles
+# RUN npm run build
 
 
 ###########################################
@@ -71,7 +71,7 @@ COPY ./app app
 COPY ./tests tests
 COPY ./pytest.ini pytest.ini
 
-COPY --from=js-builder /app/app/static /app/app/static
+# COPY --from=js-builder /app/app/static /app/app/static
 
 EXPOSE 8000
 
