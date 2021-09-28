@@ -5,7 +5,7 @@ from datetime import datetime, timezone as py_timezone
 from orbit_predictor.predictors import PredictedPass
 from timezonefinder import TimezoneFinder
 
-from .schemas import Location, Satellite, Point, Overpass, SingleSatOverpassResult, Point
+from .schemas import Location, Satellite, OrdinalDirection, Point, Overpass, SingleSatOverpassResult, Point
 
 
 tf = TimezoneFinder()
@@ -64,13 +64,14 @@ def passpoint_serializer(passpoint, tz: ZoneInfo):
     dt_local = passpoint.dt.astimezone(tz)
     timestamp = dt_local.timestamp()
     az = round(passpoint.azimuth, 2)
+    az_ord = OrdinalDirection.from_az(az).name
     el = round(passpoint.elevation, 2)
     range_ = round(passpoint.range, 3)
     return Point(
         datetime=dt_local,
         timestamp=timestamp,
         az=az,
+        az_ord=az_ord,
         el=el,
         range=range_
     )
-

@@ -3,10 +3,35 @@ from enum import Enum
 from math import floor
 from typing import List, Sequence, Tuple, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 
-COORDINATES = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW','N']
+class OrdinalDirection(int, Enum):
+    N = 0
+    NNE = 1
+    NE = 2
+    ENE = 3
+    E = 4
+    ESE = 5
+    SE = 6
+    SSE = 7
+    S = 8
+    SSW = 9
+    SW = 10
+    WSW = 11
+    W = 12
+    WNW = 13
+    NW = 14
+    NNW = 15
+
+    @classmethod
+    def from_az(cls, az_deg: float):
+        ''' Return direction from azimuth degree '''
+        azm = az_deg % 360
+        mod = 360/16. # number of degrees per coordinate heading
+        start = 0 - mod/2
+        n = floor((azm-start)/mod)
+        return cls(n)
 
 
 class Satellite(BaseModel):
@@ -33,26 +58,29 @@ class Point(BaseModel):
     # __slots__ = ['datetime', 'azimuth', 'elevation', 'range', 'declination', 'right_ascension']
     datetime: dt.datetime
     timestamp: float = Field(..., description='Unix timestamp in seconds since Jan 1 1970 UTC')
-    az: float = Field(..., description='azimuth [deg')
+    az: float = Field(..., title='Azimuth', description='azimuth [deg]')
+    az_ord: str = Field(..., description='Ordinal direction, eg. NE, NNW, WSW')
     el: float = Field(..., description='elevation [deg]')
     range: float = Field(..., description='range [km]')
     dec: float = Field(None, description='declination [deg]')
     ra: float = Field(None, description='right ascension [deg]')
-
-    def direction_from_azimuth(self):
-        ''' Return direction from azimuth degree '''
-        azm = self.az % 360
-        mod = 360/16. # number of degrees per coordinate heading
-        start = 0 - mod/2
-        n = floor((azm-start)/mod)
-        direction = COORDINATES[n]
-        return direction
 
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
         s = "{}UTC el={:.1f}d, az={:.1f}d, rng={:.1f}km".format(
             dtstr, self.el, self.az, self.range)
         return s
+
+    @validator('az_ord')
+    def validate_ordinal_direction_string(cls, v):
+        """ Try and select OrdinalDirection by name """
+        if isinstance(v, str):
+            assert OrdinalDirection[v.upper()]
+        return v
+
+
+    # class Config:
+    #     use_enum_values = True
 
 
 # class SatelliteDetails(BaseModel):
