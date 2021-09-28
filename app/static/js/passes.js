@@ -67,16 +67,9 @@ const showPassList = (passes) => {
         let html = "";
         for (const pass of passes) {
             // Refactor pass object for orbital_predictor return values
-
-            let default_obj = {
-                azimuth: 0,
-                elevation: 0,
-                range: 0,
-                brightness: 0,
-            }
-            const start_pt = new Point({ ...default_obj, datetime: pass.aos.datetime});
-            const max_pt = new Point({...default_obj, datetime: pass.tca.datetime, elevation: pass.max_elevation});
-            const end_pt = new Point({...default_obj, datetime: pass.los.datetime});
+            const start_pt = new Point(pass.aos)
+            const max_pt = new Point(pass.tca);
+            const end_pt = new Point(pass.los);
 
             const duration = pass.duration;
             const type = pass.type;

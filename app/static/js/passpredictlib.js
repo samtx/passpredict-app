@@ -3,8 +3,8 @@
 export class Point {
     constructor(obj) {
         this.date = new Date(obj.datetime);  // datetime string
-        this.azimuth = obj.azimuth;
-        this.elevation = obj.elevation;
+        this.azimuth = obj.az;
+        this.elevation = obj.el;
         this.range = obj.range;
         this.brightness = obj.brightness;
     }

@@ -5,27 +5,27 @@ from datetime import datetime, timezone as py_timezone
 from orbit_predictor.predictors import PredictedPass
 from timezonefinder import TimezoneFinder
 
-from .schemas import Location, Satellite, OrdinalDirection, Point, Overpass, SingleSatOverpassResult, Point
+from .schemas import Location, OrdinalDirection, Point, Overpass, SingleSatOverpassResult, Point
 
 
 tf = TimezoneFinder()
 
 
-def single_overpass_result_serializer(data: List[PredictedPass]) -> str:
+def single_overpass_result_serializer(
+    location,
+    satellite,
+    data: List[PredictedPass]
+) -> SingleSatOverpassResult:
     """
     Serialize the list of PredictedPass objects to json string
     """
-    # print(data[0])
-    op_location = data[0].location
-    location_h = round(op_location.elevation_m, 0)
-    location_lat = round(op_location.latitude_deg, 4)
-    location_lon = round(op_location.longitude_deg, 4)
-    location_name = op_location.name
+    location_h = round(location.elevation_m, 0)
+    location_lat = round(location.latitude_deg, 4)
+    location_lon = round(location.longitude_deg, 4)
+    location_name = location.name
     location = Location(
         lat=location_lat, lon=location_lon, h=location_h, name=location_name
     )
-    satid = data[0].satid
-    satellite = Satellite(id=satid)
     # Find timezone
     tz_str = tf.timezone_at(lng=location.lon, lat=location.lat)
     if tz_str is None:
@@ -47,13 +47,14 @@ def overpass_serializer(
         aos = passpoint_serializer(pass_.aos, tz)
         tca = passpoint_serializer(pass_.tca, tz)
         los = passpoint_serializer(pass_.los, tz)
+        max_elevation = max((aos.el, tca.el, los.el))
         overpass = Overpass(
             aos=aos,
             tca=tca,
             los=los,
             duration=round(pass_.duration, 1),
             satid=pass_.satid,
-            max_elevation=tca.el
+            max_elevation=max_elevation
         )
         overpasses.append(overpass)
     return overpasses

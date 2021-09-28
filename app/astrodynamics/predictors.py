@@ -73,7 +73,9 @@ class BasicPassInfo:
 
     @property
     def valid(self):
-        return self.max_elevation > 0 and self.aos is not None and self.los is not None
+        if (self.aos is None) or (self.los is None):
+            return False
+        return (self.max_elevation > 0)
 
     @cached_property
     def max_elevation_deg(self):
@@ -176,6 +178,7 @@ class LocationPredictor(BaseLocationPredictor):
         Initialize LocationPredictor but also compute radians for geodetic coordinates
         """
         super().__init__(*a, **kw)
+        self.aos_at_deg = degrees(self.aos_at)  # use degrees instead of radians
         self.location_lat_rad = radians(self.location.latitude_deg)
         self.location_lon_rad = radians(self.location.longitude_deg)
         self.location_ecef = np.array(self.location.position_ecef)
@@ -192,7 +195,12 @@ class LocationPredictor(BaseLocationPredictor):
                 if pass_.valid:
                     if self.limit_date is not None and pass_.aos > self.limit_date:
                         break
-                    yield self._build_predicted_pass(pass_)
+                    # if pass_.max_elevation_deg < self.max_elevation_gt:
+                    #     break
+                    predicted_pass = self._build_predicted_pass(pass_)
+                    # if (predicted_pass.aos.elevation < self.aos_at_deg) or (predicted_pass.los.elevation < self.aos_at_deg):
+                    #     break
+                    yield predicted_pass
 
                 if self.limit_date is not None and current_date > self.limit_date:
                     break

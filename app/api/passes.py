@@ -15,7 +15,7 @@ from app.astrodynamics import PasspredictTLESource, Location
 from app.resources import cache
 from app import settings
 from app.api.serializers import single_overpass_result_serializer
-from app.api.schemas import SingleSatOverpassResult
+from app.api.schemas import Satellite, SingleSatOverpassResult
 
 
 logger = logging.getLogger(__name__)
@@ -113,8 +113,8 @@ async def get_passes(
             days=days,
             min_elevation=10.0,
         )
-
-        data = single_overpass_result_serializer(overpass_result)
+        satellite = Satellite(id=satid)
+        data = single_overpass_result_serializer(location, satellite, overpass_result)
         # cache results for 30 minutes
         # maybe put this in a background task to do after returning response
         background_tasks.add_task(set_cache_with_pickle, main_key, data, ttl=12)
