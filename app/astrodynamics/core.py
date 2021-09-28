@@ -1,8 +1,7 @@
 import datetime
 
-from orbit_predictor.locations import Location
-
 from .predictors import SatellitePredictor
+from .locations import Location
 
 
 def predict_all_visible_satellite_overpasses(
@@ -31,7 +30,7 @@ def predict_single_satellite_overpasses(
     min_elevation: float
 ):
     date_end = date_start + datetime.timedelta(days=days)
-    pass_iterator = predictor.passes_over(
+    pass_iterator = predictor.pass_iterator(
         location, when_utc=date_start, limit_date=date_end,
         aos_at_dg=min_elevation, tolerance_s=1.0
     )

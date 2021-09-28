@@ -26,7 +26,12 @@ ext = [
     Extension(
         'app.astrodynamics._time',
         ['app/astrodynamics/_time.pyx'] + source_files,
-        **common_kw,
+        **common_kw
+    ),
+    Extension(
+        'app.astrodynamics._rotations',
+        ['app/astrodynamics/_rotations.pyx'],
+        **common_kw
     ),
 ]
 

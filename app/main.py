@@ -95,10 +95,6 @@ def find_and_replace_in_static():
             print(f'Added mapbox access token to {fname}')
 
 
-
-
-
-
 app = Starlette(
     debug=settings.DEBUG,
     routes=routes,

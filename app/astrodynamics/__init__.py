@@ -12,3 +12,5 @@ from ._time import (
     epoch_to_jd,
     julian_date,
 )
+
+from .locations import Location
