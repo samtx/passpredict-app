@@ -17,6 +17,7 @@
         "babel-cli": "^6.26.0",
         "babel-preset-env": "^1.7.0",
         "babel-preset-es2015-ie": "^6.7.0",
+        "bulma": "^0.9.3",
         "clean-css": "^5.1.2",
         "del": "^6.0.0",
         "dotenv": "^9.0.2",
@@ -42,15 +43,12 @@
     "license": "ISC",
     "scripts": {
         "js:compile": "rollup --config",
-        "spectre:compile": "sass --style compressed --load-path=node_modules app/static/sass/spectre.scss app/static/dist/spectre.css",
+        "bulma:compile": "sass --style compressed --load-path=node_modules app/static/sass/bulma.scss app/static/dist/bulma.css",
         "css:minify": "cleancss -o app/static/dist/styles.css app/static/css/styles.css",
         "css:copy": "cp app/static/css/styles.css app/static/dist/styles.css",
-        "compile": "npm run js:compile && npm run spectre:compile && npm run css:copy",
+        "compile": "npm run js:compile && npm run bulma:compile && npm run css:copy",
         "build": "NODE_ENV=production npm run compile",
-        "dev": "npm run js:compile && npm run spectre:compile && npm run css:copy",
+        "dev": "npm run compile",
         "watch": "watch 'npm run dev' app/static/ --ignoreDirectoryPattern=/dist/"
-    },
-    "dependencies": {
-        "spectre.css": "^0.5.9"
     }
 }

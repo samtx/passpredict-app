@@ -24,63 +24,67 @@
                 @keydown.escape="closeListbox()"
                 class="form-group"
             >
-                <label for="locationSearch" class="form-label">Location</label>
-                <input
-                    x-model="query"
-                    name="locationQuery"
-                    @input.debounce.100ms="fetchLocations()"
-                    @focus="fetchLocations()"
-                    @keydown.arrow-down="focusNextResult()"
-                    @keydown.arrow-up="focusPreviousResult()"
-                    @keydown.enter.stop.prevent="selectResult()"
-                    type="search"
-                    class="form-input"
-                    placeholder="New York, NY"
-                />
-                <div
-                    class="autocomplete-result"
-                    x-show="open"
-                >
-                    <ul
-                    class="autocomplete-result-list"
-                    @keydown.arrow-down="focusNextResult()"
-                    @keydown.arrow-up="focusPreviousResult()"
-                    @keydown.enter.stop.prevent="selectResult()"
-                    tabindex="-1"
+                <div class="field">
+                    <label for="locationSearch" class="label">Location</label>
+                    <input
+                        x-model="query"
+                        name="locationQuery"
+                        @input.debounce.100ms="fetchLocations()"
+                        @focus="fetchLocations()"
+                        @keydown.arrow-down="focusNextResult()"
+                        @keydown.arrow-up="focusPreviousResult()"
+                        @keydown.enter.stop.prevent="selectResult()"
+                        type="search"
+                        class="input"
+                        placeholder="New York, NY"
+                    />
+                    <div
+                        class="autocomplete-result"
+                        x-show="open"
                     >
-                    <template x-for="(item, index) in data" :key="index">
-                        <li
-                        :id="name + '-result-' + index"
-                        @click="selectResult()"
-                        @mouseenter="focusedIndex = index"
-                        @mouseleave="focusedIndex = null"
-                        role="option"
-                        :aria-selected="focusedIndex === index"
-                        :class="{ 'focused-result' : index === focusedIndex }"
-                        x-html="markQuerySubstring(query, item.name)"
-                        x-on= class="location-result-item"
-                        ></li>
-                    </template>
-                    </ul>
+                        <ul
+                        class="autocomplete-result-list"
+                        @keydown.arrow-down="focusNextResult()"
+                        @keydown.arrow-up="focusPreviousResult()"
+                        @keydown.enter.stop.prevent="selectResult()"
+                        tabindex="-1"
+                        >
+                        <template x-for="(item, index) in data" :key="index">
+                            <li
+                            :id="name + '-result-' + index"
+                            @click="selectResult()"
+                            @mouseenter="focusedIndex = index"
+                            @mouseleave="focusedIndex = null"
+                            role="option"
+                            :aria-selected="focusedIndex === index"
+                            :class="{ 'focused-result' : index === focusedIndex }"
+                            x-html="markQuerySubstring(query, item.name)"
+                            x-on= class="location-result-item"
+                            ></li>
+                        </template>
+                        </ul>
+                    </div>
                 </div>
-            <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
+                <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
                 <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
                 <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
                 <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
             </div>
 
-            <div class="form-group">
-                <label for="satid" class="form-label">Select satellite</label>
-                <select class="form-select" name="satid">
-                    {% for satellite in satellites %}
-                        <option value={{ satellite.id }}>{{ satellite.name }}</option>
-                    {% endfor %}
-                </select>
+            <div class="field">
+                <label for="satid" class="label">Select satellite</label>
+                <span class="select">
+                    <select name="satid">
+                        {% for satellite in satellites %}
+                            <option value={{ satellite.id }}>{{ satellite.name }}</option>
+                        {% endfor %}
+                    </select>
+                </span>
             </div>
 
             <div class="buttons">
-                <button id="submit" type="submit" class="btn btn-primary mr-5">Submit</button>
-                <button id="reset" type="reset" class="btn">Reset</button>
+                <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
+                <button id="reset" type="reset" class="button">Reset</button>
             </div>
         </form>
     </main>

@@ -102,6 +102,6 @@ def find_and_replace_in_static():
 app = Starlette(
     debug=settings.DEBUG,
     routes=routes,
-    on_startup=[connect_to_db_and_cache, find_and_replace_in_static],
+    on_startup=[connect_to_db_and_cache],
     on_shutdown=[disconnect_from_db_and_cache],
 )
