@@ -86,13 +86,18 @@ article.message {
 #passListHeader {
     display: flex;
     justify-content: space-between;
+    font-weight: 600;
+}
 
+.pass-list-header-item {
+    flex-basis: 20%;
+    text-align: center;
 }
 
 #passList {
     display: flex;
     flex-direction: column;
-    margin: 1.5em 1.5em;
+    /* margin: 1.5em 0; */
 }
 
 .pass-list-item {

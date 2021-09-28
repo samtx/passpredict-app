@@ -36,7 +36,7 @@ visibleOnlyCheckbox.addEventListener('change', function(event) {
 
 const passListItemHtml = (pass) => {
     const html = `
-        <div class="box is-rounded p-3 mb-3 pass-row pass-quality-${pass.quality}">
+        <div class="box is-rounded p-2 mb-3 pass-row pass-quality-${pass.quality}">
             <div class="p-1 pass-item pass-month-day">
                 <p class="value">${pass.start_pt.getMonthDay}</p>
             </div>
