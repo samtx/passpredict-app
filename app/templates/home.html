@@ -51,6 +51,7 @@
                         >
                         <template x-for="(item, index) in data" :key="index">
                             <li
+                            class="autocomplete-result-item"
                             :id="name + '-result-' + index"
                             @click="selectResult()"
                             @mouseenter="focusedIndex = index"
