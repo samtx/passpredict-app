@@ -74,9 +74,9 @@ const showPassList = (passes) => {
                 range: 0,
                 brightness: 0,
             }
-            const start_pt = new Point({ ...default_obj, datetime: pass.aos_dt});
-            const max_pt = new Point({...default_obj, datetime: pass.max_dt, elevation: pass.max_elevation});
-            const end_pt = new Point({...default_obj, datetime: pass.los_dt});
+            const start_pt = new Point({ ...default_obj, datetime: pass.aos.datetime});
+            const max_pt = new Point({...default_obj, datetime: pass.tca.datetime, elevation: pass.max_elevation});
+            const end_pt = new Point({...default_obj, datetime: pass.los.datetime});
 
             const duration = pass.duration;
             const type = pass.type;

@@ -136,6 +136,8 @@ article.message {
 .autocomplete-result-list > li {
     margin: 0;
     padding: 0.3rem 0.4rem;
+    position: relative;
+    z-index: inherit;
 }
 
 .focused-result {
