@@ -12,7 +12,7 @@ from orbit_predictor.predictors.accurate import HighAccuracyTLEPredictor
 from orbit_predictor.locations import Location
 
 from . import _rotations
-from .exceptions import PropagationError
+from .exceptions import NotReachable, PropagationError
 from .locations import Location
 
 
@@ -162,8 +162,24 @@ class SatellitePredictor(HighAccuracyTLEPredictor):
             tolerance_s=tolerance_s
         )
 
-    def get_next_pass(self, *a, **kw):
-        raise NotImplementedError
+    def get_next_pass(self,
+        location: Location,
+        aos_dt: dt.datetime = None,
+        *,
+        max_elevation_gt: float = 5,
+        aos_at_dg: float = 0,
+        limit_date: dt.datetime = None,
+        tolerance_s: float = 1
+        ) -> PredictedPass:
+        """
+        Gets first overpass starting at aos_dt
+        """
+        if aos_dt is None:
+            aos_dt = dt.datetime.utcnow()
+        for pass_ in self.pass_iterator(location, aos_dt, limit_date=limit_date, max_elevation_gt=max_elevation_gt, aos_at_dg=aos_at_dg, tolerance_s=tolerance_s):
+            return pass_
+        else:
+            raise NotReachable('Propagation limit date exceeded')
 
 
 class LocationPredictor(BaseLocationPredictor):

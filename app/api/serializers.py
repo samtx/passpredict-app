@@ -5,13 +5,21 @@ from datetime import datetime, timezone as py_timezone
 from orbit_predictor.predictors import PredictedPass
 from timezonefinder import TimezoneFinder
 
-from .schemas import Location, OrdinalDirection, Point, Overpass, SingleSatOverpassResult, Point
+from .schemas import (
+    Location,
+    OrdinalDirection,
+    Point,
+    Overpass,
+    SingleSatOverpassResult,
+    Point,
+    PassDetailResult,
+)
 
 
 tf = TimezoneFinder()
 
 
-def single_overpass_result_serializer(
+def single_satellite_overpass_result_serializer(
     location,
     satellite,
     data: List[PredictedPass]
@@ -35,6 +43,32 @@ def single_overpass_result_serializer(
     overpasses = overpass_serializer(data, tz=tz)
     out = SingleSatOverpassResult(location=location, overpasses=overpasses, satellite=satellite)
     return out
+
+
+def satellite_pass_detail_serializer(
+    location,
+    satellite,
+    pass_: PredictedPass
+) -> PassDetailResult:
+    """
+    Serialize the list of PredictedPass objects to json string
+    """
+    location_h = round(location.elevation_m, 0)
+    location_lat = round(location.latitude_deg, 4)
+    location_lon = round(location.longitude_deg, 4)
+    location_name = location.name
+    location = Location(
+        lat=location_lat, lon=location_lon, h=location_h, name=location_name
+    )
+    # Find timezone
+    tz_str = tf.timezone_at(lng=location.lon, lat=location.lat)
+    if tz_str is None:
+        tz = py_timezone.utc
+    else:
+        tz = ZoneInfo(tz_str)
+    overpass = overpass_serializer([pass_], tz=tz)[0]
+    resp = PassDetailResult(location=location, satellite=satellite, overpass=overpass)
+    return resp
 
 
 def overpass_serializer(

@@ -40,6 +40,12 @@ else:
 
 db = Database(postgres_uri)
 
+
 templates = Jinja2Templates(directory='app/templates')
+# Create custom datetime format Jinja filter
+datetime_format = lambda v, f="%H:%M %d-%m-%y" :  v.strftime(f)
+templates.env.filters["strftime"] = datetime_format
+# Add python zip() builtin function to Jinja templates
+templates.env.globals['zip'] = zip
 
 static_app = StaticFiles(directory='app/static')

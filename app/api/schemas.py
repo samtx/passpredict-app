@@ -142,5 +142,10 @@ class SingleSatOverpassResult(OverpassResultBase):
     overpasses: List[Overpass]
 
 
+class PassDetailResult(OverpassResultBase):
+    satellite: Satellite
+    overpass: Overpass
+
+
 class MultiSatOverpassResult(OverpassResultBase):
     overpasses: List[Overpass]

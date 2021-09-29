@@ -1,5 +1,6 @@
-from datetime import timedelta, timezone
+from datetime import datetime, timedelta, timezone
 import logging
+import urllib.parse
 
 from starlette.routing import Route
 
@@ -37,27 +38,38 @@ async def get_pass_detail(request):
     """
     Render template for pass detail
     """
-    satid = request.query_params.get('satid')
+    satid = int(request.query_params.get('satid'))
     location_name = request.query_params.get('name')
     satellite_name = request.query_params.get('satname')
-    aos_dt = request.query_params.get('aosdt')
-    lat = request.query_params.get('lat')
-    lon = request.query_params.get('lon')
-    h = request.query_params.get('h', 0.0)
+    aos_dt_str = request.query_params.get('aosdt')
+    lat = float(request.query_params.get('lat'))
+    lon = float(request.query_params.get('lon'))
+    h = float(request.query_params.get('h', 0.0))
     location = Location(lat=lat, lon=lon, h=h, name=location_name)
     satellite = Satellite(id=satid, name=satellite_name)
-    aos_dt_utc = aos_dt.astimezone(timezone.utc)
-    predictedpass = await get_single_pass(satid, aos_dt_utc, lat, lon, h)
+    aos = datetime.fromisoformat(aos_dt_str)
+    aos_dt_utc = aos.astimezone(timezone.utc)
+    pass_ = await get_single_pass(satid, aos_dt_utc, lat, lon, h)
+    pass_list_url = request.url_for('passes:get_passes')
+    pass_list_url += '?' + urllib.parse.urlencode({
+        'satid': satid,
+        'lat': lat,
+        'lon': lon,
+        'h': h,
+        'satname': satellite_name,
+        'name': location_name,
+    })
     context = {
         'request': request,
         'satellite': satellite,
         'location': location,
-        'pass': predictedpass,
+        'pass': pass_.overpass,
+        'pass_list_url': pass_list_url,
     }
     return templates.TemplateResponse('pass_detail.html', context)
 
 
 routes = [
     Route('/', get_passes, name='get_passes'),
-    Route('/detail/', get_pass_detail)
+    Route('/detail/', get_pass_detail, name='pass_detail')
 ]

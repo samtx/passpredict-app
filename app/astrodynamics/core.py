@@ -42,9 +42,10 @@ def predict_next_overpass(
     predictor: SatellitePredictor,
     location: Location,
     date_start: datetime.date,
-    min_elevation: float
+    min_elevation: float = 10.0
 ):
-    pass_iterator = predictor.pass_iterator(
-        location, when_utc=date_start, limit_date=date_end,
-        aos_at_dg=min_elevation, tolerance_s=1.0
+    pass_ = predictor.get_next_pass(
+        location, aos_dt=date_start,
+        aos_at_dg=min_elevation
     )
+    return pass_

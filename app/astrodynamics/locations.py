@@ -7,6 +7,6 @@ class Location(LocationBase):
         s = '<Location '
         if self.name:
             s += self.name + ' '
-        s += f'({self.latitude_deg:.4f}, {self.longitude_deg:.4f})'
+        s += f'({self.latitude_deg}, {self.longitude_deg})'
         s += '>'
         return s

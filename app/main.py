@@ -60,10 +60,16 @@ routes = [
 ]
 
 async def connect_to_db_and_cache():
-    ping = await cache.ping()
-    if not ping:
+    try:
+        ping = await cache.ping()
+        if not ping:
+            raise
+    except:
         raise Exception("Can't connect to redis instance")
-    await db.connect()
+    try:
+        await db.connect()
+    except:
+        raise Exception("Can't connect to postgres database")
 
 
 async def disconnect_from_db_and_cache():
