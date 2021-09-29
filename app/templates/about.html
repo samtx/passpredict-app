@@ -10,20 +10,26 @@
             </h1>
         </header>
 
-        <p>This site was created by Sam Friedman.</p>
-
         <p>
-            It is built with a Python backend using FastAPI and a frontend written
-            in Svelte, all hosted on a Digital Ocean virtual private server. It uses
-            Redis for caching API calls and intermediate orbit propagation values.
-            Orbit and satellite data is gathered from Celestrak and stored in a
-            Sqlite database.
+            This site was created by <a href="https://samtx.dev">Sam Friedman</a>.
         </p>
+        <br>
 
         <p>
-            The pass prediction algorithm uses python-sgp4 for orbit propagation and
-            custom C functions based on IAU SOFA library for the coordinate frame
-            rotations and timescales.
+            It is built with a Python backend using Starlette and FastAPI.
+            The frontend is server-rendered with Jinja templates.
+            It uses Postgresql and Redis for data storage and caching.
+            Caddy server is the reverse proxy for the Starlette application and serves the static files.
+            All of the applications are hosted on a Digital Ocean virtual private server.
+        </p>
+        <br>
+
+        <p>
+            Orbit and satellite data is gathered from Celestrak three times a day.
+            Orbit propagation and overpass prediction is computed with the <a href="https://github.com/satellogic/orbit-predictor">Orbit Predictor</a> python library.
+            It uses the SGP4 propagator <a href="https://github.com/brandon-rhodes/python-sgp4">python-sgp4</a>, written by Brandon Rhodes, with WGS84 Earth constants.
+            Coordinate frame transformations use the IAU FK5/1976 coordinate frames.
+            Cython is used to speed up some functions.
         </p>
 
         <footer class="footer-container">
