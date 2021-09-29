@@ -75,7 +75,7 @@ async def set_cache_with_pickle(key, value, ttl=None):
 
 
 @router.get(
-    '/{satid:int}',
+    '/',
     response_model=SingleSatOverpassResult,
     response_model_exclude_unset=True,
 )
@@ -83,7 +83,7 @@ async def get_passes(
     background_tasks: BackgroundTasks,
     satid: int,
     lat: float,
-    lon:float,
+    lon: float,
     h: float = 0.0,
     days: int = settings.MAX_DAYS,
 ):

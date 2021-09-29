@@ -31,8 +31,8 @@ async def home(request):
         satid = form.get('satid')
         lat = form.get('lat')
         lon = form.get('lon')
-        url = request.url_for('passes:get_passes', satid=satid)
-        params = urlencode({'lat':lat, 'lon':lon})
+        url = request.url_for('passes:get_passes')
+        params = urlencode({'satid':satid, 'lat':lat, 'lon':lon})
         url += '?' + params
         response = RedirectResponse(url, status_code=HTTP_302_FOUND)
         return response

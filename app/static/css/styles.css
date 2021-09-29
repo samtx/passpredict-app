@@ -107,6 +107,7 @@ article.message {
 .pass-row {
     display: flex;
     justify-content: space-between;
+    cursor: pointer;
 }
 
 .pass-item {
