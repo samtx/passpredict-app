@@ -92,12 +92,14 @@ const showErrorMessage = () => {
 const getPassDetailUrl = (satellite, location, pass) => {
     const params = {
         satid: satellite.id,
+        satname: satellite.name,
+        name: location.name,
         lat: location.lat,
         lon: location.lon,
         h: location.h,
-        aos: pass.aos.timestamp,
+        aosdt: pass.aos.datetime,
     }
-    const url = '/passdetail/' + new URLSearchParams(params).toString()
+    const url = '/passes/detail/' + new URLSearchParams(params).toString()
     return url
 };
 

@@ -10,12 +10,13 @@ from starlette.concurrency import run_in_threadpool
 from app.astrodynamics import (
     predict_all_visible_satellite_overpasses,
     predict_single_satellite_overpasses,
+    predict_next_overpass,
 )
 from app.astrodynamics import PasspredictTLESource, Location
 from app.resources import cache
 from app import settings
 from app.api.serializers import single_overpass_result_serializer
-from app.api.schemas import Satellite, SingleSatOverpassResult
+from app.api.schemas import Satellite, SingleSatOverpassResult, Overpass
 
 
 logger = logging.getLogger(__name__)
@@ -119,4 +120,38 @@ async def get_passes(
         # maybe put this in a background task to do after returning response
         background_tasks.add_task(set_cache_with_pickle, main_key, data, ttl=12)
         # await cache.set(main_key, pickle.dumps(data), ex=12)
+    return data
+
+@router.get(
+    '/detail/',
+    response_model=Overpass,
+    response_model_exclude_unset=True,
+)
+async def get_single_pass(
+    satid: int,
+    aos_dt: datetime.datetime,
+    lat: float,
+    lon: float,
+    h: float,
+):
+    logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h}')
+    # Create cache key
+    location = Location(
+        name="",
+        latitude_deg=lat,
+        longitude_deg=lon,
+        elevation_m=h
+    )
+    # Get TLE data for satellite
+    tle = await tle_source.get_predictor(satid)
+    aos_dt = aos_dt - datetime.timedelta(minutes=10)
+    overpass_result = await run_in_threadpool(
+        predict_next_overpass,
+        tle,
+        location,
+        date_start=aos_dt,
+        min_elevation=10.0,
+    )
+    satellite = Satellite(id=satid)
+    data = single_overpass_result_serializer(location, satellite, overpass_result)
     return data

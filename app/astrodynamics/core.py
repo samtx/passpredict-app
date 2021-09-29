@@ -36,3 +36,15 @@ def predict_single_satellite_overpasses(
     )
     passes = list(pass_iterator)
     return passes
+
+
+def predict_next_overpass(
+    predictor: SatellitePredictor,
+    location: Location,
+    date_start: datetime.date,
+    min_elevation: float
+):
+    pass_iterator = predictor.pass_iterator(
+        location, when_utc=date_start, limit_date=date_end,
+        aos_at_dg=min_elevation, tolerance_s=1.0
+    )
