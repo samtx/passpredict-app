@@ -71,7 +71,15 @@ const showPassList = (resp) => {
                 </div>
             `;
             passRowDiv.addEventListener('click', (event) => {
-                const url = event.target.getAttribute('data-location');
+                // Bubble up to parent nodes to find data-location attribute.
+                // The event.target will be the element that was clicked, so it
+                // could be the <p> tag or the row <div>
+                let url;
+                let node = event.target;
+                do {
+                    url = node.getAttribute('data-location');
+                    node = node.parentElement;
+                } while (url == null);
                 window.location.assign(url);
             });
             passList.appendChild(passRowDiv);
@@ -99,7 +107,7 @@ const getPassDetailUrl = (satellite, location, pass) => {
         h: location.h,
         aosdt: pass.aos.datetime,
     }
-    const url = '/passes/detail/' + new URLSearchParams(params).toString()
+    const url = '/passes/detail/?' + new URLSearchParams(params).toString()
     return url
 };
 
