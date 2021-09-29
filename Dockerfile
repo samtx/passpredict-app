@@ -40,7 +40,11 @@ RUN pip install --no-index --find-links=wheels -r requirements.txt
 
 # create python wheels for app
 COPY setup.py .
-COPY app app
+# don't copy app/static and app/templates since we don't need them to build binary wheel
+COPY app/api app/api
+COPY app/astrodynamics app/astrodynamics
+COPY app/*.py app/.
+
 RUN python setup.py build_ext --inplace
 RUN python setup.py bdist_wheel --dist-dir=wheels
 
