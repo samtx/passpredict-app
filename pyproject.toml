@@ -1,0 +1,8 @@
+[metadata]
+name = app
+version = 0.1.0
+description = Website for passpredict.com
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

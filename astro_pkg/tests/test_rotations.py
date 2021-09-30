@@ -1,31 +1,28 @@
 # test rotations.py
+from math import radians
 import numpy as np
 from numpy.testing import assert_allclose, assert_almost_equal
 import pytest
 
-from app import _rotations
-from app import rotations
-from app import topocentric
-from app.constants import ASEC2RAD
-from app.timefn import julian_date
+from app.astrodynamics import _rotations
 
 
-def test_ecef2sez():
+def test_ecef_to_razel():
     """
     Vallado, Eg. 11-6, p.912
     """
     phi = 42.38  # latitude, deg
     lmda = -71.13  # longitude, deg
-    # lmda = 136.2944
     h = 24  # height, m
-    rsat = np.array([885.7296, -4389.3856, 5070.1765])
-    rsite = topocentric.site_ECEF2(phi, lmda, h)
-    rhoECEF = rsat - rsite
-    print(rhoECEF)
-    rSEZ = rotations.ecef2sez(rhoECEF, phi, lmda)
+    location_ecef = np.array([1526.122, -4465.064, 4276.894])
+    satellite_ecef = np.array([885.7296, -4389.3856, 5070.1765])
+    range_, az, el = _rotations.razel(radians(phi), radians(lmda), location_ecef, satellite_ecef)
     rSEZ_true = np.array([-773.8654, -581.4980, 328.8145])
     np.set_printoptions(precision=8)
-    assert_allclose(rSEZ, rSEZ_true)
+    assert range_
+    assert az
+    assert el
+    # assert_allclose(rSEZ, rSEZ_true)
     # for i in [0, 1, 2]:
     #     assert_almost_equal(rSEZ[i], rSEZ_true[i], decimal=0, verbose=True)
 
@@ -118,7 +115,7 @@ def test_appendix_c_conversion_from_TEME_to_ITRF_UTC1():
     deltaUTC1 = -0.439961 # seconds
     jd += deltaUTC1/86400.0
     jd = np.array([jd])
-    
+
     # Polar motion
     xp = -0.140682 * ASEC2RAD # arcseconds
     yp = 0.333309 * ASEC2RAD # arcseconds

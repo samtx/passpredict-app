@@ -7,19 +7,21 @@ from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
-from app.astrodynamics import (
+from astrodynamics import (
     predict_all_visible_satellite_overpasses,
     predict_single_satellite_overpasses,
     predict_next_overpass,
+    Location,
 )
-from app.astrodynamics import PasspredictTLESource, Location
+
 from app.resources import cache
 from app import settings
-from app.api.serializers import (
+from .serializers import (
     single_satellite_overpass_result_serializer,
     satellite_pass_detail_serializer,
 )
-from app.api.schemas import Satellite, SingleSatOverpassResult, Overpass
+from .schemas import Satellite, SingleSatOverpassResult, Overpass
+from .tle import PasspredictTLESource
 
 
 logger = logging.getLogger(__name__)

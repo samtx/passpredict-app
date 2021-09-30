@@ -2,7 +2,7 @@ from typing import List
 from zoneinfo import ZoneInfo
 from datetime import datetime, timezone as py_timezone
 
-from orbit_predictor.predictors import PredictedPass
+from astrodynamics import PredictedPass
 from timezonefinder import TimezoneFinder
 
 from .schemas import (

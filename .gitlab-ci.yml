@@ -6,9 +6,9 @@ stages:
   - deploy
 
 variables:
-    LOCAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_SHORT_SHA
-    DEPLOY_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:$CI_COMMIT_REF_NAME
-    LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE/api:latest
+    LOCAL_IMAGE_TAG: $CI_REGISTRY_IMAGE/passpredict:$CI_COMMIT_SHORT_SHA
+    DEPLOY_IMAGE_TAG: $CI_REGISTRY_IMAGE/passpredict:$CI_COMMIT_REF_NAME
+    LATEST_IMAGE_TAG: $CI_REGISTRY_IMAGE/passpredict:latest
     # CI_DEBUG_TRACE: "true"
     # DOCKER_HOST: tcp://docker:2376
     # DOCKER_TLS_CERTDIR: "/certs"
@@ -19,33 +19,34 @@ variables:
 build:
   stage: build
   script:
-    - docker build -t $LOCAL_IMAGE_TAG .
+    - docker build -t $LOCAL_IMAGE_TAG -t $DEPLOY_IMAGE_TAG -t $LATEST_IMAGE_TAG --label git-commit=$CI_COMMIT_SHORT_SHA .
   tags:
     - shell
-    - api
+    - docker
 
 # Test docker image
 test:
   stage: test
   before_script:
-    - docker run -d -p 6378:6379 --name redis-test redis:latest
+    - docker run --rm -d -p 6378:6379 --name redis redis:latest
+    - docker run --rm -d -p 5432:5432 -e POSTGRES_PASSWORD=password123 --name postgres postgres:13
   script:
     - |
       docker run \
-        -e REDIS_URL=redis://redis:6378 \
-        -e DT_SECONDS=5 \
-        -e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-        -e CORS_ORIGINS=* \
-        --link=redis-test:redis \
-        -v passpredict-api-db:/db \
+        --add-host host.docker.internal:host-gateway \
+        -e REDIS_HOST=redis \
+        -e POSTGRES_HOST=postgres \
+        -e POSTGRES_USER=postgres
+        -e POSTGRES_PASSWORD=password123 \
+        --link=postgres:postgres \
+        --link=redis:redis \
         $LOCAL_IMAGE_TAG \
         /bin/bash -c "pip install pytest pytest-randomly pytest-redis pytest-mock && pytest -v"
   after_script:
     - docker container stop redis-test
-    - docker container rm redis-test
   tags:
     - shell
-    - api
+    - docker
 
 # Push docker image to container registry
 push:

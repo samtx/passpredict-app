@@ -1,10 +1,8 @@
 # TLE source for web app
-from app.astrodynamics.predictors import SatellitePredictor
 import datetime
 from typing import NamedTuple, Tuple
 
-from orbit_predictor.sources import TLESource
-from orbit_predictor.predictors.base import Predictor
+from astrodynamics import AsyncPasspredictTLESource, SatellitePredictor
 from sqlalchemy import and_, select, func, desc
 from starlette.exceptions import HTTPException
 
@@ -19,12 +17,11 @@ class TLE(NamedTuple):
     date: datetime.datetime   # datetime in UTC
 
 
-class PasspredictTLESource(TLESource):
+class PasspredictTLESource(AsyncPasspredictTLESource):
     """
     TLE source that checks the redis cache and postgres database
     for orbital elements
     """
-
     async def add_tle(self, satid, tle):
         """
         Add TLE to cache

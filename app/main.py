@@ -10,7 +10,7 @@ from starlette.requests import Request
 from starlette.routing import Route, Mount
 from starlette.status import HTTP_302_FOUND
 
-from app.tle import get_satellite_norad_ids
+from app.utils import get_satellite_norad_ids
 from app.resources import cache, db, templates, static_app
 from app import settings
 from app import passes

@@ -5,6 +5,7 @@ from pathlib import Path
 import typing
 import asyncio
 from collections import namedtuple
+from dataclasses import dataclass
 
 from sqlalchemy import and_, create_engine
 import httpx
@@ -14,8 +15,7 @@ from sqlalchemy.sql.expression import update
 # print('sys.path',sys.path)
 # print('sys.modules.keys()', sys.modules.keys())
 
-from app.utils import grouper
-from app.schemas import Tle
+from app.utils import grouper, epoch_from_tle, satid_from_tle
 from app.dbmodels import satellite, tle as tledb
 from app.resources import postgres_uri
 
@@ -36,6 +36,30 @@ logger = logging.getLogger(__name__)
 
 # Create synchronous DB engine connect
 engine = create_engine(postgres_uri, echo=False)
+
+
+@dataclass
+class Tle:
+    tle1: str
+    tle2: str
+    epoch: datetime.datetime
+    satid: int
+
+    @classmethod
+    def from_string(cls, tle1: str, tle2: str):
+        epoch = epoch_from_tle(tle1)
+        satid = satid_from_tle(tle1)
+        return cls(
+            tle1=tle1,
+            tle2=tle2,
+            epoch=epoch,
+            satid=satid,
+        )
+
+    def __hash__(self):
+        hash_str = str(self.satid) + self.tle1 + self.tle2
+        return hash(hash_str)
+
 
 
 def download_tle_data():

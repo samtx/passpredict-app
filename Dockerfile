@@ -36,17 +36,16 @@ RUN pip install wheel
 
 # create and intall python wheels for dependencies
 RUN pip wheel --wheel-dir=wheels -r requirements.txt
-RUN pip install --no-index --find-links=wheels -r requirements.txt
 
-# create python wheels for app
-COPY setup.py .
-# don't copy app/static and app/templates since we don't need them to build binary wheel
-COPY app/api app/api
-COPY app/astrodynamics app/astrodynamics
-COPY app/*.py app/.
-
+# create python wheels for astrodynamics package
+COPY astro_pkg/requirements.txt astro_pkg/requirements.txt
+WORKDIR /app/astro_pkg
+RUN pip install -r requirements.txt
+RUN pip wheel --wheel-dir=/app/wheels -r requirements.txt
+COPY astro_pkg/setup.py setup.py
+COPY astro_pkg/astrodynamics astrodynamics
 RUN python setup.py build_ext --inplace
-RUN python setup.py bdist_wheel --dist-dir=wheels
+RUN python setup.py bdist_wheel --dist-dir=/app/wheels
 
 
 #########################################
@@ -61,21 +60,18 @@ ENV PYTHONDONTWRITEBYTECODE 1
 RUN python -m venv venv
 ENV PATH="/app/venv/bin:$PATH"
 COPY requirements.txt .
+COPY astro_pkg/requirements.txt requirements-astro.txt
 RUN pip install wheel
 
 COPY --from=builder /app/wheels /app/wheels
 
 # install python wheels for dependencies
 RUN pip install --no-index --find-links=/app/wheels -r requirements.txt
+RUN pip install --no-index --find-links=/app/wheels -r requirements-astro.txt && pip uninstall cython -y
+RUN pip install --no-index --find-links=/app/wheels astrodynamics
 
 COPY ./setup.py setup.py
-COPY ./alembic alembic
-COPY ./alembic.ini alembic.ini
 COPY ./app app
-COPY ./tests tests
-COPY ./pytest.ini pytest.ini
-
-# COPY --from=js-builder /app/app/static /app/app/static
 
 EXPOSE 8000
 

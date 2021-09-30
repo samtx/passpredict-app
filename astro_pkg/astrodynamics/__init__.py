@@ -4,10 +4,6 @@ from .core import (
     predict_next_overpass,
 )
 
-from .sources import (
-    PasspredictTLESource
-)
-
 from ._time import (
     jday2datetime,
     epoch_to_jd,
@@ -15,3 +11,12 @@ from ._time import (
 )
 
 from .locations import Location
+
+from orbit_predictor.sources import TLESource
+
+from .sources import AsyncPasspredictTLESource
+
+from .predictors import (
+    SatellitePredictor,
+    PredictedPass,
+)

@@ -10,13 +10,16 @@ CONTAINER_NAME=passpredict
 TOKEN=GITLAB_PAT_PASSPREDICT_REGISTRY
 
 login:
-	 printf '%s\n' "$$$(TOKEN)" | docker login -u samtx --password-stdin registry.gitlab.com
+	printf '%s\n' "$$$(TOKEN)" | docker login -u samtx --password-stdin registry.gitlab.com
 
 ssh-cmd:
 	ssh sam@passpredict.com "$(CMD)"
 
 build:
+	@echo "Build docker image"
 	docker build -t $(LOCAL_TAG) -t $(COMMIT_TAG) --label git-commit=$(CI_COMMIT_SHORT_SHA) .
+	@echo "View docker image size"
+	docker image ls passpredict:latest
 
 push:
 	docker tag $(LOCAL_TAG) $(REMOTE_TAG)
@@ -47,11 +50,7 @@ deploy-local-foreground:
 	@echo "starting new container in foreground..."
 	docker run --name $(CONTAINER_NAME) \
 		-p 8000:8000 \
-		-e REDIS_HOST=redis \
-		-e DT_SECONDS=5 \
-		-e DATABASE_URI=sqlite:////db/passpredict.sqlite \
-		--link=redis:redis \
-		-v passpredict-api-db:/db \
+		--env-file=/home/sam/passpredict-api/.env-docker \
 		$(LOCAL_TAG)
 
 migrate:
@@ -97,3 +96,6 @@ deploy:
 			--log-driver=journald \
 			$(REMOTE_TAG) \
 			'
+	@echo "Remove old images and containers..."
+	@$(MAKE) ssh-cmd CMD='docker image prune -a -f'
+	@$(MAKE) ssh-cmd CMD='docker container prune -f --filter "until=24h"'
