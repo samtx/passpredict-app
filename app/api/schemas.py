@@ -31,6 +31,8 @@ class OrdinalDirection(int, Enum):
         mod = 360/16. # number of degrees per coordinate heading
         start = 0 - mod/2
         n = floor((azm-start)/mod)
+        if n == 16:
+            n = 0
         return cls(n)
 
 
@@ -75,7 +77,7 @@ class Point(BaseModel):
     def validate_ordinal_direction_string(cls, v):
         """ Try and select OrdinalDirection by name """
         if isinstance(v, str):
-            assert OrdinalDirection[v.upper()]
+            assert v.upper() in OrdinalDirection.__members__
         return v
 
 
