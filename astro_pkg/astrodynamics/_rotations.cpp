@@ -2735,31 +2735,31 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObj
  *     cos_location_lon = cos(location_lon_rad)
  * 
  *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)             # <<<<<<<<<<<<<<
- *     top_e = -sin_location_lon * rz + cos_location_lon * ry
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lat * ry) + (sin_location_lat * rz)
+ *     top_e = -sin_location_lon * rx + cos_location_lon * ry
+ *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
  */
   __pyx_v_top_s = ((((__pyx_v_sin_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_sin_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) - (__pyx_v_cos_location_lat * __pyx_v_rz));
 
   /* "astrodynamics/_rotations.pyx":35
  * 
  *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
- *     top_e = -sin_location_lon * rz + cos_location_lon * ry             # <<<<<<<<<<<<<<
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lat * ry) + (sin_location_lat * rz)
+ *     top_e = -sin_location_lon * rx + cos_location_lon * ry             # <<<<<<<<<<<<<<
+ *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
  * 
  */
-  __pyx_v_top_e = (((-__pyx_v_sin_location_lon) * __pyx_v_rz) + (__pyx_v_cos_location_lon * __pyx_v_ry));
+  __pyx_v_top_e = (((-__pyx_v_sin_location_lon) * __pyx_v_rx) + (__pyx_v_cos_location_lon * __pyx_v_ry));
 
   /* "astrodynamics/_rotations.pyx":36
  *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
- *     top_e = -sin_location_lon * rz + cos_location_lon * ry
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lat * ry) + (sin_location_lat * rz)             # <<<<<<<<<<<<<<
+ *     top_e = -sin_location_lon * rx + cos_location_lon * ry
+ *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)             # <<<<<<<<<<<<<<
  * 
  *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
  */
-  __pyx_v_top_z = ((((__pyx_v_cos_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_cos_location_lat * __pyx_v_sin_location_lat) * __pyx_v_ry)) + (__pyx_v_sin_location_lat * __pyx_v_rz));
+  __pyx_v_top_z = ((((__pyx_v_cos_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_cos_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) + (__pyx_v_sin_location_lat * __pyx_v_rz));
 
   /* "astrodynamics/_rotations.pyx":38
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lat * ry) + (sin_location_lat * rz)
+ *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
  * 
  *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)             # <<<<<<<<<<<<<<
  *     el = asin(top_z / range_)

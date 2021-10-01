@@ -61,20 +61,20 @@ routes = [
 
 async def connect_to_db_and_cache():
     try:
-        ping = await cache.ping()
+        ping = await app.state.cache.ping()
         if not ping:
             raise
     except:
         raise Exception("Can't connect to redis instance")
     try:
-        await db.connect()
+        await app.state.db.connect()
     except:
         raise Exception("Can't connect to postgres database")
 
 
 async def disconnect_from_db_and_cache():
-    await cache.close()
-    await db.disconnect()
+    await app.state.cache.close()
+    await app.state.db.disconnect()
 
 
 def find_and_replace_in_static():
@@ -107,3 +107,6 @@ app = Starlette(
     on_startup=[connect_to_db_and_cache],
     on_shutdown=[disconnect_from_db_and_cache],
 )
+# attach database and cache connections onto application state
+app.state.db = db
+app.state.cache = cache

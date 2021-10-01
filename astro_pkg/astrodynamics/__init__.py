@@ -10,11 +10,18 @@ from ._time import (
     julian_date,
 )
 
-from .locations import Location
+from .locations import (
+    Location,
+)
 
-from orbit_predictor.sources import TLESource
+from orbit_predictor.sources import (
+    TLESource,
+)
 
-from .sources import AsyncPasspredictTLESource
+from .sources import (
+    AsyncPasspredictTLESource,
+    TLE,
+)
 
 from .predictors import (
     SatellitePredictor,

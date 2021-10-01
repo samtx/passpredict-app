@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.astrodynamics import (
+from astrodynamics import (
     predict_single_satellite_overpasses,
 )
 

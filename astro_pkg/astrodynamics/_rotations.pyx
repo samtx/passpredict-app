@@ -32,8 +32,8 @@ def razel(
     cos_location_lon = cos(location_lon_rad)
 
     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
-    top_e = -sin_location_lon * rz + cos_location_lon * ry
-    top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lat * ry) + (sin_location_lat * rz)
+    top_e = -sin_location_lon * rx + cos_location_lon * ry
+    top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
 
     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
     el = asin(top_z / range_)
