@@ -3,9 +3,10 @@ import abc
 import datetime
 from typing import NamedTuple, Tuple
 
-from orbit_predictor.sources import TLESource
+from orbit_predictor.sources import MemoryTLESource
 
 from .predictors import SatellitePredictor
+from .base import TLESource
 
 # from orbit_predictor.sources
 class TLE(NamedTuple):
