@@ -42,7 +42,7 @@ engine = create_engine(postgres_uri, echo=False)
 class Tle:
     tle1: str
     tle2: str
-    epoch: datetime.datetime
+    epoch: datetime
     satid: int
 
     @classmethod

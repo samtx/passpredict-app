@@ -1,23 +1,3 @@
-# FROM node:15 as js-builder
-
-# # install dev dependencies
-# ENV NODE_ENV=development
-
-# WORKDIR /app
-
-# COPY package.json .
-# COPY package-lock.json .
-
-# RUN npm ci
-
-# COPY rollup.config.js .
-# COPY app/static app/static
-
-# # build javascript and css bundles
-# RUN npm run build
-
-
-###########################################
 FROM python:3.9-slim as builder
 
 ENV PYTHONPATH "${PYTHONPATH}:/app"
@@ -70,7 +50,7 @@ RUN pip install --no-index --find-links=/app/wheels -r requirements.txt
 RUN pip install --no-index --find-links=/app/wheels -r requirements-astro.txt && pip uninstall cython -y
 RUN pip install --no-index --find-links=/app/wheels astrodynamics
 
-COPY ./setup.py setup.py
+# COPY ./setup.py setup.py
 COPY ./app app
 
 EXPOSE 8000

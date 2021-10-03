@@ -2,10 +2,13 @@ import datetime
 import logging
 import pickle
 import logging
+from astrodynamics.sources import AsyncPasspredictTLESource
 
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
+from databases import Database
+from aioredis import Redis
 
 from astrodynamics import (
     predict_all_visible_satellite_overpasses,
@@ -14,7 +17,6 @@ from astrodynamics import (
     Location,
 )
 
-from app.resources import cache
 from app import settings
 from .serializers import (
     single_satellite_overpass_result_serializer,
@@ -30,10 +32,16 @@ router = APIRouter(
     prefix="/passes"
 )
 
-tle_source = PasspredictTLESource()
+
+def get_db(request: Request):
+    return request.app.state.db
 
 
-async def set_cache_with_pickle(key, value, ttl=None):
+def get_cache(request: Request):
+    return request.app.state.cache
+
+
+async def set_cache_with_pickle(cache, key, value, ttl=None):
     """
     Add value to cache with ttl. To be used as Background task
     """
@@ -86,12 +94,15 @@ async def set_cache_with_pickle(key, value, ttl=None):
     response_model_exclude_unset=True,
 )
 async def get_passes(
+    request: Request,
     background_tasks: BackgroundTasks,
     satid: int,
     lat: float,
     lon: float,
     h: float = 0.0,
     days: int = settings.MAX_DAYS,
+    db: Database = Depends(get_db),
+    cache: Redis = Depends(get_cache),
 ):
     logger.info(f'route api/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
@@ -102,6 +113,7 @@ async def get_passes(
     if result:
         data = pickle.loads(result)
     else:
+        tle_source = PasspredictTLESource(db, cache)
         location = Location(
             name="",
             latitude_deg=lat,
@@ -123,7 +135,7 @@ async def get_passes(
         data = single_satellite_overpass_result_serializer(location, satellite, overpass_result)
         # cache results for 30 minutes
         # maybe put this in a background task to do after returning response
-        background_tasks.add_task(set_cache_with_pickle, main_key, data, ttl=12)
+        background_tasks.add_task(set_cache_with_pickle, cache, main_key, data, ttl=12)
         # await cache.set(main_key, pickle.dumps(data), ex=12)
     return data
 
@@ -132,14 +144,29 @@ async def get_passes(
     response_model=Overpass,
     response_model_exclude_unset=True,
 )
-async def get_single_pass(
+async def get_pass_detail(
+    satid: int,
+    aosdt: datetime.datetime,
+    lat: float,
+    lon: float,
+    h: float = 0.0,
+    db: Database = Depends(get_db),
+    cache: Redis = Depends(get_cache),
+):
+    logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
+    data = await _get_pass_detail(satid, aosdt, lat, lon, h, db, cache)
+    return data
+
+
+async def _get_pass_detail(
     satid: int,
     aosdt: datetime.datetime,
     lat: float,
     lon: float,
     h: float,
+    db: Database,
+    cache: Redis,
 ):
-    logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
     # Create cache key
     location = Location(
         name="",
@@ -148,6 +175,7 @@ async def get_single_pass(
         elevation_m=h
     )
     # Get TLE data for satellite
+    tle_source = PasspredictTLESource(db, cache)
     predictor = await tle_source.get_predictor(satid, aosdt)
     aos_dt = aosdt - datetime.timedelta(minutes=10)
     overpass_result = await run_in_threadpool(

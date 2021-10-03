@@ -31,8 +31,17 @@ async def home(request):
         satid = form.get('satid')
         lat = form.get('lat')
         lon = form.get('lon')
+        location_name = form.get('name')
+        h = form.get('h')
+        sat_name = form.get('satname')
         url = request.url_for('passes:get_passes')
-        params = urlencode({'satid':satid, 'lat':lat, 'lon':lon})
+        params = urlencode({
+            'satid': satid,
+            'lat': lat,
+            'lon': lon,
+            'name': location_name,
+            'satname': sat_name,
+        })
         url += '?' + params
         response = RedirectResponse(url, status_code=HTTP_302_FOUND)
         return response
@@ -50,14 +59,6 @@ async def about(request):
     logger.info(f'route /about')
     return templates.TemplateResponse('about.html', {'request': request})
 
-
-routes = [
-    Route('/', home, name='home', methods=['GET', 'POST']),
-    Route('/about', about, name='about'),
-    Mount('/passes', routes=passes.routes, name='passes'),
-    Mount('/api', app=api_app, name='api'),
-    Mount('/static', app=static_app, name='static'),
-]
 
 async def connect_to_db_and_cache():
     try:
@@ -101,6 +102,15 @@ def find_and_replace_in_static():
             print(f'Added mapbox access token to {fname}')
 
 
+routes = [
+    Route('/', home, name='home', methods=['GET', 'POST']),
+    Route('/about', about, name='about'),
+    Mount('/passes', routes=passes.routes, name='passes'),
+    Mount('/api', app=api_app, name='api'),
+    Mount('/static', app=static_app, name='static'),
+]
+
+
 app = Starlette(
     debug=settings.DEBUG,
     routes=routes,
@@ -110,3 +120,5 @@ app = Starlette(
 # attach database and cache connections onto application state
 app.state.db = db
 app.state.cache = cache
+api_app.state.db = db
+api_app.state.cache = cache

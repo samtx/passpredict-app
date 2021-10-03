@@ -66,7 +66,13 @@
                         </template>
                         </ul>
                     </div>
+                    <div x-show="(selectedIndex != null) && !open">
+                        Latitude: <span x-text="parseFloat(data[selectedIndex].lat).toFixed(4)"></span>
+                        &nbsp; &nbsp;
+                        Longitude: <span x-text="parseFloat(data[selectedIndex].lon).toFixed(4)"></span>
+                    </div>
                 </div>
+
                 <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
                 <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
                 <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
@@ -83,6 +89,7 @@
                     </select>
                 </span>
             </div>
+            <input type="hidden" name="satname" value="" />
 
             <div class="buttons">
                 <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>

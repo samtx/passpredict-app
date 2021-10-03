@@ -14,4 +14,4 @@ python-multipart
 fastapi
 asyncpg
 timezonefinder
-psycopg2
+

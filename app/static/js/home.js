@@ -21,7 +21,7 @@ window.locationSearch = function() {
             if (query) {
                 this.query = query;
                 this.data[0].lat = localStorage.getItem('location-lat');
-                this.data[0].lon = localStorage.getItem('location-lat');
+                this.data[0].lon = localStorage.getItem('location-lon');
                 this.data[0].name = localStorage.getItem('location-name');
                 this.data[0].h = localStorage.getItem('location-h');
             }
@@ -111,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // save satellite selection for next time
     const form = document.getElementById("passes-form");
     form.addEventListener("submit", () => {
+        const satname = satelliteSelect.options[satelliteSelect.selectedIndex].text;
+        form.satname.value = satname
         localStorage.setItem("satid", satelliteSelect.value);
     });
 });

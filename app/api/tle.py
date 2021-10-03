@@ -22,13 +22,18 @@ class PasspredictTLESource(AsyncPasspredictTLESource):
     TLE source that checks the redis cache and postgres database
     for orbital elements
     """
+
+    def __init__(self, db, cache):
+        self.db = db
+        self.cache = cache
+
     async def add_tle(self, satid, tle):
         """
         Add TLE to cache
         """
         key = self.tle_cache_key(satid)
         data = "\n".join(tle.lines).encode('utf-8')
-        await cache.set(key, data, ex=10)  # save for 10 seconds
+        await self.cache.set(key, data, ex=10)  # save for 10 seconds
 
     async def get_tle_or_404(self, satid: int, date: datetime.datetime):
         """
@@ -61,7 +66,7 @@ class PasspredictTLESource(AsyncPasspredictTLESource):
         Check cache if TLE is already stored there
         """
         key = self.tle_cache_key(satid)
-        result = await cache.get(key)
+        result = await self.cache.get(key)
         if result:
             lines = result.decode('utf-8').splitlines()
             tle = TLE(satid, lines, date)
@@ -84,7 +89,7 @@ class PasspredictTLESource(AsyncPasspredictTLESource):
         #     subq, stmt.c.id == subq.c.id
         # )
         # stmt = select(tledb).join_from(subq, max_date)
-        res = await db.fetch_one(query=stmt)
+        res = await self.db.fetch_one(query=stmt)
         if res:
             lines = (res['tle1'], res['tle2'])
             tle = TLE(satid, lines, res['epoch'])

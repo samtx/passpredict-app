@@ -3,11 +3,13 @@ import logging
 import urllib.parse
 
 from starlette.routing import Route
+import httpx
 
 from app.settings import MAX_DAYS
 from app.resources import templates
+from app.api import app as api_app
 from app.api.schemas import Location, Satellite
-from app.api.passes import get_single_pass
+from app.api.passes import _get_pass_detail
 
 logger = logging.getLogger(__name__)
 
@@ -45,11 +47,13 @@ async def get_pass_detail(request):
     lat = float(request.query_params.get('lat'))
     lon = float(request.query_params.get('lon'))
     h = float(request.query_params.get('h', 0.0))
+    db = request.app.state.db
+    cache = request.app.state.cache
     location = Location(lat=lat, lon=lon, h=h, name=location_name)
     satellite = Satellite(id=satid, name=satellite_name)
     aos = datetime.fromisoformat(aos_dt_str)
     aos_dt_utc = aos.astimezone(timezone.utc)
-    pass_ = await get_single_pass(satid, aos_dt_utc, lat, lon, h)
+    pass_ = await _get_pass_detail(satid, aos_dt_utc, lat, lon, h, db, cache)
     pass_list_url = request.url_for('passes:get_passes')
     pass_list_url += '?' + urllib.parse.urlencode({
         'satid': satid,
