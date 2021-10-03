@@ -7,11 +7,9 @@ description = "Website for passpredict.com"
 requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
-
 [tool.pytest.ini_options]
-testpaths = [
-    "tests"
-]
-filterwarnings = [
-    "ignore: 'contextfunction' is renamed to 'pass_context':DeprecationWarning",
-]
+testpaths = ["tests"]
+filterwarnings = ["ignore: 'contextfunction' is renamed to 'pass_context':DeprecationWarning"]
+
+[tool.coverage.run]
+omit = ["app/tests/*", "astro_pkg/tests"]
