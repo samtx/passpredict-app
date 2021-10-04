@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from sqlalchemy import and_
 from databases import Database
 import httpx
+import click
 
 from app.utils import grouper, epoch_from_tle, satid_from_tle
 from app.dbmodels import satellite, tle as tledb
@@ -118,7 +119,7 @@ async def update_tle_in_database(conn, tle, created_at) -> int:
         })
         res = await conn.execute(query=query)
         logger.debug(f'Created new satellite record {tle.satid} in db')
-
+    logger.debug(f'Satellite {tle.satid} already exists in db')
     # Check if there is a tle for the datetime,
     # if not then insert record, otherwise skip
     query = tledb.select().where(
@@ -127,7 +128,7 @@ async def update_tle_in_database(conn, tle, created_at) -> int:
             tledb.c.epoch == tle.epoch
         )
     )
-    res = await conn.fetch_all(query=query)
+    res = await conn.fetch_one(query=query)
     if not res:
         stmt = tledb.insert({
             'satellite_id': tle.satid,
@@ -139,6 +140,7 @@ async def update_tle_in_database(conn, tle, created_at) -> int:
         res = await conn.execute(stmt)
         logger.debug(f'Inserted satellite {tle.satid} TLE for epoch {tle.epoch} in db.')
         return 1
+    logger.debug(f'TLE for satid {tle.satid} and epoch {tle.epoch} already exists. Skipping.')
     return 0
 
 
@@ -150,15 +152,21 @@ async def remove_old_tles_from_database() -> int:
         stmt = tledb.delete().where(
             tledb.c.epoch < date_limit
         )
-        res = await conn.fetch_all(stmt)
-        tles_deleted = sum(res)
+        res = await conn.execute(stmt)
+        try:
+            tles_deleted = sum(res)
+        except TypeError:
+            tles_deleted = 'Unknown'
     return tles_deleted
 
-
-def main():
+@click.command()
+@click.option('--debug', is_flag=True, default=False)
+def main(debug):
     """
     Entrypoint for downloading, parsing, and updating TLE database
     """
+    if debug:
+        logger.setLevel(logging.DEBUG)
     base_url = 'https://www.celestrak.com/NORAD/elements/'
     endpoints = [
         'stations.txt',
