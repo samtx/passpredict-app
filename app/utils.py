@@ -7,7 +7,6 @@ from pathlib import Path
 from functools import lru_cache
 from collections import namedtuple
 
-from app.dbmodels import location, satellite
 from app.resources import static_app
 
 

@@ -6,8 +6,10 @@ import typing
 import asyncio
 from collections import namedtuple
 from dataclasses import dataclass
+import functools
 
 from sqlalchemy import and_, create_engine
+from databases import Database
 import httpx
 from sqlalchemy.sql.expression import update
 
@@ -33,9 +35,6 @@ logger = logging.getLogger(__name__)
 # fh = logging.FileHandler('app-update-tle.log')
 # fh.setLevel(logging.DEBUG)
 # logger.addHandler(fh)
-
-# Create synchronous DB engine connect
-engine = create_engine(postgres_uri, echo=False)
 
 
 @dataclass
@@ -111,48 +110,43 @@ def parse_tle_data(r: httpx.Response) -> typing.Set[Tle]:
     return tles
 
 
-def update_database(tles):
+async def update_database(tles, created_at):
     #  Import TLE data to databse
     num_inserted = 0
-    created_at = datetime.utcnow()
-    with engine.connect() as conn:
-        for tle in tles:
-            try:
-                res = update_tle_in_database(conn, tle, created_at)
-                num_inserted += res
-            except Exception as e:
-                logger.exception('Exception trying to update database with new TLEs', exc_info=e)
-                print('exception here!!', e, tle)
+    async with Database(postgres_uri) as conn:
+        tasks = [update_tle_in_database(conn, tle, created_at) for tle in tles]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+    num_inserted = sum(results)
     num_skipped = len(tles) - num_inserted
     return (num_inserted, num_skipped)
 
 
-def update_tle_in_database(conn, tle, created_at) -> int:
+async def update_tle_in_database(conn, tle, created_at) -> int:
     """
     Update database with new TLE data
     """
     # check if satellite exists
     # if not then insert new satellite record
-    stmt = satellite.select().where(
+    query = satellite.select().where(
         satellite.c.id == tle.satid
     )
-    res = conn.execute(stmt).fetchone()
+    res = await conn.fetch_one(query=query)
     if not res:
-        stmt = satellite.insert({
+        query = satellite.insert({
             'id': tle.satid
         })
-        res = conn.execute(stmt)
+        res = await conn.execute(query=query)
         logger.debug(f'Created new satellite record {tle.satid} in db')
 
     # Check if there is a tle for the datetime,
     # if not then insert record, otherwise skip
-    stmt = tledb.select().where(
+    query = tledb.select().where(
         and_(
             tledb.c.satellite_id == tle.satid,
             tledb.c.epoch == tle.epoch
         )
     )
-    res = conn.execute(stmt).fetchall()
+    res = await conn.fetch_all(query=query)
     if not res:
         stmt = tledb.insert({
             'satellite_id': tle.satid,
@@ -161,41 +155,60 @@ def update_tle_in_database(conn, tle, created_at) -> int:
             'epoch': tle.epoch,
             'created': created_at
         })
-        res = conn.execute(stmt)
+        res = await conn.execute(stmt)
         logger.debug(f'Inserted satellite {tle.satid} TLE for epoch {tle.epoch} in db.')
         return 1
     return 0
 
 
-def remove_old_tles_from_database() -> int:
+async def remove_old_tles_from_database() -> int:
     st = 'Remove old TLEs from database'
     logger.info(st)
     print(st)
     date_limit = datetime.utcnow() - timedelta(days=2)
     tles_deleted = 0
-    with engine.connect() as conn:
+    async with Database(postgres_uri) as conn:
         stmt = tledb.delete().where(
             tledb.c.epoch < date_limit
         )
-        res = conn.execute(stmt)
-        tles_deleted = res.rowcount
+        res = await conn.fetch_all(stmt)
+        tles_deleted = sum(res)
         print('done')
     return tles_deleted
 
 
 def main():
-    responses = download_tle_data()
+    """
+    Entrypoint for downloading, parsing, and updating TLE database
+    """
+    base_url = 'https://www.celestrak.com/NORAD/elements/'
+    endpoints = [
+        'stations.txt',
+        'active.txt',
+        'visual.txt',
+        'amateur.txt',
+        'starlink.txt',
+        'tle-new.txt',
+        'noaa.txt',
+        'goes.txt',
+        'supplemental/starlink.txt',
+        'supplemental/planet.txt',
+    ]
+    tasks = [fetch(u, base_url) for u in endpoints]
+    loop = asyncio.get_event_loop()
+    responses = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+    created_at = datetime.utcnow()
     for r in responses:
         print(f'URL: {r.url}')
         if not r:
             logger.error(f'url {r.url} not downloaded, error code {r.status_code}')
         tles = parse_tle_data(r)
-        num_inserted, num_skipped = update_database(tles)
+        num_inserted, num_skipped = asyncio.run(update_database(tles, created_at))
         st = f'Url: {r.url}, inserted {num_inserted}, skipped {num_skipped}'
         logger.info(st)
         print(st)
 
-    num_deleted = remove_old_tles_from_database()
+    num_deleted = asyncio.run(remove_old_tles_from_database())
     print(f'Number TLEs deleted: {num_deleted}')
 
     logger.info(f'Finishe d updating TLE database.')

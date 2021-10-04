@@ -75,25 +75,15 @@ satellite = Table(
     Column('inclination', Float),
 )
 
-location = Table(
-    'location', metadata,
-    Column('id', Integer, primary_key=True),
-    Column('query', Unicode(200), index=True, unique=True),
-    Column('name', Unicode(200)),
-    Column('lat', Float),
-    Column('lon', Float),
-    Column('height', Float),
-    Column('expires', DateTime)
-)
 
 tle = Table(
     'tle', metadata,
     Column('id', Integer, primary_key=True),
     Column('tle1', String(70)),
     Column('tle2', String(70)),
-    Column('epoch', DateTime),
+    Column('epoch', DateTime(timezone=True)),
     Column('satellite_id', Integer, ForeignKey('satellite.id', ondelete='CASCADE'), index=True),
-    Column('created', DateTime, onupdate=datetime.datetime.now())
+    Column('created', DateTime(timezone=True), onupdate=datetime.datetime.now())
 )
 
 # # many to many association table for satellite tags
