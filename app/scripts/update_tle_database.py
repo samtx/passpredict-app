@@ -148,15 +148,15 @@ async def remove_old_tles_from_database() -> int:
     logger.info('Remove old TLEs from database')
     date_limit = datetime.utcnow() - timedelta(days=2)
     tles_deleted = 0
-    async with Database(postgres_uri) as conn:
-        stmt = tledb.delete().where(
-            tledb.c.epoch < date_limit
-        )
-        res = await conn.execute(stmt)
-        try:
-            tles_deleted = sum(res)
-        except TypeError:
-            tles_deleted = 'Unknown'
+    async with Database(postgres_uri) as db:
+        async with db.connection() as conn:
+            rawconn = conn.raw_connection
+            query = """DELETE FROM tle WHERE tle.epoch < ($1) RETURNING tle.id"""
+            res = await rawconn.fetch(query, date_limit)
+            try:
+                tles_deleted = len(res)
+            except TypeError:
+                tles_deleted = 'Unknown'
     return tles_deleted
 
 @click.command()
