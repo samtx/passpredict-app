@@ -10,7 +10,7 @@ app.include_router(passes.router)
 
 
 @app.get('/', include_in_schema=False)
-def api_home(request: Request):
+def home(request: Request):
     """
     Render API homepage with explanation on how to use the API
     """

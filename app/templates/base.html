@@ -35,8 +35,30 @@
 
 <body>
 
-    {% block content %}
-    {% endblock content %}
+    <div class="container is-max-desktop px-3 pt-2">
+
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            {% if ignore_navbar_brand is defined %}
+            {% else %}
+                <div class="navbar-brand">
+                    <a href="{{ url_for('home') }}" class="navbar-item has-text-weight-semibold">
+                        Pass Predict
+                    </a>
+                </div>
+            {% endif %}
+            <div class="navbar-menu">
+                <div class="navbar-end">
+                    <a href="{{ url_for('about') }}" class="navbar-item is-primary">About</a>
+                    <a href="{{ url_for('api:home') }}" class="navbar-item is-primary">API</a>
+                    <a href="{{ url_for('help') }}" class="navbar-item">Help</a>
+                </div>
+            </div>
+        </nav>
+
+        {% block content %}
+        {% endblock content %}
+
+    </div>
 
     {% block javascript %}
     {% endblock javascript %}

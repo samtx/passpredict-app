@@ -50,6 +50,7 @@ async def home(request):
     context = {
         'request': request,
         'satellites': satellites,
+        'ignore_navbar_brand': True,
     }
     response = templates.TemplateResponse('home.html', context)
     return response
@@ -58,6 +59,11 @@ async def home(request):
 async def about(request):
     logger.info(f'route /about')
     return templates.TemplateResponse('about.html', {'request': request})
+
+
+async def help(request):
+    logger.info(f'route /help')
+    return templates.TemplateResponse('help.html', {'request': request})
 
 
 async def connect_to_db_and_cache():
@@ -105,6 +111,7 @@ def find_and_replace_in_static():
 routes = [
     Route('/', home, name='home', methods=['GET', 'POST']),
     Route('/about', about, name='about'),
+    Route('/help', help, name='help'),
     Mount('/passes', routes=passes.routes, name='passes'),
     Mount('/api', app=api_app, name='api'),
     Mount('/static', app=static_app, name='static'),

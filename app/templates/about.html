@@ -2,42 +2,39 @@
 
 {% block content %}
 
-<div class="container is-max-desktop px-3 pt-2">
+<header>
+    <h1 class="title mb-3">
+        About
+    </h1>
+</header>
 
-        <header>
-            <h1 class="title has-text-centered">
-                About
-            </h1>
-        </header>
+<p>
+    This site was created by <a href="https://samtx.dev">Sam Friedman</a>.
+</p>
+<br>
 
-        <p>
-            This site was created by <a href="https://samtx.dev">Sam Friedman</a>.
-        </p>
-        <br>
+<p>
+    It is built with a Python backend using Starlette and FastAPI.
+    The frontend is server-rendered with Jinja templates.
+    It uses Postgresql and Redis for data storage and caching.
+    Caddy server is the reverse proxy for the Starlette application and serves the static files.
+    All of the applications are hosted on a Digital Ocean virtual private server.
+</p>
+<br>
 
-        <p>
-            It is built with a Python backend using Starlette and FastAPI.
-            The frontend is server-rendered with Jinja templates.
-            It uses Postgresql and Redis for data storage and caching.
-            Caddy server is the reverse proxy for the Starlette application and serves the static files.
-            All of the applications are hosted on a Digital Ocean virtual private server.
-        </p>
-        <br>
+<p>
+    Orbit and satellite data is gathered from Celestrak three times a day.
+    Orbit propagation and overpass prediction is computed with the <a href="https://github.com/satellogic/orbit-predictor">Orbit Predictor</a> python library.
+    It uses the SGP4 propagator <a href="https://github.com/brandon-rhodes/python-sgp4">python-sgp4</a>, written by Brandon Rhodes, with WGS84 Earth constants.
+    Coordinate frame transformations use the IAU FK5/1976 coordinate frames.
+    Cython is used to speed up some functions.
+</p>
 
-        <p>
-            Orbit and satellite data is gathered from Celestrak three times a day.
-            Orbit propagation and overpass prediction is computed with the <a href="https://github.com/satellogic/orbit-predictor">Orbit Predictor</a> python library.
-            It uses the SGP4 propagator <a href="https://github.com/brandon-rhodes/python-sgp4">python-sgp4</a>, written by Brandon Rhodes, with WGS84 Earth constants.
-            Coordinate frame transformations use the IAU FK5/1976 coordinate frames.
-            Cython is used to speed up some functions.
-        </p>
+<footer class="footer-container">
+    <div class="footer-item">
+        <a href="/">Home</a>
+    </div>
+</footer>
 
-        <footer class="footer-container">
-            <div class="footer-item">
-                <a href="/">Home</a>
-            </div>
-        </footer>
-
-</div>
 
 {% endblock content %}

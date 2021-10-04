@@ -1,5 +1,15 @@
 @charset "utf-8";
-@import "bulma/bulma.sass";
+
+$navbar-height: 2.0rem;
+
+@import "bulma/sass/utilities/_all";
+@import "bulma/sass/base/_all";
+@import "bulma/sass/elements/_all";
+@import "bulma/sass/form/_all";
+@import "bulma/sass/components/_all";
+@import "bulma/sass/grid/_all";
+@import "bulma/sass/helpers/_all";
+@import "bulma/sass/layout/_all";
 
 /*  From https://www.npmjs.com/package/bulma-floating-button  */
 .button.is-floating {

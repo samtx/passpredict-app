@@ -21,7 +21,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: min(600px, 70vw + 50px);
+    width: min(750px, 70vw + 50px);
     margin: 0 auto;
 }
 
@@ -37,12 +37,8 @@ header {
     padding: 0 auto;
 } */
 
-h1 {
-    /* Using the clamp function: https://www.youtube.com/watch?v=dg488RrpNTc */
-    font-size: clamp(40px, 5vw, 4em);
-}
 
-#passes-form {
+form {
     width: 100%;
 }
 
