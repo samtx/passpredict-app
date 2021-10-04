@@ -99,9 +99,7 @@ async def update_database(tles, created_at):
     async with Database(postgres_uri) as conn:
         tasks = [update_tle_in_database(conn, tle, created_at) for tle in tles]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-    num_inserted = sum(results)
-    num_skipped = len(tles) - num_inserted
-    return (num_inserted, num_skipped)
+    return results
 
 
 async def update_tle_in_database(conn, tle, created_at) -> int:
@@ -176,17 +174,29 @@ def main():
     ]
     tasks = [fetch(u, base_url) for u in endpoints]
     loop = asyncio.get_event_loop()
+    logger.info('Download data from Celestrak')
     responses = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
     created_at = datetime.utcnow()
     tles = set()
     for r in responses:
+        if not r:
+            logger.error(f'Error downloading data from {r.url}')
+            continue
         try:
             tmp = parse_tle_data(r)
             tles |= tmp
         except:
             logger.error(f'Error parsing TLEs from {r.url}')
     logger.info(f"Total unique TLEs found: {len(tles)}")
-    num_inserted, num_skipped = asyncio.run(update_database(tles, created_at))
+    results = asyncio.run(update_database(tles, created_at))
+    inserts = []
+    for r in results:
+        if isinstance(r, Exception):
+            logger.error(r)
+        else:
+            inserts.append(r)
+    num_inserted = sum(inserts)
+    num_skipped = len(tles) - num_inserted
     logger.info(f'TLEs inserted {num_inserted}, skipped {num_skipped}')
     num_deleted = asyncio.run(remove_old_tles_from_database())
     logger.info(f'Number TLEs deleted: {num_deleted}')
