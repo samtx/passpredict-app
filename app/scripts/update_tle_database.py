@@ -1,40 +1,26 @@
 from datetime import datetime, timedelta
 import logging
-import time
-from pathlib import Path
 import typing
 import asyncio
+import sys
 from collections import namedtuple
 from dataclasses import dataclass
-import functools
 
-from sqlalchemy import and_, create_engine
+from sqlalchemy import and_
 from databases import Database
 import httpx
-from sqlalchemy.sql.expression import update
-
-# import os, sys
-# print('sys.path',sys.path)
-# print('sys.modules.keys()', sys.modules.keys())
 
 from app.utils import grouper, epoch_from_tle, satid_from_tle
 from app.dbmodels import satellite, tle as tledb
 from app.resources import postgres_uri
 
 
-log_path = Path(__file__).parent.parent
-log_filename = log_path / "update-tle.log"
 logging.basicConfig(
-    filename=log_filename,
+    stream=sys.stdout,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-
-# # Create handlers
-# fh = logging.FileHandler('app-update-tle.log')
-# fh.setLevel(logging.DEBUG)
-# logger.addHandler(fh)
 
 
 @dataclass
@@ -60,15 +46,11 @@ class Tle:
         return hash(hash_str)
 
 
-
 def download_tle_data():
     """
     Download common tle data from celestrak
     """
-
-    st = 'Download TLEs from Celestrak'
-    logger.info(st)
-    print(st)
+    logger.info('Download TLEs from Celestrak')
     base_url = 'https://www.celestrak.com/NORAD/elements/'
     endpoints = [
         'stations.txt',
@@ -95,6 +77,8 @@ async def fetch(url, base_url=''):
     headers = {'user-agent': 'passpredict.com'}
     async with httpx.AsyncClient(base_url=base_url, headers=headers) as client:
         res = await client.get(url)
+    if not res:
+        logger.error(f'Error downloading URL: {res.url}')
     return res
 
 
@@ -112,7 +96,6 @@ def parse_tle_data(r: httpx.Response) -> typing.Set[Tle]:
 
 async def update_database(tles, created_at):
     #  Import TLE data to databse
-    num_inserted = 0
     async with Database(postgres_uri) as conn:
         tasks = [update_tle_in_database(conn, tle, created_at) for tle in tles]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -162,9 +145,7 @@ async def update_tle_in_database(conn, tle, created_at) -> int:
 
 
 async def remove_old_tles_from_database() -> int:
-    st = 'Remove old TLEs from database'
-    logger.info(st)
-    print(st)
+    logger.info('Remove old TLEs from database')
     date_limit = datetime.utcnow() - timedelta(days=2)
     tles_deleted = 0
     async with Database(postgres_uri) as conn:
@@ -173,7 +154,6 @@ async def remove_old_tles_from_database() -> int:
         )
         res = await conn.fetch_all(stmt)
         tles_deleted = sum(res)
-        print('done')
     return tles_deleted
 
 
@@ -198,21 +178,19 @@ def main():
     loop = asyncio.get_event_loop()
     responses = loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
     created_at = datetime.utcnow()
+    tles = set()
     for r in responses:
-        print(f'URL: {r.url}')
-        if not r:
-            logger.error(f'url {r.url} not downloaded, error code {r.status_code}')
-        tles = parse_tle_data(r)
-        num_inserted, num_skipped = asyncio.run(update_database(tles, created_at))
-        st = f'Url: {r.url}, inserted {num_inserted}, skipped {num_skipped}'
-        logger.info(st)
-        print(st)
-
+        try:
+            tmp = parse_tle_data(r)
+            tles |= tmp
+        except:
+            logger.error(f'Error parsing TLEs from {r.url}')
+    logger.info(f"Total unique TLEs found: {len(tles)}")
+    num_inserted, num_skipped = asyncio.run(update_database(tles, created_at))
+    logger.info(f'TLEs inserted {num_inserted}, skipped {num_skipped}')
     num_deleted = asyncio.run(remove_old_tles_from_database())
-    print(f'Number TLEs deleted: {num_deleted}')
-
-    logger.info(f'Finishe d updating TLE database.')
-    print(f'Finished updating TLE database.')
+    logger.info(f'Number TLEs deleted: {num_deleted}')
+    logger.info(f'Finished updating TLE database.')
 
 
 if __name__ == "__main__":
