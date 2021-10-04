@@ -16,29 +16,34 @@
             <p>
                 <span class="has-text-weight-semibold">Location: </span>
                 {% if location.name %}
-                    {{ location.name }}
+                {{ location.name }}
                 {% endif %}
-                {{ location.lat }}&deg;, {{ location.lon }}&deg;
+                <div class="is-size-7">
+                    <span class="has-text-weight-medium">Latitude: </span>{{ location.lat }}&deg; &nbsp;
+                    <span class="has-text-weight-medium">Longitude: </span>{{ location.lon }}&deg;
+                </div>
             </p>
             <p>
-                <span class="has-text-weight-semibold">
-                    Satellite:
-                </span>
-                {{ satellite.id }} &nbsp; {{ satellite.name }}
+                <span class="has-text-weight-semibold">Satellite: </span>{{ satellite.name }}
             </p>
+            <p class="is-size-7">
+                <span class="has-text-weight-medium">NORAD ID: </span>{{ satellite.id }}
+            </p>
+
+
         </div>
         <div class="results-header-right">
-            <a class="button is-info m-3" href="{{ url_for('home') }}">Search Again</a>
+            <a class="button is-primary m-3" href="{{ url_for('home') }}">Search Again</a>
 
-            <label for="visibleOnly" class="checkbox">
+            <!-- <label for="visibleOnly" class="checkbox">
                 <input id="visibleOnly" type="checkbox" checked />
                 Visible Only
-            </label>
+            </label> -->
         </div>
     </div>
 
     <div class="message-container">
-        <article class="message is-danger mt-5">
+        <article class="message is-warning mt-5">
             <div class="message-body">
                 This site is a work in progress and these results may not be accurate. 🛰️
             </div>
@@ -57,14 +62,18 @@
             <progress class="progress is-primary">50%</progress>
         </p>
 
-            <!-- if filteredPasses.length > 0 -->
-                <!-- for each pass in filteredPasses -->
-                    <div class="pass-list-item"></div>
-            <!-- else -->
-                <p class="is-size-5 has-text-centered mt-6">
-                    No passes found
-                </p>
+        <!-- if filteredPasses.length > 0 -->
+        <!-- for each pass in filteredPasses -->
+        <div class="pass-list-item"></div>
+        <!-- else -->
+        <p class="is-size-5 has-text-centered mt-6">
+            No passes found
+        </p>
     </div>
+
+    <a href="#" class="button is-floating is-primary">
+        <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
+    </a>
 
     <footer class="footer-container">
         <div class="footer-item">

@@ -60,16 +60,16 @@
                             role="option"
                             :aria-selected="focusedIndex === index"
                             :class="{ 'focused-result' : index === focusedIndex }"
-                            x-html="markQuerySubstring(query, item.name)"
+                            x-html="item.name"
                             x-on= class="location-result-item"
                             ></li>
                         </template>
                         </ul>
                     </div>
-                    <div x-show="(selectedIndex != null) && !open">
-                        Latitude: <span x-text="parseFloat(data[selectedIndex].lat).toFixed(4)"></span>
+                    <div class="latlon-result" x-show="(selectedIndex != null) && !open">
+                        <span class="latlon">Latitude:</span> <span x-text="parseFloat(data[selectedIndex].lat).toFixed(4)"></span>&deg;
                         &nbsp; &nbsp;
-                        Longitude: <span x-text="parseFloat(data[selectedIndex].lon).toFixed(4)"></span>
+                        <span class="latlon">Longitude:</span> <span x-text="parseFloat(data[selectedIndex].lon).toFixed(4)"></span>&deg;
                     </div>
                 </div>
 

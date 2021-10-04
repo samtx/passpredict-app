@@ -9,8 +9,12 @@ Spectre responsive breakpoints (_variables.scss)
 // $size-2x: 1440px !default;
 */
 
+
+
 :root {
     font-size: clamp(1.25em, 2vw, 1.5em);
+    --primary-light: hsl(171, 100%, 96%);
+    --primary-dark: hsl(171, 100%, 29%);
 }
 
 main {
@@ -91,6 +95,9 @@ article.message {
     display: flex;
     justify-content: space-between;
     font-weight: 600;
+    position: sticky;
+    top: 0;
+    background-color: white;
 }
 
 .pass-list-header-item {
@@ -112,6 +119,13 @@ article.message {
     display: flex;
     justify-content: space-between;
     cursor: pointer;
+}
+
+.pass-row:hover {
+    background-color: var(--primary-dark);
+    /* border: 1px solid var(--primary-dark); */
+    font-weight: 500;
+    color: white;
 }
 
 .pass-item {
@@ -151,7 +165,7 @@ article.message {
 }
 
 .focused-result {
-    background-color: black;
+    background-color: var(--primary-dark);
     color: white;
 }
 
@@ -171,3 +185,17 @@ article.message {
 .table-azimuth {
     text-align: center !important;
 }
+
+.latlon-result {
+    font-size: 0.75em;
+}
+
+.latlon {
+    font-weight: 700;
+}
+
+/* .is-floating {
+    border-radius: 100% !important;
+
+} */
+/* hsl(171, 100%, 96%) */

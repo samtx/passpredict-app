@@ -22,18 +22,18 @@ const filterVisibleOnlyPasses = (visibleOnly, passes) => {
 };
 
 
-visibleOnlyCheckbox.addEventListener('change', function(event) {
-    let notVisiblePasses = document.querySelector('.not-visible');
-    if (this.checked) {
-        notVisiblePasses.hidden = true;
-    }
-    else {
-        notVisiblePasses.hidden = false;
-    }
-})
+// visibleOnlyCheckbox.addEventListener('change', function(event) {
+//     let notVisiblePasses = document.querySelector('.not-visible');
+//     if (this.checked) {
+//         notVisiblePasses.hidden = true;
+//     }
+//     else {
+//         notVisiblePasses.hidden = false;
+//     }
+// })
 
 
-const showPassList = (resp) => {
+const showPassList = (resp, locationName) => {
     if (resp.overpasses.length == 0) {
         passList.innerHTML = `
             <p class="is-size-5 has-text-centered mt-6">
@@ -43,6 +43,7 @@ const showPassList = (resp) => {
     }
     else {
         passList.innerHTML = "";
+        resp.location.name = locationName;
         for (const pass of resp.overpasses) {
             // Refactor pass object for orbital_predictor return values
             const start_pt = new Point(pass.aos)
@@ -115,6 +116,7 @@ const getPassDetailUrl = (satellite, location, pass) => {
 document.addEventListener('DOMContentLoaded', () => {
     const url_string = (window.location.href).toLowerCase();
     const url = new URL(url_string);
+    const name = url.searchParams.get('name');  // location name
     const params = {
         satid: url.searchParams.get('satid'),
         lat: url.searchParams.get('lat'),
@@ -122,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
         h: url.searchParams.get('h') ? url.searchParams.get('h') : 0,
     };
     getPasses(params)
-        .then((resp) => showPassList(resp))
+        .then((resp) => showPassList(resp, name))
         .catch(error => {
             console.error('Error getting passes: ' + error.message);
             showErrorMessage();

@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 from databases import Database
 from aioredis import Redis
+from sqlalchemy import select
 
 from astrodynamics import (
     predict_all_visible_satellite_overpasses,
@@ -18,6 +19,7 @@ from astrodynamics import (
 )
 
 from app import settings
+from app.utils import get_satellite_norad_ids
 from .serializers import (
     single_satellite_overpass_result_serializer,
     satellite_pass_detail_serializer,
@@ -31,6 +33,9 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/passes"
 )
+
+
+SATELLITE_DB = {s.id: s for s in get_satellite_norad_ids()}
 
 
 def get_db(request: Request):
@@ -49,52 +54,12 @@ async def set_cache_with_pickle(cache, key, value, ttl=None):
     await cache.set(key, pickled_value, ex=ttl)
 
 
-# @router.get('/')
-# async def get_all_passes(
-#     lat: float,
-#     lon:float,
-#     h: float = 0.0,
-# ):
-#     """
-#     Compute passes for top 100 visible satellites for 24 hours
-#     """
-#     logger.info(f'route api/passes/ lat={lat},lon={lon},h={h}')
-#     # Check cache with input string
-#     today = datetime.date.today()
-#     main_key = f'all_passes:lat{lat}:lon{lon}:h{h}:start{today.isoformat()}'
-#     result = await cache.get(main_key)
-#     if result:
-#         response_data = pickle.loads(result)
-#     else:
-#         location = Location(
-#             name="",
-#             latitude_deg=lat,
-#             longitude_deg=lon,
-#             elevation_m=h
-#         )
-#         # Get list of TLEs for visible satellites
-#         tles = None
-
-#         overpass_result = run_in_threadpool(
-#             predict_all_visible_satellite_overpasses,
-#             tles,
-#             location,
-#             date_start=today,
-#             min_elevation=10.0,
-#         )
-#         # cache results for 30 minutes
-#         response_data = overpass_result.json()
-#         await cache.set(main_key, pickle.dumps(response_data), ex=1800)
-#     return JSONResponse(response_data)
-
-
 @router.get(
     '/',
     response_model=SingleSatOverpassResult,
     response_model_exclude_unset=True,
 )
 async def get_passes(
-    request: Request,
     background_tasks: BackgroundTasks,
     satid: int,
     lat: float,
@@ -131,7 +96,9 @@ async def get_passes(
             days=days,
             min_elevation=10.0,
         )
-        satellite = Satellite(id=satid)
+        # Query satellite data
+        satellite = SATELLITE_DB.get(satid)
+
         data = single_satellite_overpass_result_serializer(location, satellite, overpass_result)
         # cache results for 30 minutes
         # maybe put this in a background task to do after returning response

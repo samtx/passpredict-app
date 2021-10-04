@@ -1,0 +1,39 @@
+@charset "utf-8";
+@import "bulma/bulma.sass";
+
+/*  From https://www.npmjs.com/package/bulma-floating-button  */
+.button.is-floating {
+    position: fixed;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    bottom: 2.5%;
+    right: 2.5%;
+    border-radius: 50%;
+    text-align: center;
+    // font-size: 1.6rem;
+    box-shadow: 0 .0625em .125em rgba($scheme-invert, .05);
+    z-index: 3;
+    cursor: pointer;
+
+    // .is-large {
+    //     width: 90px;
+    //     height: 90px;
+    //     font-size: 2.6rem;
+    // }
+
+    // .is-medium {
+    //     width: 75px;
+    //     height: 75px;
+    //     font-size: 2.2rem;
+    // }
+
+    // .is-small {
+    //     width: 45px;
+    //     height: 45px;
+    //     font-size: 1.2rem;
+    //     border-radius: 50px;
+    // }
+}

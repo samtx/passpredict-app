@@ -47,11 +47,11 @@ COPY --from=builder /app/wheels /app/wheels
 
 # install python wheels for dependencies
 RUN pip install --no-index --find-links=/app/wheels -r requirements.txt
-RUN pip install --no-index --find-links=/app/wheels -r requirements-astro.txt && pip uninstall cython -y
-RUN pip install --no-index --find-links=/app/wheels astrodynamics
+RUN pip install --no-index --find-links=/app/wheels sgp4>=2.12 numpy>=1.20 orbit-predictor astrodynamics
 
 # COPY ./setup.py setup.py
 COPY ./app app
+COPY ./static/dist static/dist
 
 EXPOSE 8000
 

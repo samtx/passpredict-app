@@ -81,7 +81,7 @@ deploy:
 	@echo "Build static files locally"
 	npm run build
 	@echo "Upload static files to remote server"
-	rsync -vzrgo --chown=root:web --delete app/static/ sam@passpredict.com:/var/www/passpredict.com/
+	rsync -vzrgo --chown=root:web --delete static/ sam@passpredict.com:/var/www/passpredict.com/
 	@echo "Stopping old container..."
 	-$(MAKE) ssh-cmd CMD='docker container stop $(CONTAINER_NAME)'
 	@echo "Remove old container..."

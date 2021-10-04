@@ -48,4 +48,4 @@ templates.env.filters["strftime"] = datetime_format
 # Add python zip() builtin function to Jinja templates
 templates.env.globals['zip'] = zip
 
-static_app = StaticFiles(directory='app/static')
+static_app = StaticFiles(directory='static')

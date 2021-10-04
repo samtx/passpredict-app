@@ -10,6 +10,7 @@ from .schemas import (
     OrdinalDirection,
     Point,
     Overpass,
+    Satellite,
     SingleSatOverpassResult,
     Point,
     PassDetailResult,
@@ -41,6 +42,7 @@ def single_satellite_overpass_result_serializer(
     else:
         tz = ZoneInfo(tz_str)
     overpasses = overpass_serializer(data, tz=tz)
+    satellite = Satellite(**satellite._asdict())  # convert to pydantic model
     out = SingleSatOverpassResult(location=location, overpasses=overpasses, satellite=satellite)
     return out
 

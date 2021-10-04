@@ -43,12 +43,12 @@
     "license": "ISC",
     "scripts": {
         "js:compile": "rollup --config",
-        "bulma:compile": "sass --style compressed --load-path=node_modules app/static/sass/bulma.scss app/static/dist/bulma.css",
-        "css:minify": "cleancss -o app/static/dist/styles.css app/static/css/styles.css",
-        "css:copy": "cp app/static/css/styles.css app/static/dist/styles.css",
+        "bulma:compile": "sass --style compressed --load-path=node_modules static/sass/bulma.scss static/dist/bulma.css",
+        "css:minify": "cleancss -o static/dist/styles.css static/css/styles.css",
+        "css:copy": "cp static/css/styles.css static/dist/styles.css",
         "compile": "npm run js:compile && npm run bulma:compile && npm run css:copy",
         "build": "NODE_ENV=production npm run compile",
         "dev": "npm run compile",
-        "watch": "watch 'npm run dev' app/static/ --ignoreDirectoryPattern=/dist/"
+        "watch": "watch 'npm run dev' static/ --ignoreDirectoryPattern=/dist/"
     }
 }

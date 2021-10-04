@@ -20,6 +20,8 @@ def get_passes(request):
     """
     satid = request.query_params.get('satid')
     location_name = request.query_params.get('name')
+    if location_name:
+        location_name = location_name.title()
     satellite_name = request.query_params.get('satname')
     lat = request.query_params.get('lat')
     lon = request.query_params.get('lon')
@@ -42,6 +44,8 @@ async def get_pass_detail(request):
     """
     satid = int(request.query_params.get('satid'))
     location_name = request.query_params.get('name')
+    if location_name:
+        location_name = location_name.title()
     satellite_name = request.query_params.get('satname')
     aos_dt_str = request.query_params.get('aosdt')
     lat = float(request.query_params.get('lat'))

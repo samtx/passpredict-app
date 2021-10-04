@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const staticDir = 'app/static/';
+const staticDir = 'static/';
 
 const production = process.env.NODE_ENV == 'production';
 const mapboxToken = production ? process.env.MAPBOX_ACCESS_TOKEN : process.env.MAPBOX_ACCESS_TOKEN_DEV
