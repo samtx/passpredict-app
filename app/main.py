@@ -1,11 +1,9 @@
 # main.py
-import datetime
 import logging
 from urllib.parse import urlencode
-import pathlib
 
 from starlette.applications import Starlette
-from starlette.responses import HTMLResponse, PlainTextResponse, RedirectResponse
+from starlette.responses import RedirectResponse
 from starlette.requests import Request
 from starlette.routing import Route, Mount
 from starlette.status import HTTP_302_FOUND
@@ -25,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def home(request):
+async def home(request: Request):
     if request.method == 'POST':
         form = await request.form()
         satid = form.get('satid')
@@ -56,12 +54,12 @@ async def home(request):
     return response
 
 
-async def about(request):
+async def about(request: Request):
     logger.info(f'route /about')
     return templates.TemplateResponse('about.html', {'request': request})
 
 
-async def help(request):
+async def help(request: Request):
     logger.info(f'route /help')
     return templates.TemplateResponse('help.html', {'request': request})
 
@@ -82,30 +80,6 @@ async def connect_to_db_and_cache():
 async def disconnect_from_db_and_cache():
     await app.state.cache.close()
     await app.state.db.disconnect()
-
-
-def find_and_replace_in_static():
-    """
-    Search static files and replace keywords
-    """
-    import re
-    if settings.DEBUG:
-        token = settings.MAPBOX_ACCESS_TOKEN_DEV
-    else:
-        token = settings.MAPBOX_ACCESS_TOKEN
-    directory = pathlib.Path(static_app.directory) / 'dist'
-    mapbox_regex = re.compile(r'MAPBOX_ACCESS_TOKEN')
-    files = list(directory.iterdir())
-    for fname in files:
-        if fname.suffix in '.gz':
-            continue
-        with open(fname, 'r') as f:
-            contents = f.read()
-        if mapbox_regex.search(contents):
-            new_contents = mapbox_regex.sub(str(token), contents)
-            with open(fname, 'w') as f:
-                f.write(new_contents)
-            print(f'Added mapbox access token to {fname}')
 
 
 routes = [
