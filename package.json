@@ -52,6 +52,6 @@
         "watch": "watch 'npm run dev' static/ --ignoreDirectoryPattern=/dist/"
     },
     "dependencies": {
-        "leaflet": "^1.7.1"
+        "alpinejs": "^3.4.2"
     }
 }

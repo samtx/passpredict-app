@@ -1,4 +1,4 @@
-import {Point, getPassQuality, formatMinutes} from "./passpredictlib.js";
+import {Point, getPassQuality, formatMinutes, setNavbarMenuListener} from "./passpredictlib.js";
 
 const passList = document.getElementById('passList');
 const visibleOnlyCheckbox = document.getElementById('visibleOnly');

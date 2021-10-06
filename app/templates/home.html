@@ -14,12 +14,18 @@
     </header>
 
     <main>
-        <form id="passes-form" autocomplete="off" method="POST" action="{{ url_for('home') }}">
+        <form
+            id="passes-form"
+            autocomplete="off"
+            method="POST"
+            action="{{ url_for('home') }}"
+        >
             <!-- Reference: https://github.com/danharrin/alpine-tailwind-components/blob/151fd18324f6a596ad93907e98cc87ca0dc893de/select/index.html -->
             <div
-                id="locationSearch"
-                x-data="locationSearch()"
+                x-data="passesFormComponent()"
                 x-init="init()"
+                @reset="reset()"
+                id="locationSearch"
                 @click.away="closeListbox()"
                 @keydown.escape="closeListbox()"
                 class="form-group"
@@ -34,6 +40,7 @@
                         @keydown.arrow-down="focusNextResult()"
                         @keydown.arrow-up="focusPreviousResult()"
                         @keydown.enter.stop.prevent="selectResult()"
+                        @reset="reset()"
                         type="search"
                         class="input"
                         placeholder="New York, NY"
@@ -61,15 +68,15 @@
                             :aria-selected="focusedIndex === index"
                             :class="{ 'focused-result' : index === focusedIndex }"
                             x-html="item.name"
-                            x-on= class="location-result-item"
+                            x-on="class='location-result-item'"
                             ></li>
                         </template>
                         </ul>
                     </div>
                     <div class="latlon-result" x-show="(selectedIndex != null) && !open">
-                        <span class="latlon">Latitude:</span> <span x-text="parseFloat(data[selectedIndex].lat).toFixed(4)"></span>&deg;
+                        <span class="latlon">Latitude:</span> <span x-text="selectedIndex ? parseFloat(data[selectedIndex].lat).toFixed(4) : 'n/a' "></span>&deg;
                         &nbsp; &nbsp;
-                        <span class="latlon">Longitude:</span> <span x-text="parseFloat(data[selectedIndex].lon).toFixed(4)"></span>&deg;
+                        <span class="latlon">Longitude:</span> <span x-text="selectedIndex ? parseFloat(data[selectedIndex].lon).toFixed(4) : 'n/a' "></span>&deg;
                     </div>
                 </div>
 
@@ -77,29 +84,26 @@
                 <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
                 <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
                 <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
-            </div>
 
-            <div class="field">
-                <label for="satid" class="label">Select satellite</label>
-                <span class="select">
-                    <select name="satid">
-                        {% for satellite in satellites %}
-                            <option value={{ satellite.id }}>{{ satellite.name }}</option>
-                        {% endfor %}
-                    </select>
-                </span>
-            </div>
-            <input type="hidden" name="satname" value="" />
+                <div class="field">
+                    <label for="satid" class="label">Select satellite</label>
+                    <span class="select">
+                        <select name="satid">
+                            {% for satellite in satellites %}
+                                <option value={{ satellite.id }}>{{ satellite.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </span>
+                </div>
+                <input type="hidden" name="satname" value="" />
 
-            <div class="buttons">
-                <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
-                <button id="reset" type="reset" class="button">Reset</button>
+                <div class="buttons">
+                    <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
+                    <button id="reset" type="reset" @click="reset()" class="button">Reset</button>
+                </div>
+
             </div>
         </form>
     </main>
 
 {% endblock content %}
-
-{% block javascript %}
-<script src="{{ url_for('static', path='dist/home.js') }}"></script>
-{% endblock javascript %}

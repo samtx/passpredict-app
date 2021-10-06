@@ -20,7 +20,7 @@
     <script async defer data-domain="passpredict.com" src="https://plausible.io/js/plausible.js"></script>
 
     <!-- Alpine JS -->
-    <script defer src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.8.2/dist/alpine.min.js"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.4.2/dist/cdn.min.js"></script>
 
     <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
 
@@ -66,9 +66,7 @@
         </div>
     </footer>
 
-    {% block javascript %}
-    {% endblock javascript %}
-
+    <script src="{{ url_for('static', path='dist/bundle.js') }}"></script>
     <script>
         // Reference: https://bulma.io/documentation/components/navbar/#navbar-menu
         // Get all "navbar-burger" elements
@@ -88,6 +86,9 @@
             });
         }
     </script>
+
+    {% block javascript %}
+    {% endblock javascript %}
 
 </body>
 

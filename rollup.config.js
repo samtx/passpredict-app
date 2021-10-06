@@ -18,11 +18,12 @@ if (production) {
 
 export default [
     {
-        input: staticDir + 'js/home.js',
+        input: staticDir + 'js/main.js',
         output: {
-            file:  staticDir + 'dist/home.js',
+            file:  staticDir + 'dist/bundle.js',
             sourcemap: true,
-            format: 'umd'
+            format: 'umd',
+            external: ['alpinejs']
         },
         plugins: [
             mapboxToken && replace({
@@ -36,27 +37,4 @@ export default [
             production && terser(),
         ]
     },
-    {
-        input: staticDir + 'js/passes.js',
-        output: {
-            file: staticDir + 'dist/passes.js',
-            sourcemap: true,
-            format: 'umd'
-        },
-        plugins: [
-            commonjs(),
-            filesize(),
-            production && terser(),
-        ]
-    },
-    // {
-    //     input: staticDir + 'js/base.js',
-    //     output: {
-    //         file: staticDir + 'dist/base.js',
-    //         format: 'umd'
-    //     },
-    //     plugins: [
-    //         commonjs(),
-    //     ]
-    // },
 ];
