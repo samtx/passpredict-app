@@ -12,7 +12,6 @@ from aioredis import Redis
 from sqlalchemy import select
 
 from astrodynamics import (
-    predict_all_visible_satellite_overpasses,
     predict_single_satellite_overpasses,
     predict_next_overpass,
     Location,
