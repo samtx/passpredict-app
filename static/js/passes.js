@@ -57,12 +57,16 @@ const showPassList = (resp, locationName) => {
             const passRowDiv = document.createElement('div');
             passRowDiv.classList.add('box', 'is-rounded', 'p-2', 'mb-3', 'pass-row');
             passRowDiv.setAttribute('data-location', getPassDetailUrl(resp.satellite, resp.location, pass))
+            const timeParts = start_pt.getTimeMinutesParts;
+            const timeMinutes = timeParts.minute;
+            const timeHour = timeParts.hour;
+            const timePeriod = timeParts.dayPeriod;
             passRowDiv.innerHTML = `
                 <div class="p-1 pass-item pass-month-day">
                     <p class="value">${start_pt.getMonthDay}</p>
                 </div>
                 <div class="p-1 pass-item pass-time">
-                    <p class="value">${start_pt.getTimeMinutes}</p>
+                    <p class="value">${timeHour}:${timeMinutes} <span class="pass-time-ampm">${timePeriod}</span></p>
                 </div>
                 <div class="p-1 pass-item pass-duration">
                     <p class="value">${formatMinutes(duration)}</p>

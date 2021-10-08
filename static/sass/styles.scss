@@ -1,0 +1,59 @@
+:root {
+    font-size: clamp(1.25em, 2vw, 1.5em);
+    --primary-light: hsl(171, 100%, 96%);
+    --primary-dark: hsl(171, 100%, 29%);
+}
+
+@import "autocomplete.scss";
+@import "passes.scss";
+@import "passdetail.scss";
+
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(750px, 70vw + 50px);
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    margin: 0 auto;
+}
+
+form {
+    width: 100%;
+}
+
+.footer-container {
+    margin-top: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-container {
+    margin-top: 3em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.latlon-result {
+    font-size: 0.75em;
+}
+
+.latlon {
+    font-weight: 700;
+}
+
+.location-header {
+    margin-bottom: 1em;
+}
+
+.satellite-header {
+    margin-bottom: 1em;
+}

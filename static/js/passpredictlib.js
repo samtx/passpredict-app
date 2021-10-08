@@ -15,9 +15,13 @@ export class Point {
         return dateString;
     }
 
-    get getTimeMinutes() {
-        const t = new Intl.DateTimeFormat([], { timeStyle: "short" }).format(this.date);
-        return t;
+    get getTimeMinutesParts() {
+        const partsArray = new Intl.DateTimeFormat([], { timeStyle: "short" }).formatToParts(this.date);
+        let partsObject = {}
+        for (let i = 0; i < partsArray.length; i++) {
+            partsObject[partsArray[i].type] = partsArray[i].value;
+        }
+        return partsObject;
     }
 
     get getTime() {

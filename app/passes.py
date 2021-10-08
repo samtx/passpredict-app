@@ -3,6 +3,7 @@ import logging
 import urllib.parse
 
 from starlette.routing import Route
+from starlette.requests import Request
 import httpx
 
 from app.settings import MAX_DAYS
@@ -14,20 +15,12 @@ from app.api.passes import _get_pass_detail
 logger = logging.getLogger(__name__)
 
 
-def get_passes(request):
+def get_passes(request: Request):
     """
     Render template for satellite passes for one satellite
     """
-    satid = request.query_params.get('satid')
-    location_name = request.query_params.get('name')
-    if location_name:
-        location_name = location_name.title()
-    satellite_name = request.query_params.get('satname')
-    lat = request.query_params.get('lat')
-    lon = request.query_params.get('lon')
-    h = request.query_params.get('h', 0.0)
-    location = Location(lat=lat, lon=lon, h=h, name=location_name)
-    satellite = Satellite(id=satid, name=satellite_name)
+    location = _get_location_query_params(request)
+    satellite = _get_satellite_query_params(request)
     days = request.query_params.get('days', MAX_DAYS)
     context = {
         'request': request,
@@ -42,30 +35,22 @@ async def get_pass_detail(request):
     """
     Render template for pass detail
     """
-    satid = int(request.query_params.get('satid'))
-    location_name = request.query_params.get('name')
-    if location_name:
-        location_name = location_name.title()
-    satellite_name = request.query_params.get('satname')
-    aos_dt_str = request.query_params.get('aosdt')
-    lat = float(request.query_params.get('lat'))
-    lon = float(request.query_params.get('lon'))
-    h = float(request.query_params.get('h', 0.0))
+    location = _get_location_query_params(request)
+    satellite = _get_satellite_query_params(request)
     db = request.app.state.db
     cache = request.app.state.cache
-    location = Location(lat=lat, lon=lon, h=h, name=location_name)
-    satellite = Satellite(id=satid, name=satellite_name)
+    aos_dt_str = request.query_params.get('aosdt')
     aos = datetime.fromisoformat(aos_dt_str)
     aos_dt_utc = aos.astimezone(timezone.utc)
-    pass_ = await _get_pass_detail(satid, aos_dt_utc, lat, lon, h, db, cache)
+    pass_ = await _get_pass_detail(satellite.id, aos_dt_utc, location.lat, location.lon, location.h, db, cache)
     pass_list_url = request.url_for('passes:get_passes')
     pass_list_url += '?' + urllib.parse.urlencode({
-        'satid': satid,
-        'lat': lat,
-        'lon': lon,
-        'h': h,
-        'satname': satellite_name,
-        'name': location_name,
+        'satid': satellite.id,
+        'lat': location.lat,
+        'lon': location.lon,
+        'h': location.h,
+        'satname': satellite.name,
+        'name': location.name,
     })
     context = {
         'request': request,
@@ -75,6 +60,30 @@ async def get_pass_detail(request):
         'pass_list_url': pass_list_url,
     }
     return templates.TemplateResponse('pass_detail.html', context)
+
+
+def _get_location_query_params(request: Request) -> Location:
+    """
+    Parse request object query parameters to get location object
+    """
+    name = request.query_params.get('name', "")
+    lat = request.query_params.get('lat')
+    lon = request.query_params.get('lon')
+    h = request.query_params.get('h', 0.0)
+    name = name.title()
+    lat = round(float(lat), 4)
+    lon = round(float(lon), 4)
+    h = round(float(h), 0)
+    return Location(lat=lat, lon=lon, h=h, name=name)
+
+
+def _get_satellite_query_params(request: Request) -> Satellite:
+    """
+    Parse request object query parameters to get satellite object
+    """
+    satname = request.query_params.get('satname')
+    satid = request.query_params.get('satid')
+    return Satellite(id=satid, name=satname)
 
 
 routes = [
