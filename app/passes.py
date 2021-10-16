@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 import logging
 import urllib.parse
 
@@ -22,11 +22,16 @@ def get_passes(request: Request):
     location = _get_location_query_params(request)
     satellite = _get_satellite_query_params(request)
     days = request.query_params.get('days', MAX_DAYS)
+    start_datetime = datetime.utcnow()
+    start_date = date(start_datetime.year, start_datetime.month, start_datetime.day)
+    end_date = start_date + timedelta(days=days)
     context = {
         'request': request,
         'satellite': satellite,
         'location': location,
         'days': days,
+        'start_date': start_date,
+        'end_date': end_date,
     }
     return templates.TemplateResponse('passes.html', context)
 

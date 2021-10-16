@@ -12,8 +12,8 @@
     </header>
 
     <div class="results-header">
-        <div id="results-header-left" class="mx-5">
-            <p>
+        <div class="results-header-left">
+            <div class="location-header">
                 <span class="has-text-weight-semibold">Location: </span>
                 {% if location.name %}
                     {{ location.name }}
@@ -22,25 +22,56 @@
                     <span class="has-text-weight-medium">Latitude: </span>{{ location.lat }}&deg; &nbsp;
                     <span class="has-text-weight-medium">Longitude: </span>{{ location.lon }}&deg;
                 </div>
-            </p>
-            <p>
-                <span class="has-text-weight-semibold">Satellite: </span>{{ satellite.name }}
-            </p>
-            <p class="is-size-7">
-                <span class="has-text-weight-medium">NORAD ID: </span>{{ satellite.id }}
-            </p>
-            <p>
+            </div>
+            <div class="satellite-header">
+                <span class="has-text-weight-semibold">Satellite:</span>&nbsp;{{ satellite.name }}
+                <div class="is-size-7">
+                    <span class="has-text-weight-medium">NORAD ID:</span>&nbsp;{{ satellite.id }}
+                </div>
+            </div>
+            <div class="date-header">
                 <span class="has-text-weight-semibold">
                     Date:
                 </span>{{ pass.aos.datetime|strftime("%x") }}<span id="satellite" />
-            </p>
+                <div class="is-size-7">
+                    <span class="has-text-weight-medium">Timezone:</span>&nbsp;{{ pass.aos.datetime.tzname() }}
+                </div>
+            </div>
         </div>
         <div class="results-header-right">
-            <a class="button is-primary is-light m-3" href="{{ pass_list_url }}">Pass List</a>
+            <a class="button is-primary is-light" href="{{ pass_list_url }}">Pass List</a>
         </div>
     </div>
 
-    <div class="table-container">
+    <div class="table-container-mobile">
+        <div class="table">
+            <div class="table-body">
+                {% for ptname, pt in zip(['Begin','Max','End'], [pass.aos, pass.tca, pass.los]) %}
+                <div class="table-row">
+                    <div class="table-cell table-point-name">{{ ptname }}</div>
+                    <div class="table-row-mobile">
+                        <div class="table-header-cell">Time</div>
+                        <div class="table-cell table-time">{{ pt.datetime|strftime('%X') }}</div>
+                    </div>
+                    <div class="table-row-mobile">
+                        <div class="table-header-cell">Azimuth</div>
+                        <div class="table-cell table-azimuth">{{ pt.az|round|int }}&deg;</div>
+                    </div>
+                    <div class="table-row-mobile">
+                        <div class="table-header-cell">Elevation</div>
+                        <div class="table-cell table-elevation">{{ pt.el|round|int }}&deg;</div>
+                    </div>
+                    <div class="table-row-mobile">
+                        <div class="table-header-cell">Range</div>
+                        <div class="table-cell table-range">{{ pt.range|round|int }} km</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container-desktop">
         <table class="table">
             <thead>
                 <tr>
@@ -48,20 +79,19 @@
                     <th class="table-time">Time</th>
                     <th class="table-azimuth">Azimuth</th>
                     <th class="table-elevation">Elevation</th>
-                    <th class="table-range">Range [km]</th>
+                    <th class="table-range">Range</th>
                 </tr>
             </thead>
             <tbody>
                 {% for ptname, pt in zip(['Begin','Max','End'], [pass.aos, pass.tca, pass.los]) %}
-                <tr>
-                    <th>{{ ptname }}</th>
-                    <td class="table-time">{{ pt.datetime|strftime('%X') }}</td>
-                    <td class="table-azimuth">{{ pt.az|round|int }}&deg;</td>
-                    <td class="table-elevation">{{ pt.el|round|int }}&deg;</td>
-                    <td class="table-range">{{ pt.range|round|int }}</td>
-                </tr>
+                    <tr>
+                        <th>{{ ptname }}</th>
+                        <td class="table-time">{{ pt.datetime|strftime('%X') }}</td>
+                        <td class="table-azimuth">{{ pt.az|round|int }}&deg;</td>
+                        <td class="table-elevation">{{ pt.el|round|int }}&deg;</td>
+                        <td class="table-range">{{ pt.range|round|int }} km</td>
+                    </tr>
                 {% endfor %}
-
             </tbody>
         </table>
     </div>

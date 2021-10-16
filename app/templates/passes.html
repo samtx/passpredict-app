@@ -12,11 +12,11 @@
     </header>
 
     <div class="results-header">
-        <div id="results-header-left" class="mx-5">
+        <div class="results-header-left">
             <div class="location-header">
                 <span class="has-text-weight-semibold">Location: </span>
                 {% if location.name %}
-                {{ location.name }}
+                    {{ location.name }}
                 {% endif %}
                 <div class="is-size-7">
                     <span class="has-text-weight-medium">Latitude:</span>&nbsp;{{ location.lat }}&deg;&nbsp;
@@ -29,9 +29,12 @@
                     <span class="has-text-weight-medium">NORAD ID:</span>&nbsp;{{ satellite.id }}
                 </div>
             </div>
+            <div class="date-header">
+                <span class="has-text-weight-semibold">Dates:</span>&nbsp;{{ start_date|strftime("%x") }}&nbsp;-&nbsp; {{ end_date|strftime("%x") }}
+            </div>
         </div>
         <div class="results-header-right">
-            <a class="button is-primary m-3" href="{{ url_for('home') }}">Search Again</a>
+            <a class="button is-primary" href="{{ url_for('home') }}">Search Again</a>
 
             <!-- <label for="visibleOnly" class="checkbox">
                 <input id="visibleOnly" type="checkbox" checked />

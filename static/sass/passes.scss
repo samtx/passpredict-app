@@ -85,22 +85,37 @@ label[for="visibleOnly"] {
 
 .results-header {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     justify-content: left;
+    flex-wrap: wrap;
+}
+
+.results-header-left {
+    flex-grow: 4;
 }
 
 .results-header-right {
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    // margin: auto;
+    // flex-grow: 1;
 }
 
+// .results-header-right > .button {
+//     // "Pass List" or "Search Again" button
+//     // flex: auto;
+// }
+
+
+
 @media screen and (min-width: $desktop) {
-    .results-header {
-        flex-direction: row;
-        justify-content: space-between;
-        align-items: center;
-    }
+    // .results-header {
+    //     flex-direction: row;
+    //     justify-content: space-between;
+    //     align-items: center;
+    // }
 
     .pass-time-ampm {
         font-size: 1em;

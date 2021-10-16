@@ -45,6 +45,7 @@
         "js:compile": "rollup --config",
         "sass:compile": "sass --load-path=node_modules static/sass/styles.scss static/dist/styles.css",
         "sass:compile-minify": "sass --style compressed --load-path=node_modules static/sass/styles.scss static/dist/styles.css",
+        "sass:watch": "sass --watch --load-path=node_modules static/sass/styles.scss static/dist/styles.css",
         "compile": "npm run js:compile && npm run sass:compile",
         "build": "NODE_ENV=production npm run js:compile && npm run sass:compile-minify",
         "dev": "npm run compile",
