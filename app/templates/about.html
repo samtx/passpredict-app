@@ -8,26 +8,22 @@
     </h1>
 </header>
 
-<p>
-    This site was created by <a href="https://samtx.dev">Sam Friedman</a>.
-</p>
-<br>
-
-<p>
-    It is built with a Python backend using Starlette and FastAPI.
-    The frontend is server-rendered with Jinja templates.
-    It uses Postgresql and Redis for data storage and caching.
-    Caddy server is the reverse proxy for the Starlette application and serves the static files.
-    All of the applications are hosted on a Digital Ocean virtual private server.
-</p>
-<br>
-
-<p>
-    Orbit and satellite data is gathered from Celestrak three times a day.
-    Orbit propagation and overpass prediction is computed with the <a href="https://github.com/satellogic/orbit-predictor">Orbit Predictor</a> python library.
-    It uses the SGP4 propagator <a href="https://github.com/brandon-rhodes/python-sgp4">python-sgp4</a>, written by Brandon Rhodes, with WGS84 Earth constants.
-    Coordinate frame transformations use the IAU FK5/1976 coordinate frames.
-    Cython is used to speed up some functions.
-</p>
+<main id="about">
+    <p>
+        This site was created by <a href="https://samtx.dev">Sam Friedman</a>.
+    </p>
+    <p>
+        The goal is to make the website easy enough to use for novice satellite watchers but detailed enough for experts.
+        It is in active development, so check back for updates and new features.
+    </p>
+    <p>
+        Orbit and satellite data is gathered from Celestrak three times a day.
+        Coordinate frame transformations use the IAU FK5/1976 transformations and WGS84 Earth constants.
+    </p>
+    <p>
+        For detailed description of the technology stack and astrodynamics computation, see my <a href="https://samtx.dev/projects/passpredict">personal blog</a>.
+        The code for the site is open source and can be viewed at <a href="https://github.com/samtx/passpredict-app">github.com/samtx/passpredict-app</a>.
+    </p>
+</main>
 
 {% endblock content %}
