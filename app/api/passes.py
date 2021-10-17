@@ -2,14 +2,11 @@ import datetime
 import logging
 import pickle
 import logging
-from astrodynamics.sources import AsyncPasspredictTLESource
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, Query
 from starlette.concurrency import run_in_threadpool
 from databases import Database
 from aioredis import Redis
-from sqlalchemy import select
 
 from astrodynamics import (
     predict_single_satellite_overpasses,
@@ -23,15 +20,13 @@ from .serializers import (
     single_satellite_overpass_result_serializer,
     satellite_pass_detail_serializer,
 )
-from .schemas import Satellite, SingleSatOverpassResult, Overpass
+from .schemas import Satellite, SingleSatOverpassResult, PassDetailResult
 from .tle import PasspredictTLESource
 
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(
-    prefix="/passes"
-)
+router = APIRouter()
 
 
 SATELLITE_DB = {s.id: s for s in get_satellite_norad_ids()}
@@ -64,7 +59,7 @@ async def get_passes(
     lat: float,
     lon: float,
     h: float = 0.0,
-    days: int = settings.MAX_DAYS,
+    days: int = Query(settings.MAX_DAYS, gt=0, le=settings.MAX_DAYS),
     db: Database = Depends(get_db),
     cache: Redis = Depends(get_cache),
 ):
@@ -107,7 +102,7 @@ async def get_passes(
 
 @router.get(
     '/detail/',
-    response_model=Overpass,
+    response_model=PassDetailResult,
     response_model_exclude_unset=True,
 )
 async def get_pass_detail(

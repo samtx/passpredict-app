@@ -1,19 +1,17 @@
 :root {
-    font-size: clamp(1.25em, 2vw, 1.5em);
+    font-size: clamp(1em, 2vw, 1.25em);
     --primary-light: hsl(171, 100%, 96%);
     --primary-dark: hsl(171, 100%, 29%);
 }
 
+@import "_variables.scss";
+@import "_bulma.scss";
 @import "autocomplete.scss";
 @import "passes.scss";
 @import "passdetail.scss";
 
-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: min(750px, 70vw + 50px);
-    margin: 0 auto;
+main.content h2 {
+    font-size: 1.25em;
 }
 
 header {
@@ -26,6 +24,11 @@ header {
 
 form {
     width: 100%;
+}
+
+#passes-form {
+    max-width: 960px;
+    margin: auto;
 }
 
 .footer-container {

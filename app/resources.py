@@ -1,9 +1,9 @@
 from aioredis import Redis
 from databases import Database
-from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
 
 from app import settings
+from app.templating import Jinja2Templates
 
 
 if not settings.REDIS_URL:

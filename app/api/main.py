@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+import markdown
+from starlette import middleware
 
 from app import settings
 from app.resources import templates
@@ -24,7 +29,15 @@ app = FastAPI(
     # },
     debug=settings.DEBUG
 )
-app.include_router(passes.router)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['*'],
+    allow_headers=['*'],
+)
+app.include_router(
+    passes.router,
+    prefix='/passes',
+)
 
 
 @app.get('/', include_in_schema=False)
@@ -32,7 +45,22 @@ def home(request: Request):
     """
     Render API homepage with explanation on how to use the API
     """
+    # Get markdown content
+    fpath = Path(templates.directory) / 'api-home.md'
+    config = {
+        'toc': {
+            'permalink': True,
+            'baselevel': 2,
+        }
+    }
+    with open(fpath, 'r') as f:
+        content = markdown.markdown(
+            f.read(),
+            extensions=['fenced_code', 'toc'],
+            extension_configs=config,
+        )
     context = {
         'request': request,
+        'content': content,
     }
     return templates.TemplateResponse('api-home.html', context)

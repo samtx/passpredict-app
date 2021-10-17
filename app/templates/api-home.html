@@ -8,8 +8,8 @@
     </h1>
 </header>
 
-<p>
-    The prediction algorithm is available as a developer API. OpenAPI documentation can be found at <a href="{{ url_for('api', path='docs/') }}">passpredict.com/api/docs</a>.
-</p>
+<main class="content">
+    {{ content|safe }}
+</main>
 
 {% endblock content %}

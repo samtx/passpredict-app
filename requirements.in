@@ -14,3 +14,4 @@ python-multipart
 fastapi
 asyncpg
 timezonefinder
+Markdown
