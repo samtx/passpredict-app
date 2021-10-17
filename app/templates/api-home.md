@@ -1,5 +1,5 @@
 The prediction algorithm is available as a CORS-enabled developer API.
-Full OpenAPI documentation can be found at [passpredict.com/api/docs](/api/docs).
+OpenAPI documentation can be found at [passpredict.com/api/docs](/api/docs).
 
 Base URL: `https://passpredict.com/api`
 

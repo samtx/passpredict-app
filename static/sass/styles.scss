@@ -1,5 +1,5 @@
 :root {
-    font-size: clamp(1em, 2vw, 1.25em);
+    font-size: clamp(1.1em, 2vw, 1.25em);
     --primary-light: hsl(171, 100%, 96%);
     --primary-dark: hsl(171, 100%, 29%);
 }
@@ -10,7 +10,7 @@
 @import "passes.scss";
 @import "passdetail.scss";
 
-main.content h2 {
+#api-home h3 {
     font-size: 1.25em;
 }
 
