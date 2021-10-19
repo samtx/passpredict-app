@@ -1,6 +1,7 @@
 from aioredis import Redis
 from databases import Database
 from starlette.staticfiles import StaticFiles
+import arq.connections
 
 from app import settings
 from app.templating import Jinja2Templates
@@ -25,6 +26,8 @@ else:
     redis_uri = settings.REDIS_URL
 
 cache = Redis.from_url(redis_uri)
+
+queue_settings = arq.connections.RedisSettings().from_dsn(redis_uri)
 
 
 if settings.POSTGRES_URI:

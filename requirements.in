@@ -3,7 +3,7 @@ uvicorn[standard]>=0.15
 uvloop>=0.16
 python-dotenv
 gunicorn
-aioredis[hiredis]
+aioredis >= 2.0.0
 databases[postgresql]
 sqlalchemy
 aiofiles
@@ -15,3 +15,4 @@ fastapi
 asyncpg
 timezonefinder
 Markdown
+arq

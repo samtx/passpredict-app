@@ -7,9 +7,10 @@ from starlette.responses import RedirectResponse
 from starlette.requests import Request
 from starlette.routing import Route, Mount
 from starlette.status import HTTP_302_FOUND
+import arq
 
 from app.utils import get_satellite_norad_ids
-from app.resources import cache, db, templates, static_app
+from app.resources import cache, db, templates, static_app, redis_uri, queue_settings
 from app import settings
 from app import passes
 from app.api import app as api_app
@@ -64,21 +65,30 @@ async def help(request: Request):
     return templates.TemplateResponse('help.html', {'request': request})
 
 
-async def connect_to_db_and_cache():
+async def connect_to_db_cache_and_queue():
+    # Connect to Redis cache
     try:
         ping = await app.state.cache.ping()
         if not ping:
             raise
     except:
         raise Exception("Can't connect to redis instance")
+    # Connect to Arq queue
+    try:
+        queue = await arq.create_pool(queue_settings)
+        app.state.queue = queue
+    except:
+        raise Exception("Can't connect to Arq connection pool")
+    # Connect to Postgres database
     try:
         await app.state.db.connect()
     except:
         raise Exception("Can't connect to postgres database")
 
 
-async def disconnect_from_db_and_cache():
+async def disconnect_from_db_cache_and_queue():
     await app.state.cache.close()
+    await app.state.queue.close()
     await app.state.db.disconnect()
 
 
@@ -95,8 +105,8 @@ routes = [
 app = Starlette(
     debug=settings.DEBUG,
     routes=routes,
-    on_startup=[connect_to_db_and_cache],
-    on_shutdown=[disconnect_from_db_and_cache],
+    on_startup=[connect_to_db_cache_and_queue],
+    on_shutdown=[disconnect_from_db_cache_and_queue],
 )
 # attach database and cache connections onto application state
 app.state.db = db
