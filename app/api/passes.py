@@ -4,31 +4,21 @@ import pickle
 import logging
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, Query
-from starlette.concurrency import run_in_threadpool
 from databases import Database
 from aioredis import Redis
 
-from astrodynamics import (
-    predict_single_satellite_overpasses,
-    Location,
-)
-
 from app import settings
-from app.utils import get_satellite_norad_ids
-from app.core.passes import _get_pass_detail
-from app.core.tle import PasspredictTLESource
-from app.core.serializers import (
-    single_satellite_overpass_result_serializer,
+from app.core.passes import (
+    _get_pass_detail,
+    _get_passes,
 )
 from app.core.schemas import SingleSatOverpassResult, PassDetailResult
+from app.core.jobs import set_cache_with_pickle
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-SATELLITE_DB = {s.id: s for s in get_satellite_norad_ids()}
 
 
 def get_db(request: Request):
@@ -71,11 +61,12 @@ async def get_passes(
     if result:
         data = pickle.loads(result)
     else:
-
+        data = await _get_passes(satid, lat, lon, h, today, days, db, cache)
         # cache results for 30 minutes
         background_tasks.add_task(set_cache_with_pickle, cache, main_key, data, ttl=12)
         # await cache.set(main_key, pickle.dumps(data), ex=12)
     return data
+
 
 @router.get(
     '/detail/',

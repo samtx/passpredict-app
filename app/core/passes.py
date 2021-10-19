@@ -6,12 +6,20 @@ from starlette.concurrency import run_in_threadpool
 
 
 from astrodynamics import (
+    predict_single_satellite_overpasses,
     predict_next_overpass,
     Location,
 )
+from app.utils import get_satellite_norad_ids
 from .schemas import Satellite
-from .serializers import satellite_pass_detail_serializer
+from .serializers import (
+    satellite_pass_detail_serializer,
+    single_satellite_overpass_result_serializer,
+)
 from .tle import PasspredictTLESource
+
+
+SATELLITE_DB = {s.id: s for s in get_satellite_norad_ids()}
 
 
 async def _get_passes(
@@ -19,6 +27,7 @@ async def _get_passes(
     lat: float,
     lon: float,
     h: float,
+    start_date: datetime.datetime,
     days: int,
     db: Database,
     cache: Redis,
@@ -31,20 +40,21 @@ async def _get_passes(
         elevation_m=h
     )
     # Get TLE data for satellite
-    tle = await tle_source.get_predictor(satid, today)
+    tle = await tle_source.get_predictor(satid, start_date)
 
     overpass_result = await run_in_threadpool(
         predict_single_satellite_overpasses,
         tle,
         location,
-        date_start=today,
+        date_start=start_date,
         days=days,
         min_elevation=10.0,
     )
     # Query satellite data
     satellite = SATELLITE_DB.get(satid)
-
     data = single_satellite_overpass_result_serializer(location, satellite, overpass_result)
+    return data
+
 
 async def _get_pass_detail(
     satid: int,

@@ -1,15 +1,14 @@
-import datetime as dt
-from typing import NamedTuple
+from __future__ import annotations
+import datetime
+from typing import NamedTuple, Sequence
 from math import radians, degrees, pi
 from functools import cached_property
 from dataclasses import dataclass
-import logging
 
 import numpy as np
 from orbit_predictor.predictors.pass_iterators import LocationPredictor as BaseLocationPredictor
 from orbit_predictor.predictors.pass_iterators import PredictedPass as BasePredictedPass
 from orbit_predictor.predictors.accurate import HighAccuracyTLEPredictor
-from orbit_predictor.locations import Location
 
 from . import _rotations
 from .exceptions import NotReachable, PropagationError
@@ -22,16 +21,13 @@ class RangeAzEl(NamedTuple):
     el: float     # deg
 
 
+@dataclass(frozen=True)
 class PassPoint:
-    def __init__(self, datetime: dt.datetime, range_: float, azimuth: float, elevation: float):
-        self.dt = datetime          # datetime UTC
-        self.range_ = range_        # km
-        self.azimuth= azimuth       # deg
-        self.elevation = elevation  # deg
-
-    @property
-    def range(self):
-        return self.range_
+    dt: datetime                # datetime UTC
+    range: float                # km
+    azimuth: float              # deg
+    elevation: float            # deg
+    brightness: float = None    # magnitude brightness
 
 
 class BasicPassInfo:
@@ -46,9 +42,9 @@ class BasicPassInfo:
     """
     def __init__(
         self,
-        aos_dt: dt.datetime,
-        tca_dt: dt.datetime,
-        los_dt: dt.datetime,
+        aos_dt: datetime.datetime,
+        tca_dt: datetime.datetime,
+        los_dt: datetime.datetime,
         max_elevation: float
     ):
         self.aos_dt = aos_dt if aos_dt is not None else None
@@ -82,17 +78,21 @@ class BasicPassInfo:
         return degrees(self.max_elevation)
 
     @cached_property
-    def duration(self) -> dt.timedelta:
+    def duration(self) -> datetime.timedelta:
         return self.los - self.aos
 
 
-@dataclass(frozen=True)
+@dataclass
 class PredictedPass:
     satid: int
     location: Location
     aos: PassPoint
     tca: PassPoint
     los: PassPoint
+    azimuth: Sequence[float] = None
+    elevation: Sequence[float] = None
+    range: Sequence[float] = None
+    datetime: Sequence[datetime.datetime] = None
 
     @cached_property
     def midpoint(self):
@@ -131,77 +131,45 @@ class SatellitePredictor(HighAccuracyTLEPredictor):
     def set_propagator(self):
         self._propagator = self._get_propagator()
 
-    def get_only_position(self, datetime: dt.datetime) -> np.ndarray:
+    def get_only_position(self, datetime: datetime.datetime) -> np.ndarray:
         """
         Get satellite position in ECEF coordinates [km]
         """
         pos_tuple = super().get_only_position(datetime)
         return np.array(pos_tuple)
 
-    @property
-    def passes_over(self, *a, **kw):
-        return self.pass_iterator(*a, **kw)
 
-    def pass_iterator(
-        self,
-        location: Location,
-        when_utc: dt.datetime,
-        *,
-        limit_date: dt.datetime = None,
-        max_elevation_gt: float = 0,
-        aos_at_dg: float = 0,
-        tolerance_s: float = 1.0,
-    ):
-        return LocationPredictor(
-            location,
-            self,
-            when_utc,
-            limit_date,
-            max_elevation_gt,
-            aos_at_dg,
-            tolerance_s=tolerance_s
-        )
-
-    def get_next_pass(self,
-        location: Location,
-        aos_dt: dt.datetime = None,
-        *,
-        max_elevation_gt: float = 5,
-        aos_at_dg: float = 0,
-        limit_date: dt.datetime = None,
-        tolerance_s: float = 1
-        ) -> PredictedPass:
-        """
-        Gets first overpass starting at aos_dt
-        """
-        if aos_dt is None:
-            aos_dt = dt.datetime.utcnow()
-        for pass_ in self.pass_iterator(location, aos_dt, limit_date=limit_date, max_elevation_gt=max_elevation_gt, aos_at_dg=aos_at_dg, tolerance_s=tolerance_s):
-            return pass_
-        else:
-            raise NotReachable('Propagation limit date exceeded')
-
-
-class LocationPredictor(BaseLocationPredictor):
-    """Predicts passes over a given location.
+class Observer(BaseLocationPredictor):
+    """
+    Predicts passes of a satellite over a given location.
     Exposes an iterable interface.
     Notice that this algorithm is not fully exhaustive,
     see https://github.com/satellogic/orbit-predictor/issues/99 for details.
     """
 
-    def __init__(self, *a, **kw):
+    def __init__(
+        self,
+        location: Location,
+        satellite: SatellitePredictor,
+        max_elevation_gt=0,
+        aos_at_dg=0,
+        tolerance_s=1.0
+    ):
         """
-        Initialize LocationPredictor but also compute radians for geodetic coordinates
+        Initialize Observer but also compute radians for geodetic coordinates
         """
-        super().__init__(*a, **kw)
-        self.aos_at_deg = degrees(self.aos_at)  # use degrees instead of radians
+        self.location = location
+        self.predictor = satellite
+        self.max_elevation_gt = radians(max([max_elevation_gt, aos_at_dg]))
+        self.set_minimum_elevation(aos_at_dg)
+        self.set_tolerance(tolerance_s)
         self.location_lat_rad = radians(self.location.latitude_deg)
         self.location_lon_rad = radians(self.location.longitude_deg)
         self.location_ecef = np.array(self.location.position_ecef)
 
-    def iter_passes(self):
+    def iter_passes(self, start_date, limit_date=None):
         """Returns one pass each time"""
-        current_date = self.start_date
+        current_date = start_date
         while True:
             if self._is_ascending(current_date):
                 # we need a descending point
@@ -209,22 +177,46 @@ class LocationPredictor(BaseLocationPredictor):
                 descending_date = self._find_nearest_descending(ascending_date)
                 pass_ = self._refine_pass(ascending_date, descending_date)
                 if pass_.valid:
-                    if self.limit_date is not None and pass_.aos > self.limit_date:
+                    if limit_date is not None and pass_.aos > limit_date:
                         break
-                    # if pass_.max_elevation_deg < self.max_elevation_gt:
-                    #     break
                     predicted_pass = self._build_predicted_pass(pass_)
-                    # if (predicted_pass.aos.elevation < self.aos_at_deg) or (predicted_pass.los.elevation < self.aos_at_deg):
-                    #     break
                     yield predicted_pass
-
-                if self.limit_date is not None and current_date > self.limit_date:
+                if limit_date is not None and current_date > limit_date:
                     break
-
                 current_date = pass_.tca + self._orbit_step(0.6)
-
             else:
                 current_date = self._find_nearest_ascending(current_date)
+
+    @property
+    def passes_over(self, *a, **kw):
+        return self.iter_passes(*a, **kw)
+
+    def get_next_pass(self,
+        aos_dt: datetime.datetime = None,
+        *,
+        limit_date: datetime.datetime = None,
+    ) -> PredictedPass:
+        """
+        Gets first overpass starting at aos_dt
+        """
+        if aos_dt is None:
+            aos_dt = datetime.datetime.utcnow()
+        for pass_ in self.iter_passes(aos_dt, limit_date=limit_date):
+            return pass_
+        else:
+            raise NotReachable('Propagation limit date exceeded')
+
+    def set_minimum_elevation(self, elevation: float):
+        """  Set minimum elevation for an overpass  """
+        self.aos_at = radians(elevation)
+        self.aos_at_deg = elevation
+
+    def set_tolerance(self, seconds: float):
+        """  Set tolerance variables """
+        if seconds <= 0:
+            raise Exception("Tolerance must be > 0")
+        self.tolerance_s = seconds
+        self.tolerance = datetime.timedelta(seconds=seconds)
 
     def _build_predicted_pass(self, basic_pass: BasicPassInfo):
         """Returns a classic predicted pass"""
@@ -258,7 +250,6 @@ class LocationPredictor(BaseLocationPredictor):
         mid = self.midpoint(start, end)
         mid_right = self.midpoint(mid, end)
         mid_left = self.midpoint(start, mid)
-
         return [end, mid, mid_right, mid_left]
 
     def _refine_pass(self, ascending_date, descending_date):
@@ -278,7 +269,6 @@ class LocationPredictor(BaseLocationPredictor):
                 ascending_date = midpoint
             else:
                 descending_date = midpoint
-
         return ascending_date
 
     def _precision_reached(self, start, end):
@@ -303,7 +293,7 @@ class LocationPredictor(BaseLocationPredictor):
         """Returns a time step, that will make the satellite advance a given number of orbits"""
         step_in_radians = size * 2 * pi
         seconds = (step_in_radians / self.predictor.mean_motion) * 60
-        return dt.timedelta(seconds=seconds)
+        return datetime.timedelta(seconds=seconds)
 
     def _find_aos(self, tca):
         end = tca
@@ -325,15 +315,13 @@ class LocationPredictor(BaseLocationPredictor):
         while not self._precision_reached(start, end):
             midpoint = self.midpoint(start, end)
             elevation = self._elevation_at(midpoint)
-
             if elevation < self.aos_at:
                 end = midpoint
             else:
                 start = midpoint
-
         return start
 
-    def razel(self, datetime: dt.datetime) -> RangeAzEl:
+    def razel(self, datetime: datetime.datetime) -> RangeAzEl:
         """
         Get range, azimuth, and elevation for datetime
         """
@@ -343,7 +331,7 @@ class LocationPredictor(BaseLocationPredictor):
         )
         return RangeAzEl(range_, az, el)
 
-    def point(self, datetime: dt.datetime) -> PassPoint:
+    def point(self, datetime: datetime.datetime) -> PassPoint:
         """
         Get PassPoint with range, azimuth, and elevation data for datetime
         """

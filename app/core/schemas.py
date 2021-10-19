@@ -60,7 +60,7 @@ class SatelliteDetail(Satellite):
     datetime: List[datetime.datetime]
     latitude: List[float]
     longitude: List[float]
-    altitude: List[float] = Field(None, "Satellite altitude in km")
+    altitude: List[float] = Field(None, description="Satellite altitude in km")
 
 
 class Point(BaseModel):
@@ -73,7 +73,7 @@ class Point(BaseModel):
     range: float = Field(..., description='range [km]')
     dec: float = Field(None, description='declination [deg]')
     ra: float = Field(None, description='right ascension [deg]')
-    brightness: float = Field(None, 'brightness magnitude')
+    brightness: float = Field(None, description='brightness magnitude')
 
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
