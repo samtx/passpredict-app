@@ -1,7 +1,7 @@
-import datetime as dt
+import datetime
 from enum import Enum
 from math import floor
-from typing import List, Sequence, Tuple, Optional
+from typing import List
 
 from pydantic import BaseModel, Field, validator
 
@@ -42,7 +42,7 @@ class Satellite(BaseModel):
     name: str = None
     description: str = None
     decayed: bool = None
-    launch_date: dt.date = None
+    launch_date: datetime.date = None
     launch_year: int = None
     # orbit_type: int = None
     # constellation: int = None
@@ -56,9 +56,16 @@ class Satellite(BaseModel):
     inclination: float = None
 
 
+class SatelliteDetail(Satellite):
+    datetime: List[datetime.datetime]
+    latitude: List[float]
+    longitude: List[float]
+    altitude: List[float] = Field(None, "Satellite altitude in km")
+
+
 class Point(BaseModel):
     # __slots__ = ['datetime', 'azimuth', 'elevation', 'range', 'declination', 'right_ascension']
-    datetime: dt.datetime
+    datetime: datetime.datetime
     timestamp: float = Field(..., description='Unix timestamp in seconds since Jan 1 1970 UTC')
     az: float = Field(..., title='Azimuth', description='azimuth [deg]')
     az_ord: str = Field(..., description='Ordinal direction, eg. NE, NNW, WSW')
@@ -66,6 +73,7 @@ class Point(BaseModel):
     range: float = Field(..., description='range [km]')
     dec: float = Field(None, description='declination [deg]')
     ra: float = Field(None, description='right ascension [deg]')
+    brightness: float = Field(None, 'brightness magnitude')
 
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
@@ -106,17 +114,6 @@ class PassType(str, Enum):
     visible = 'visible'
 
 
-# class Overpass(BaseModel):
-#     start_pt: Point
-#     max_pt: Point
-#     end_pt: Point
-#     satellite_id: int = None
-#     type: PassType = None
-#     vis_start_pt: Point = None
-#     vis_end_pt: Point = None
-#     brightness: float = None
-
-
 class Overpass(BaseModel):
     aos: Point = Field(..., description='Acquisition of signal')
     tca: Point = Field(..., description='Time of closest approach')
@@ -126,6 +123,13 @@ class Overpass(BaseModel):
     satid: int = Field(None, description='Satellite NORAD ID')
     type: PassType = None
     brightness: float = None
+
+
+class OverpassDetail(Overpass):
+    datetime: List[datetime.datetime]
+    azimuth: List[float]
+    elevation: List[float]
+    range: List[float]
 
 
 class Location(BaseModel):
@@ -145,8 +149,8 @@ class SingleSatOverpassResult(OverpassResultBase):
 
 
 class PassDetailResult(OverpassResultBase):
-    satellite: Satellite
-    overpass: Overpass
+    satellite: SatelliteDetail
+    overpass: OverpassDetail
 
 
 class MultiSatOverpassResult(OverpassResultBase):

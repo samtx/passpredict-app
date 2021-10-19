@@ -3,10 +3,11 @@ import datetime
 from typing import NamedTuple, Tuple
 
 from astrodynamics import AsyncPasspredictTLESource, SatellitePredictor
-from sqlalchemy import and_, select, func, desc
+from sqlalchemy import select
 from starlette.exceptions import HTTPException
+from databases import Database
+from aioredis import Redis
 
-from app.resources import cache, db
 from app.dbmodels import tle as tledb
 
 
@@ -23,7 +24,7 @@ class PasspredictTLESource(AsyncPasspredictTLESource):
     for orbital elements
     """
 
-    def __init__(self, db, cache):
+    def __init__(self, db: Database, cache: Redis):
         self.db = db
         self.cache = cache
 

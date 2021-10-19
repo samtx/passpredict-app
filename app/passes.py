@@ -9,8 +9,8 @@ import httpx
 from app.settings import MAX_DAYS
 from app.resources import templates
 from app.api import app as api_app
-from app.api.schemas import Location, Satellite
-from app.api.passes import _get_pass_detail
+from app.core.schemas import Location, Satellite
+from app.core.passes import _get_pass_detail
 
 logger = logging.getLogger(__name__)
 
