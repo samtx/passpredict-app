@@ -76,13 +76,20 @@ async def _get_pass_detail(
     tle_source = PasspredictTLESource(db, cache)
     predictor = await tle_source.get_predictor(satid, aosdt)
     aos_dt = aosdt - datetime.timedelta(minutes=10)
-    overpass_result = await run_in_threadpool(
+    pass_detail, llh = await run_in_threadpool(
         get_next_pass_detail,
         predictor,
         location,
         date_start=aos_dt,
         min_elevation=10.0,
     )
-    satellite = Satellite(id=satid)
-    data = satellite_pass_detail_serializer(location, satellite, overpass_result)
+    SatelliteDetail, OverpassDetail
+    satellite = SatelliteDetail(
+        id=satid,
+        latitude=llh.latitude.tolist(),
+        longitude=llh.longitude.tolist(),
+        altitude=llh.altitude.tolist(),
+        datetime=llh.datetime
+    )
+    data = satellite_pass_detail_serializer(location, satellite, pass_detail)
     return data

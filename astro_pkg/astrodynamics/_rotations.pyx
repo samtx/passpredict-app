@@ -50,6 +50,7 @@ def ecef_to_llh(double[:] recef):
     """
     Convert ECEF coordinates to latitude, longitude, and altitude
     Uses WGS84 constants
+    Based on orbit_predictor.coordinate_systems.ecef_to_llh
     """
      # WGS-84 ellipsoid parameters */
     cdef double a = 6378.1370

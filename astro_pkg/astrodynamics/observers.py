@@ -1,22 +1,23 @@
 from __future__ import annotations
 import datetime
-from typing import NamedTuple, Sequence
+import typing
 from math import radians, degrees, pi
 from functools import cached_property
 from dataclasses import dataclass
 
 import numpy as np
-from orbit_predictor.predictors.pass_iterators import LocationPredictor as BaseLocationPredictor
-from orbit_predictor.predictors.accurate import HighAccuracyTLEPredictor
-from orbit_predictor.coordinate_systems import ecef_to_eci, ecef_to_llh
+from orbit_predictor.predictors.pass_iterators import LocationPredictor
 
 from . import _rotations
 from .exceptions import NotReachable, PropagationError
 from .locations import Location
 from .utils import get_pass_detail_datetime_metadata
 
+if typing.TYPE_CHECKING:
+    from .satellites import SatellitePredictor, LLH
 
-class RangeAzEl(NamedTuple):
+
+class RangeAzEl(typing.NamedTuple):
     range: float  # km
     az: float     # deg
     el: float     # deg
@@ -90,10 +91,10 @@ class PredictedPass:
     aos: PassPoint
     tca: PassPoint
     los: PassPoint
-    azimuth: Sequence[float] = None
-    elevation: Sequence[float] = None
-    range: Sequence[float] = None
-    datetime: Sequence[datetime.datetime] = None
+    azimuth: typing.Sequence[float] = None
+    elevation: typing.Sequence[float] = None
+    range: typing.Sequence[float] = None
+    datetime: typing.Sequence[datetime.datetime] = None
 
     @cached_property
     def midpoint(self):
@@ -110,54 +111,7 @@ class PredictedPass:
         return f"<PredictedPass {self.satid} over {repr(self.location)} on {self.aos.dt}"
 
 
-class SatellitePredictor(HighAccuracyTLEPredictor):
-    """
-    Predictor for satellite overpasses. Uses sgp4 for propagation
-    """
-    def __init__(self, satid: int):
-        """
-        Params:
-            satid: int = NORAD id for satellite
-            source: PasspredictTLESource
-        """
-        self.satid = satid
-        self._source = None
-        self.tle = None
-        self._propagator = None
-
-    @property
-    def sate_id(self):
-        return self.satid
-
-    def set_propagator(self):
-        self._propagator = self._get_propagator()
-
-    def get_only_position(self, datetime: datetime.datetime) -> np.ndarray:
-        """
-        Get satellite position in ECEF coordinates [km]
-        """
-        pos_tuple = super().get_only_position(datetime)
-        return np.array(pos_tuple)
-
-    def get_satellite_position_detail(self, start_date, n_steps, time_step):
-        """
-        Get satellite subpoints and details
-        """
-        latitude = np.empty(n_steps)
-        longitude = np.empty(n_steps)
-        altitude = np.empty(n_steps)
-        dt = start_date
-        for i in range(n_steps):
-            recef = self.get_only_position()
-            lat, lon, h = ecef_to_llh(recef)
-            latitude[i] = lat
-            longitude[i] = lon
-            altitude[i] = h
-            dt += time_step
-        return latitude, longitude, altitude
-
-
-class Observer(BaseLocationPredictor):
+class Observer(LocationPredictor):
     """
     Predicts passes of a satellite over a given location.
     Exposes an iterable interface.
@@ -177,13 +131,18 @@ class Observer(BaseLocationPredictor):
         Initialize Observer but also compute radians for geodetic coordinates
         """
         self.location = location
-        self.predictor = satellite
+        self.satellite = satellite
         self.max_elevation_gt = radians(max([max_elevation_gt, aos_at_dg]))
         self.set_minimum_elevation(aos_at_dg)
         self.set_tolerance(tolerance_s)
         self.location_lat_rad = radians(self.location.latitude_deg)
         self.location_lon_rad = radians(self.location.longitude_deg)
         self.location_ecef = np.array(self.location.position_ecef)
+
+    @property
+    def predictor(self):
+        """ For backwards compatibility """
+        return self.satellite
 
     def iter_passes(self, start_date, limit_date=None):
         """Returns one pass each time"""
@@ -229,16 +188,16 @@ class Observer(BaseLocationPredictor):
         limit_date: datetime.datetime = None,
         delta_s: float = 10,
         pad_minutes: int = 5,
-    ) -> PredictedPass:
+    ) -> typing.Tuple[PredictedPass, LLH]:
         """
         Add details to PredictedPass
         Evaluate position and velocity properties for each delta_s seconds
         """
-        pass_ = self.get_next_pass(aos_dt, limit_date)
+        pass_ = self.get_next_pass(aos_dt, limit_date=limit_date)
         start_date, n_steps, time_step = get_pass_detail_datetime_metadata(pass_, delta_s, pad_minutes=pad_minutes)
         pass_detail = self._get_overpass_detail(pass_, start_date, n_steps, time_step)
-        satellite_detail = self.satellite.get_satellite_position_detail(start_date, n_steps, time_step)
-        return pass_detail, satellite_detail
+        llh = self.satellite.get_position_detail(start_date, n_steps, time_step)
+        return (pass_detail, llh)
 
     def _get_overpass_detail(
         self,

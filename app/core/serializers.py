@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, Union
 from zoneinfo import ZoneInfo
 
 from astrodynamics import PredictedPass
@@ -7,6 +7,7 @@ from astrodynamics import PredictedPass
 from .schemas import (
     Location,
     OrdinalDirection,
+    OverpassDetail,
     Point,
     Overpass,
     Satellite,
@@ -63,7 +64,7 @@ def satellite_pass_detail_serializer(
 def overpass_serializer(
     pass_list: List[PredictedPass],
     tz: ZoneInfo,
-) -> List[Overpass]:
+) -> Union[List[Overpass], List[OverpassDetail]]:
     """ Serialize individual overpass data """
     overpasses = []
     for pass_ in pass_list:
@@ -79,6 +80,15 @@ def overpass_serializer(
             satid=pass_.satid,
             max_elevation=max_elevation
         )
+        if pass_.elevation is not None:
+            # serialize OverpassDetail
+            overpass = OverpassDetail(
+                elevation=pass_.elevation.tolist(),
+                azimuth=pass_.azimuth.tolist(),
+                range=pass_.range.tolist(),
+                datetime=pass_.datetime,
+                **overpass.dict()
+            )
         overpasses.append(overpass)
     return overpasses
 

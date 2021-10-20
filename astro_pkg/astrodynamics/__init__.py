@@ -22,10 +22,14 @@ from .sources import (
     TLE,
 )
 
-from .predictors import (
+from .satellites import (
     SatellitePredictor,
-    PredictedPass,
+    LLH,
+)
+
+from .observers import (
     Observer,
+    PredictedPass,
 )
 
 __all__ = [

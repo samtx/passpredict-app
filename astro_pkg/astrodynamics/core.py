@@ -1,6 +1,7 @@
 import datetime
 
-from .predictors import SatellitePredictor, Observer
+from .satellites import SatellitePredictor
+from .observers import Observer
 from .locations import Location
 
 
@@ -54,5 +55,5 @@ def get_next_pass_detail(
     min_elevation: float = 10.0,
 ):
     observer = Observer(location, satellite, aos_at_dg=min_elevation, tolerance_s=1.0)
-    pass_detail, satellite_detail = observer.get_next_pass_detail(date_start, detail=True)
-    return pass_detail, satellite_detail
+    pass_detail, llh = observer.get_next_pass_detail(date_start)
+    return pass_detail, llh
