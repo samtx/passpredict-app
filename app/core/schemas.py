@@ -132,11 +132,17 @@ class OverpassDetail(Overpass):
     range: List[float]
 
 
+class Timezone(BaseModel):
+    name: str
+    utc_offset: float
+
+
 class Location(BaseModel):
     lat: float = Field(..., description='latitude, \u0b00N')
     lon: float = Field(..., description='longitude, \u0b00E')
     h: float = Field(0.0, description='height, [m] above WGS84 ellipsoid')
     name: str = None
+    timezone: Timezone = None
 
 
 class OverpassResultBase(BaseModel):
