@@ -2,6 +2,7 @@ from .core import (
     predict_all_visible_satellite_overpasses,
     predict_single_satellite_overpasses,
     predict_next_overpass,
+    get_next_pass_detail,
 )
 
 from ._time import (
@@ -24,12 +25,14 @@ from .sources import (
 from .predictors import (
     SatellitePredictor,
     PredictedPass,
+    Observer,
 )
 
 __all__ = [
     'predict_all_visible_satellite_overpasses',
     'predict_single_satellite_overpasses',
     'predict_next_overpass',
+    'get_next_pass_detail',
     'jday2datetime',
     'epoch_to_jd',
     'julian_date',
@@ -40,4 +43,5 @@ __all__ = [
     'TLE',
     'SatellitePredictor',
     'PredictedPass',
+    'Observer',
 ]

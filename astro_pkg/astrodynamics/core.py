@@ -45,3 +45,14 @@ def predict_next_overpass(
     observer = Observer(location, satellite, aos_at_dg=min_elevation, tolerance_s=1.0)
     pass_ = observer.get_next_pass(date_start)
     return pass_
+
+
+def get_next_pass_detail(
+    satellite: SatellitePredictor,
+    location: Location,
+    date_start: datetime.datetime,
+    min_elevation: float = 10.0,
+):
+    observer = Observer(location, satellite, aos_at_dg=min_elevation, tolerance_s=1.0)
+    pass_detail, satellite_detail = observer.get_next_pass_detail(date_start, detail=True)
+    return pass_detail, satellite_detail

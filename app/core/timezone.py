@@ -1,4 +1,6 @@
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+from datetime import timezone as py_timezone
+from zoneinfo import ZoneInfo
+from functools import lru_cache
 
 from timezonefinder import TimeZoneFinder
 
@@ -14,11 +16,13 @@ def set_timezone_on_datetime(dt: OverpassResultBase):
     pass
 
 
-def get_timezone_from_latlon(latitude: float, longitude: float):
+@lru_cache(maxsize=128)
+def get_timezone_from_latlon(latitude: float, longitude: float) -> ZoneInfo:
     """
     Returns timezone string. E.g. 'Europe/Berlin'
     """
-    tz = tf.timezone_at(lng=longitude, lat=latitude)
+    tz_str = tf.timezone_at(lng=longitude, lat=latitude)
+    tz = py_timezone.utc if not tz_str else ZoneInfo(tz_str)
     return tz
 
 

@@ -4,14 +4,14 @@ from databases import Database
 from aioredis import Redis
 from starlette.concurrency import run_in_threadpool
 
-
 from astrodynamics import (
     predict_single_satellite_overpasses,
     predict_next_overpass,
+    get_next_pass_detail,
     Location,
 )
 from app.utils import get_satellite_norad_ids
-from .schemas import Satellite
+from .schemas import Satellite, SatelliteDetail, OverpassDetail
 from .serializers import (
     satellite_pass_detail_serializer,
     single_satellite_overpass_result_serializer,
@@ -77,7 +77,7 @@ async def _get_pass_detail(
     predictor = await tle_source.get_predictor(satid, aosdt)
     aos_dt = aosdt - datetime.timedelta(minutes=10)
     overpass_result = await run_in_threadpool(
-        predict_next_overpass,
+        get_next_pass_detail,
         predictor,
         location,
         date_start=aos_dt,

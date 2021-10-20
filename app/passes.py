@@ -4,7 +4,6 @@ import urllib.parse
 
 from starlette.routing import Route
 from starlette.requests import Request
-import httpx
 
 from app.settings import MAX_DAYS
 from app.resources import templates

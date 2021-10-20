@@ -7,12 +7,13 @@ from dataclasses import dataclass
 
 import numpy as np
 from orbit_predictor.predictors.pass_iterators import LocationPredictor as BaseLocationPredictor
-from orbit_predictor.predictors.pass_iterators import PredictedPass as BasePredictedPass
 from orbit_predictor.predictors.accurate import HighAccuracyTLEPredictor
+from orbit_predictor.coordinate_systems import ecef_to_eci, ecef_to_llh
 
 from . import _rotations
 from .exceptions import NotReachable, PropagationError
 from .locations import Location
+from .utils import get_pass_detail_datetime_metadata
 
 
 class RangeAzEl(NamedTuple):
@@ -138,6 +139,23 @@ class SatellitePredictor(HighAccuracyTLEPredictor):
         pos_tuple = super().get_only_position(datetime)
         return np.array(pos_tuple)
 
+    def get_satellite_position_detail(self, start_date, n_steps, time_step):
+        """
+        Get satellite subpoints and details
+        """
+        latitude = np.empty(n_steps)
+        longitude = np.empty(n_steps)
+        altitude = np.empty(n_steps)
+        dt = start_date
+        for i in range(n_steps):
+            recef = self.get_only_position()
+            lat, lon, h = ecef_to_llh(recef)
+            latitude[i] = lat
+            longitude[i] = lon
+            altitude[i] = h
+            dt += time_step
+        return latitude, longitude, altitude
+
 
 class Observer(BaseLocationPredictor):
     """
@@ -192,19 +210,56 @@ class Observer(BaseLocationPredictor):
         return self.iter_passes(*a, **kw)
 
     def get_next_pass(self,
-        aos_dt: datetime.datetime = None,
+        aos_dt: datetime.datetime,
         *,
         limit_date: datetime.datetime = None,
     ) -> PredictedPass:
         """
         Gets first overpass starting at aos_dt
         """
-        if aos_dt is None:
-            aos_dt = datetime.datetime.utcnow()
-        for pass_ in self.iter_passes(aos_dt, limit_date=limit_date):
-            return pass_
-        else:
+        pass_ = next(self.iter_passes(aos_dt, limit_date=limit_date))
+        if not pass_:
             raise NotReachable('Propagation limit date exceeded')
+        return pass_
+
+    def get_next_pass_detail(
+        self,
+        aos_dt: datetime.datetime,
+        *,
+        limit_date: datetime.datetime = None,
+        delta_s: float = 10,
+        pad_minutes: int = 5,
+    ) -> PredictedPass:
+        """
+        Add details to PredictedPass
+        Evaluate position and velocity properties for each delta_s seconds
+        """
+        pass_ = self.get_next_pass(aos_dt, limit_date)
+        start_date, n_steps, time_step = get_pass_detail_datetime_metadata(pass_, delta_s, pad_minutes=pad_minutes)
+        pass_detail = self._get_overpass_detail(pass_, start_date, n_steps, time_step)
+        satellite_detail = self.satellite.get_satellite_position_detail(start_date, n_steps, time_step)
+        return pass_detail, satellite_detail
+
+    def _get_overpass_detail(
+        self,
+        pass_,
+        start_date: datetime.datetime,
+        n_steps: int,
+        time_step: datetime.timedelta,
+    ):
+        pass_.azimuth = np.empty(n_steps)
+        pass_.elevation = np.empty(n_steps)
+        pass_.range = np.empty(n_steps)
+        pass_.datetime = [None] * n_steps
+        dt = start_date
+        for i in range(n_steps):
+            rae = self.razel(dt)
+            pass_.datetime[i] = dt
+            pass_.azimuth[i] = rae.az
+            pass_.elevation[i] = rae.el
+            pass_.range[i] = rae.range
+            dt += time_step
+        return pass_
 
     def set_minimum_elevation(self, elevation: float):
         """  Set minimum elevation for an overpass  """

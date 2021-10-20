@@ -1,7 +1,7 @@
 # cython: boundscheck=False, wraparound=False
 # cython: language_level=3
 
-from libc.math cimport sin, cos, sqrt, atan2, asin, pi
+from libc.math cimport sin, cos, sqrt, atan, atan2, asin, pi, pow
 
 import numpy as np
 cimport numpy as np
@@ -44,3 +44,28 @@ def razel(
     az_deg = az * 180.0 / pi
 
     return (range_, az_deg, el_deg)
+
+
+def ecef_to_llh(double[:] recef):
+    """
+    Convert ECEF coordinates to latitude, longitude, and altitude
+    Uses WGS84 constants
+    """
+     # WGS-84 ellipsoid parameters */
+    cdef double a = 6378.1370
+    cdef double b = 6356.752314
+    cdef double p, thet, esq, epsq, lat, lon, h, n
+
+    p = sqrt(recef[0]*recef[0] + recef[1]*recef[1])
+    thet = atan(recef[2] * a / (p * b))
+    esq = 1.0 - (b / a)*(b / a)
+    epsq = (a / b)*(a / b) - 1.0
+
+    lat = atan((recef[2] + epsq * b * pow(sin(thet), 3)) / (p - esq * a * pow(cos(thet), 3)))
+    lon = atan2(recef[1], recef[0])
+    n = a*a / sqrt(a*a*cos(lat)*cos(lat) + b*b*sin(lat)*sin(lat))
+    h = p / cos(lat) - n
+
+    lat = lat * 180.0 / pi  # convert from radians to degrees
+    lon = lon * 180.0 / pi
+    return lat, lon, h

@@ -1,9 +1,8 @@
+from __future__ import annotations
 from typing import List
 from zoneinfo import ZoneInfo
-from datetime import datetime, timezone as py_timezone
 
 from astrodynamics import PredictedPass
-from timezonefinder import TimezoneFinder
 
 from .schemas import (
     Location,
@@ -15,9 +14,6 @@ from .schemas import (
     Point,
     PassDetailResult,
 )
-
-
-tf = TimezoneFinder()
 
 
 def single_satellite_overpass_result_serializer(
@@ -32,19 +28,14 @@ def single_satellite_overpass_result_serializer(
     location_lat = round(location.latitude_deg, 4)
     location_lon = round(location.longitude_deg, 4)
     location_name = location.name
+    tzinfo = location.timezone
     location = Location(
         lat=location_lat, lon=location_lon, h=location_h, name=location_name
     )
-    # Find timezone
-    tz_str = tf.timezone_at(lng=location.lon, lat=location.lat)
-    if tz_str is None:
-        tz = py_timezone.utc
-    else:
-        tz = ZoneInfo(tz_str)
-    overpasses = overpass_serializer(data, tz=tz)
+    overpasses = overpass_serializer(data, tz=tzinfo)
     satellite = Satellite(**satellite._asdict())  # convert to pydantic model
-    out = SingleSatOverpassResult(location=location, overpasses=overpasses, satellite=satellite)
-    return out
+    res = SingleSatOverpassResult(location=location, overpasses=overpasses, satellite=satellite)
+    return res
 
 
 def satellite_pass_detail_serializer(
@@ -63,14 +54,10 @@ def satellite_pass_detail_serializer(
         lat=location_lat, lon=location_lon, h=location_h, name=location_name
     )
     # Find timezone
-    tz_str = tf.timezone_at(lng=location.lon, lat=location.lat)
-    if tz_str is None:
-        tz = py_timezone.utc
-    else:
-        tz = ZoneInfo(tz_str)
-    overpass = overpass_serializer([pass_], tz=tz)[0]
-    resp = PassDetailResult(location=location, satellite=satellite, overpass=overpass)
-    return resp
+    tzinfo = location.timezone
+    overpass = overpass_serializer([pass_], tz=tzinfo)[0]
+    res = PassDetailResult(location=location, satellite=satellite, overpass=overpass)
+    return res
 
 
 def overpass_serializer(

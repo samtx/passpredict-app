@@ -4,7 +4,7 @@ import numpy as np
 from numpy.testing import assert_allclose
 import pytest
 
-from orbit_predictor.coordinate_systems import to_horizon, horizon_to_az_elev
+from orbit_predictor.coordinate_systems import ecef_to_llh, to_horizon, horizon_to_az_elev
 
 from astrodynamics import _rotations, Location
 
@@ -43,4 +43,23 @@ class TestECEFtoRazelRotations:
         assert_allclose(range_, 1022.3143, atol=1e-4)
         assert_allclose(az, 323.0780, atol=1e-4)
         assert_allclose(el, 18.7619, atol=1e-4)
+
+
+
+@pytest.mark.parametrize(
+    'ecef, llh, tol',
+    (
+        pytest.param([2750.19, -4476.679, -3604.011],[-34.628284, -58.436045, 0.0], 1e-2, id="orbit_predictor tests, buenos aires"),
+        pytest.param([2922.48, -4757.126, -3831.311],[-34.628284, -58.436045, 400.0], 1e-2, id="orbit_predictor tests, buenos aires high altitude"),
+        pytest.param([4919.4248, 793.8355, 3967.8253],[38.716666, 9.16666, 0.0], 1e-2, id="orbit_predictor tests, lisbon"),
+        pytest.param([5266.051, 849.7698, 4249.2854],[38.716666, 9.16666, 450.0], 1e-2, id="orbit_predictor tests, lisbon high altitude"),
+        pytest.param([.382, -1.0495, 6356.7772], [89.99, -70, 0.025], 1e-2, id="orbit_predictor tests, north pole"),
+        pytest.param([.382, -1.0495, -6356.777], [-89.99, -70, 0.025], 1e-2, id="orbit_predictor tests, south pole"),
+    )
+)
+def test_ecef_to_llh(ecef, llh, tol):
+    ecef_ary = np.array(ecef)
+    llh_computed = _rotations.ecef_to_llh(ecef_ary)
+    for i in range(3):
+        assert_allclose(llh_computed[i], llh[i], atol=tol)
 

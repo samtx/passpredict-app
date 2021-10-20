@@ -17,7 +17,7 @@
             "astrodynamics/sofa",
             "astrodynamics/sgp4",
             "astrodynamics/ast2body",
-            "/tmp/pip-build-env-vtw_iwp0/overlay/lib/python3.9/site-packages/numpy/core/include"
+            "/tmp/pip-build-env-lbm5ehn6/overlay/lib/python3.9/site-packages/numpy/core/include"
         ],
         "language": "c++",
         "name": "astrodynamics._time",
