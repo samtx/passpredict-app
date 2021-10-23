@@ -6,4 +6,3 @@ pytest-asyncio
 pytest-random
 requests
 tqdm
-psycopg2

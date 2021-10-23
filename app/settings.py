@@ -17,8 +17,6 @@ POSTGRES_USER = config('POSTGRES_USER')
 POSTGRES_PASSWORD = config('POSTGRES_PASSWORD')
 POSTGRES_NAME = config('POSTGRES_NAME', default='passpredict')
 
-HERE_API_KEY = config('HERE_API_KEY', cast=Secret)
-
 # Maximum number of days to predict overpasses for a single satellite
 MAX_DAYS = config('MAX_DAYS', cast=int, default=10)
 
@@ -34,6 +32,7 @@ REDIS_URL = config('REDIS_URL', cast=URL, default=None)
 
 MAPBOX_ACCESS_TOKEN = config('MAPBOX_ACCESS_TOKEN', cast=Secret, default='')
 MAPBOX_ACCESS_TOKEN_DEV = config('MAPBOX_ACCESS_TOKEN_DEV', cast=Secret, default='')
+MAPBOX_SECRET_TOKEN = config('MAPBOX_SECRET_TOKEN', cast=Secret, default='')
 
 CORS_ORIGINS = config('CORS_ORIGINS', cast=CommaSeparatedStrings, default='*')
 

@@ -12,6 +12,7 @@ from app.utils import get_satellite_norad_ids
 from app.resources import cache, db, templates, static_app
 from app import settings
 from app import passes
+from app import locations
 from app.api import app as api_app
 
 
@@ -88,6 +89,7 @@ routes = [
     Route('/help', help, name='help'),
     Mount('/passes', routes=passes.routes, name='passes'),
     Mount('/api', app=api_app, name='api'),
+    Mount('/locations', app=locations.app, name='location'),
     Mount('/static', app=static_app, name='static'),
 ]
 
@@ -103,3 +105,4 @@ app.state.db = db
 app.state.cache = cache
 api_app.state.db = db
 api_app.state.cache = cache
+locations.app.state.cache = cache

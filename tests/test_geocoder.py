@@ -1,8 +1,13 @@
 from urllib.parse import quote
 
 import httpx
+from starlette.testclient import TestClient
 
 from app import settings
+from app.main import app
+
+client = TestClient(app)
+
 
 def test_mapbox_geocoder():
     """
@@ -31,3 +36,14 @@ def test_mapbox_geocoder():
     lon, lat = austin['center']
     assert 30.2 <= lat <= 30.3
     assert -97.7 >= lon >= -97.8
+
+
+def test_location_api():
+    query_str = "austin, texas"
+    response = client.get("/locations", params={'q': query_str})
+    assert response.status_code == 200
+    data = response.json()
+    locations = data['locations']
+    austin = locations[0]
+    assert 30.2 <= austin['lat'] <= 30.3
+    assert -97.7 >= austin['lon'] >= -97.8
