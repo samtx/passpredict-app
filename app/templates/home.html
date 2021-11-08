@@ -29,7 +29,7 @@
                     <input
                         x-model="query"
                         name="locationQuery"
-                        @input.debounce.75ms="fetchLocations()"
+                        @input.debounce.50ms="fetchLocations()"
                         @focus="fetchLocations()"
                         @keydown.arrow-down="focusNextResult()"
                         @keydown.arrow-up="focusPreviousResult()"

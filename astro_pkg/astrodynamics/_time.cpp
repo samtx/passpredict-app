@@ -17,18 +17,18 @@
             "astrodynamics/sofa",
             "astrodynamics/sgp4",
             "astrodynamics/ast2body",
-            "/tmp/pip-build-env-lbm5ehn6/overlay/lib/python3.9/site-packages/numpy/core/include"
+            "/tmp/pip-build-env-qbzzo_ve/overlay/lib/python3.9/site-packages/numpy/core/include"
         ],
         "language": "c++",
         "name": "astrodynamics._time",
         "sources": [
             "astrodynamics/_time.pyx",
-            "astrodynamics/sofa/anp.c",
             "astrodynamics/sofa/gmst82.c",
+            "astrodynamics/sofa/anp.c",
             "astrodynamics/sgp4/SGP4.cpp",
             "astrodynamics/ast2body/astMath.cpp",
-            "astrodynamics/ast2body/ast2Body.cpp",
-            "astrodynamics/ast2body/astTime.cpp"
+            "astrodynamics/ast2body/astTime.cpp",
+            "astrodynamics/ast2body/ast2Body.cpp"
         ]
     },
     "module_name": "astrodynamics._time"

@@ -33,7 +33,7 @@ window.locationSearch = function() {
             if (this.query.length == 0) {
                 this.selectedIndex = null;
             }
-            if (this.query.length < 3) {
+            if (this.query.length < 2) {
                 return null;
             };
             this.open = true;

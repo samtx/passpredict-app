@@ -48,51 +48,18 @@ export const getPassQuality = (pass) => {
 
 
 async function queryLocationAPI(search_text) {
-    const params = {
-        access_token: "MAPBOX_ACCESS_TOKEN",
-        autocomplete: true,
-        types: [
-            "postcode",
-            "district",
-            "place",
-            "locality",
-            "neighborhood",
-            "address",
-        ],
-    };
-    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURI(
-        search_text
-    )}.json`;
+    const url = `locations/`;
     const response = await fetch(
-        url + "?" + new URLSearchParams(params).toString()
+        url + "?" + new URLSearchParams({q: search_text}).toString()
     );
-    const json = await response.json();
-    // console.log(json);
-    const { features: locations } = json;
+    const locations = await response.json();
     return locations;
 }
 
 
-const parseLocations = (locations) => {
-    locations = locations.map((locationObject) => {
-        const {
-            place_name: name,
-            geometry: { coordinates: lonlat },
-        } = locationObject;
-        return {
-            name: name,
-            lat: lonlat[1],
-            lon: lonlat[0], // switch the order to lat, lon
-        };
-    });
-    return locations;
-};
-
-
 export const getLocations = async (query) => {
-    const locations = await queryLocationAPI(query);
-    const parsedLocations = parseLocations(locations);
-    return parsedLocations;
+    const data = await queryLocationAPI(query);
+    return data['locations'];
 };
 
 
