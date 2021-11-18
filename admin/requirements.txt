@@ -1,0 +1,9 @@
+Flask
+gunicorn
+psycopg2
+flask-admin
+python-dotenv
+redis
+WTForms
+starlette
+Flask-SQLAlchemy

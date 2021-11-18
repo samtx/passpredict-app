@@ -21,7 +21,6 @@ fileConfig(config.config_file_name)
 import sys, pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parents[1]))
 from app import dbmodels
-from app import settings
 from app.resources import postgres_uri
 
 config.set_main_option('sqlalchemy.url', postgres_uri)
