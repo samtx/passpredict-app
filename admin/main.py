@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla import ModelView as BaseSqlaModelView
 from flask_admin.contrib import rediscli
 from redis import Redis
 
@@ -30,18 +30,22 @@ def set_cache_headers(response):
     return response
 
 
-class SatelliteModelView(ModelView):
+class ModelView(BaseSqlaModelView):
     column_display_pk = True
+
+
+class SatelliteModelView(ModelView):
     can_delete = True
     page_size = 50  # the number of entries to display on the list view
-
-
-class UserModelView(ModelView):
-    pass
+    # inline_models = (models.Tle,)
 
 
 class TleModelView(ModelView):
     page_size = 50
+
+
+class UserModelView(ModelView):
+    pass
 
 
 admin = Admin(app, name='Pass Predict Admin', url="/", template_mode='bootstrap3')
@@ -49,5 +53,9 @@ app.config['FLASK_ADMIN_SWATCH'] = 'cosmo'   # set optional bootswatch theme
 
 # Add administrative views here
 admin.add_view(SatelliteModelView(models.Satellite, db.session, name='Satellite'))
+admin.add_view(ModelView(models.SatelliteStatus, db.session, name='SatelliteStatus'))
+admin.add_view(ModelView(models.SatelliteType, db.session, name='SatelliteType'))
+admin.add_view(ModelView(models.SatelliteOwner, db.session, name='SatelliteOwner'))
+admin.add_view(ModelView(models.LaunchSite, db.session, name='LaunchSite'))
 admin.add_view(TleModelView(models.Tle, db.session, name='TLE'))
 admin.add_view(rediscli.RedisCli(Redis.from_url(redis_uri)))

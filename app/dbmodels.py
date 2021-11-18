@@ -2,7 +2,6 @@
 
 import datetime
 
-import sqlalchemy as sa
 from sqlalchemy import (
     MetaData, Table, Column, Integer, String, Boolean, Date, Float, Text,
     ForeignKey, Unicode, DateTime
@@ -54,6 +53,41 @@ JSR_status_decayed = {
 #     Column('name', String(30), unique=True)
 # )
 
+launch_site = Table(
+    'launch_site', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), unique=True, nullable=False),
+    Column('short_name', String(10), unique=True),
+    Column('description', Text),
+    Column('latitude', Float),
+    Column('longitude', Float),
+)
+
+satellite_owner = Table(
+    'satellite_owner', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), unique=True, nullable=False),
+    Column('short_name', String(10), unique=True),
+    Column('description', Text),
+)
+
+satellite_status = Table(
+    'satellite_status', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), unique=True, nullable=False),
+    Column('description', Text),
+)
+
+
+satellite_type = Table(
+    'satellite_type', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(100), unique=True, nullable=False),
+    Column('short_name', String(10), unique=True),
+    Column('description', Text),
+)
+
+
 satellite = Table(
     'satellite', metadata,
     Column('id', Integer, primary_key=True),  # NORAD ID
@@ -63,6 +97,8 @@ satellite = Table(
     Column('decayed', Boolean),
     Column('launch_date', Date),
     Column('launch_year', Integer),
+    Column('decayed_date', Date),
+    Column('launch_site_id', Integer, ForeignKey('launch_site.id', ondelete='SET NULL')),
     # Column('orbit_type', Integer, ForeignKey('orbit_type.id')),
     # Column('constellation', Integer, ForeignKey('constellation.id')),
     Column('mass', Float),
@@ -73,6 +109,10 @@ satellite = Table(
     Column('perigee', Float),
     Column('apogee', Float),
     Column('inclination', Float),
+    # Column('rcs', Float),
+    Column('status', Integer, ForeignKey('satellite_status.id', ondelete='SET NULL')),
+    Column('owner', Integer, ForeignKey('satellite_owner.id', ondelete='SET NULL')),
+    Column('type', Integer, ForeignKey('satellite_type.id', ondelete='SET NULL')),
 )
 
 
