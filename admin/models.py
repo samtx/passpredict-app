@@ -29,10 +29,15 @@ def _tle_repr(self):
 Tle.__repr__ = _tle_repr
 
 
+def _satellite_repr(self):
+    """ Define custom repr for Satellite object """
+    return f"({self.id}) {self.name}"
+Satellite.__repr__ = _satellite_repr
+
+
 def _name_repr(self):
     """ Define repr to show name of object """
     return f"{self.name}"
-
 LaunchSite.__repr__ = _name_repr
 SatelliteOwner.__repr__ = _name_repr
 SatelliteType.__repr__ = _name_repr

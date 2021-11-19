@@ -38,12 +38,12 @@ class ModelView(BaseSqlaModelView):
 
 class SatelliteModelView(ModelView):
     can_delete = True
-    page_size = 50  # the number of entries to display on the list view
+    page_size = 25  # the number of entries to display on the list view
     # inline_models = (models.Tle,)
 
 
 class TleModelView(ModelView):
-    page_size = 50
+    page_size = 25
 
 
 class UserModelView(ModelView):
@@ -54,10 +54,10 @@ admin = Admin(app, name='Pass Predict Admin', url="/", template_mode='bootstrap3
 app.config['FLASK_ADMIN_SWATCH'] = 'cosmo'   # set optional bootswatch theme
 
 # Add administrative views here
-admin.add_view(SatelliteModelView(models.Satellite, db.session, name='Satellite'))
-admin.add_view(ModelView(models.SatelliteStatus, db.session, name='SatelliteStatus'))
-admin.add_view(ModelView(models.SatelliteType, db.session, name='SatelliteType'))
-admin.add_view(ModelView(models.SatelliteOwner, db.session, name='SatelliteOwner'))
-admin.add_view(ModelView(models.LaunchSite, db.session, name='LaunchSite'))
+admin.add_view(SatelliteModelView(models.Satellite, db.session, name='Satellite', category='Satellite'))
+admin.add_view(ModelView(models.SatelliteStatus, db.session, name='SatelliteStatus', category='Satellite'))
+admin.add_view(ModelView(models.SatelliteType, db.session, name='SatelliteType', category='Satellite'))
+admin.add_view(ModelView(models.SatelliteOwner, db.session, name='SatelliteOwner', category='Satellite'))
+admin.add_view(ModelView(models.LaunchSite, db.session, name='LaunchSite', category='Satellite'))
 admin.add_view(TleModelView(models.Tle, db.session, name='TLE'))
 admin.add_view(rediscli.RedisCli(Redis.from_url(redis_uri)))
