@@ -2,6 +2,10 @@
 
 {% block title %} Passes {% endblock title %}
 
+{% block javascript_head %}
+<link href='https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css' rel='stylesheet' />
+{% endblock javascript_head %}
+
 {% block content %}
 <div class="container is-max-desktop px-3 pt-2">
 
@@ -96,5 +100,58 @@
         </table>
     </div>
 
+    <div id="groundtrack-map"></div>
+
 </div>
+
+<!--  Javascript  -->
+<script src='https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js'></script>
+<script>
+    mapboxgl.accessToken = "{{ access_token }}";
+    let site = {
+        lon: {{ location.lon|tojson }},
+        lat: {{ location.lat|tojson }}
+    };
+
+    const map = new mapboxgl.Map({
+        container: 'groundtrack-map', // container ID
+        style: 'mapbox://styles/mapbox/light-v10', // style URL, alternate: outdoors-v11
+        center: [site.lon, site.lat], // starting position [lng, lat]
+        zoom: 4,  // starting zoom
+        interactive: false,
+    });
+
+    map.on('load', () => {
+        map.addSource('satellite', {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'properties': {},
+                'geometry': {
+                    'type': 'LineString',
+                    'coordinates': {{ satellite_coordinates|tojson }},
+                }
+            }
+        });
+        map.addLayer({
+            'id': 'satellite',
+            'type': 'line',
+            'source': 'satellite',
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': '#D2042D',
+                'line-width': 2
+            }
+        });
+    });
+    const marker = new mapboxgl.Marker({
+        color: "#6495ED",
+        scale: 0.5,
+        }).setLngLat([site.lon, site.lat])
+        .addTo(map);
+</script>
+
 {% endblock content %}

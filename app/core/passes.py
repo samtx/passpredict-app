@@ -83,7 +83,6 @@ async def _get_pass_detail(
         date_start=aos_dt,
         min_elevation=10.0,
     )
-    SatelliteDetail, OverpassDetail
     satellite = SatelliteDetail(
         id=satid,
         latitude=llh.latitude.tolist(),
@@ -93,3 +92,13 @@ async def _get_pass_detail(
     )
     data = satellite_pass_detail_serializer(location, satellite, pass_detail)
     return data
+
+
+def get_visibility_circle(
+    lat: float,
+    lon: float,
+    h: float,    # location elevation above ellipsoid [m]
+    alt: float,  # satellite altitude [km]
+):
+    """ Compute visibility circle around satellite at location with satellite altitude """
+    pass

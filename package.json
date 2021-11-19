@@ -50,5 +50,8 @@
         "build": "NODE_ENV=production npm run js:compile && npm run sass:compile-minify",
         "dev": "npm run compile",
         "watch": "watch 'npm run dev' static/ --ignoreDirectoryPattern=/dist/"
+    },
+    "dependencies": {
+        "leaflet": "^1.7.1"
     }
 }

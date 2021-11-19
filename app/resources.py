@@ -40,6 +40,10 @@ else:
 
 db = Database(postgres_uri)
 
+if settings.DEBUG:
+    mapbox_tile_token = settings.MAPBOX_DEFAULT_TOKEN
+else:
+    mapbox_tile_token = settings.MAPBOX_TILES_TOKEN
 
 templates = Jinja2Templates(directory='app/templates')
 # Create custom datetime format Jinja filter

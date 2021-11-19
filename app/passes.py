@@ -6,7 +6,7 @@ from starlette.routing import Route
 from starlette.requests import Request
 
 from app.settings import MAX_DAYS
-from app.resources import templates
+from app.resources import templates, mapbox_tile_token
 from app.api import app as api_app
 from app.core.schemas import Location, Satellite
 from app.core.passes import _get_pass_detail
@@ -62,6 +62,9 @@ async def get_pass_detail(request):
         'location': location,
         'pass': pass_.overpass,
         'pass_list_url': pass_list_url,
+        'satellite_coordinates': [[lon, lat] for lon, lat in zip(pass_.satellite.longitude, pass_.satellite.latitude)],
+        'visibility_circle': [],
+        'access_token': mapbox_tile_token,
     }
     return templates.TemplateResponse('pass_detail.html', context)
 
