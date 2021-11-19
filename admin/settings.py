@@ -6,6 +6,8 @@ config = Config(".env")
 
 DEBUG = config('PASSPREDICT_DEBUG', cast=bool, default=False)
 
+SECRET_KEY = config('SECRET_KEY', cast=str)
+
 POSTGRES_URI = config('POSTGRES_URI', cast=URL, default=None)
 # Echo sqlalchemy commands to stdout, default false
 DB_ECHO = config('DB_ECHO', cast=bool, default=False)

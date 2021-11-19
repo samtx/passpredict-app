@@ -6,6 +6,7 @@ from sqlalchemy import (
     MetaData, Table, Column, Integer, String, Boolean, Date, Float, Text,
     ForeignKey, Unicode, DateTime
 )
+from sqlalchemy.sql.functions import now as sql_now
 
 # from app.database import Base, engine
 
@@ -75,6 +76,7 @@ satellite_status = Table(
     'satellite_status', metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(100), unique=True, nullable=False),
+    Column('short_name', String(10), unique=True),
     Column('description', Text),
 )
 
@@ -94,10 +96,10 @@ satellite = Table(
     Column('cospar_id', String(30), unique=True),  # Intl. designator, COSPAR ID
     Column('name', String(100)),
     Column('description', Text),
-    Column('decayed', Boolean),
+    Column('decayed', Boolean, index=True),
     Column('launch_date', Date),
     Column('launch_year', Integer),
-    Column('decayed_date', Date),
+    Column('decay_date', Date),
     Column('launch_site_id', Integer, ForeignKey('launch_site.id', ondelete='SET NULL')),
     # Column('orbit_type', Integer, ForeignKey('orbit_type.id')),
     # Column('constellation', Integer, ForeignKey('constellation.id')),
@@ -107,12 +109,14 @@ satellite = Table(
     Column('span', Float),
     # Column('shape', Integer, ForeignKey('shape.id')),
     Column('perigee', Float),
+    Column('period', Float),
     Column('apogee', Float),
     Column('inclination', Float),
-    # Column('rcs', Float),
-    Column('status', Integer, ForeignKey('satellite_status.id', ondelete='SET NULL')),
-    Column('owner', Integer, ForeignKey('satellite_owner.id', ondelete='SET NULL')),
-    Column('type', Integer, ForeignKey('satellite_type.id', ondelete='SET NULL')),
+    Column('rcs', Float),
+    Column('status_id', Integer, ForeignKey('satellite_status.id', ondelete='SET NULL')),
+    Column('owner_id', Integer, ForeignKey('satellite_owner.id', ondelete='SET NULL')),
+    Column('type_id', Integer, ForeignKey('satellite_type.id', ondelete='SET NULL')),
+    Column('updated', DateTime(timezone=True), onupdate=datetime.datetime.utcnow()),
 )
 
 

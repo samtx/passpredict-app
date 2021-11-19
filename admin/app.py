@@ -7,9 +7,11 @@ from redis import Redis
 
 import models
 from resources import postgres_uri, redis_uri
+import settings
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = postgres_uri
+app.config['SECRET_KEY'] = settings.SECRET_KEY
 db = SQLAlchemy(app)
 
 

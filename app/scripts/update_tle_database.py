@@ -10,6 +10,7 @@ from sqlalchemy import and_
 from databases import Database
 import httpx
 import click
+from tqdm.asyncio import tqdm
 
 from app.utils import grouper, epoch_from_tle, satid_from_tle
 from app.dbmodels import satellite, tle as tledb
@@ -99,7 +100,7 @@ async def update_database(tles, created_at):
     #  Import TLE data to databse
     async with Database(postgres_uri) as conn:
         tasks = [update_tle_in_database(conn, tle, created_at) for tle in tles]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results = await tqdm.gather(*tasks)
     return results
 
 
