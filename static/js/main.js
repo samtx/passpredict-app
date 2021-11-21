@@ -3,8 +3,6 @@ import Autocomplete from './autocomplete.js';
 
 console.log('alright then')
 
-// window.Alpine = Alpine;
-
 
 const setNavbarMenuListener = () => {
     // Reference: https://bulma.io/documentation/components/navbar/#navbar-menu
@@ -26,6 +24,7 @@ const setNavbarMenuListener = () => {
     }
 }
 setNavbarMenuListener();
+
 
 // module for passpredict javascript functions
 
@@ -99,7 +98,6 @@ const regExpEscape = (s) => {
     return s.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-
 const markQuerySubstring = (query, string) => {
     query = regExpEscape(query);
     string = string.replace(new RegExp(query, 'gmi'), `<strong>${query}</strong>`);
@@ -113,7 +111,6 @@ const padZeros = (n, size) => {
     }
     return nstr
 }
-
 
 const setPassesFormListeners = (form) => {
     // select satellite id from previous search

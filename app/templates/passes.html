@@ -78,10 +78,11 @@
                     :data-location="detailUrl"
                 >
                     <div class="p-1 pass-item pass-month-day">
-                        <p class="value" x-text="pass.start_pt.getMonthDay"></p>
+                        <p class="value" x-text="monthDay"></p>
                     </div>
                     <div class="p-1 pass-item pass-time">
-                        <p class="value" x-text="pass.start_pt.getTimeMinutes"></p>
+                        <p class="value" x-html="timeHtml"></p>
+
                     </div>
                     <div class="p-1 pass-item pass-duration">
                         <p class="value" x-text="pass.duration"></p>
@@ -165,6 +166,24 @@
             goToDetailUrl() {
                 window.location.assign(this.detailUrl);
             },
+            get monthDay() {
+                return this.pass.start_pt.getMonthDay
+            },
+            get timeMinutes() {
+                return this.pass.start_pt.getTimeMinutesParts.minute;
+            },
+            get timeHour() {
+                return this.pass.start_pt.getTimeMinutesParts.hour;
+            },
+            get timePeriod() {
+                return this.pass.start_pt.getTimeMinutesParts.dayPeriod;
+            },
+            get timeHtml() {
+                return `
+                ${this.timeHour}:${this.timeMinutes} <span class='pass-time-ampm'>${this.timePeriod}</span>
+                `;
+            }
+
         }))
     })
 </script>
