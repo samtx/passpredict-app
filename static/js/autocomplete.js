@@ -114,5 +114,6 @@ export default (config) => {
     if (config) {
         ac = Object.assign(ac, config);
     }
+
     return ac;
 }

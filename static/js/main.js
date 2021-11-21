@@ -94,17 +94,6 @@ class Pass {
     }
 }
 
-
-async function queryLocationAPI(search_text) {
-    const response = await fetch(
-        "locations/?" + new URLSearchParams({q: search_text}).toString()
-    );
-    const data = await response.json();
-    const locations = data['locations'];
-    return locations;
-}
-
-
 const regExpEscape = (s) => {
     // From https://github.com/elcobvg/svelte-autocomplete/blob/master/src/index.html
     return s.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&")
@@ -141,4 +130,4 @@ const setPassesFormListeners = (form) => {
 };
 
 
-export { Autocomplete, Pass, Point, queryLocationAPI, regExpEscape, padZeros };
+export { Autocomplete, Pass, Point, regExpEscape, padZeros };

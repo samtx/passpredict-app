@@ -15,3 +15,4 @@ fastapi
 asyncpg
 timezonefinder
 Markdown
+python-dateutil

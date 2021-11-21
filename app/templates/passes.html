@@ -53,7 +53,6 @@
 
     <!-- Alpine JS Component for returning pass results from backend API -->
     <div
-        x-data="passList"
         id="passListHeader"
         class="p-2 mb-1"
     >
@@ -61,46 +60,52 @@
         <p class="pass-item pass-time">Time</p>
         <p class="pass-item pass-duration">Duration</p>
         <p class="pass-item pass-max-el">Max Elevation</p>
-
-        <div id="passList">
-            <p x-show="isLoading" class="is-size-5 has-text-centered mt-6 mb-4">
-                Getting passes...
-                <progress class="progress is-primary">50%</progress>
-            </p>
-
-            <template x-if="passes != null && passes.length > 0">
-                <template x-for="pass in passes">
-                    <div class="box is-rounded p-2 mb-3 pass-row">
-                        <div class="p-1 pass-item pass-month-day">
-                            <p class="value" x-text="pass.start_pt.getMonthDay"></p>
-                        </div>
-                        <div class="p-1 pass-item pass-time">
-                            <p class="value" x-text="pass.start_pt.getTimeMinutes"></p>
-                        </div>
-                        <div class="p-1 pass-item pass-duration">
-                            <p class="value" x-text="pass.duration"></p>
-                        </div>
-                        <div class="p-1 pass-item pass-max-el">
-                            <p class="value" x-text="pass.elevation + '&deg;'"></p>
-                        </div>
-                    </div>
-                </template>
-            </template>
-
-            <p x-show="!isLoading && passes !== null && passes.length == 0" class="is-size-5 has-text-centered mt-6">
-                No passes found
-            </p>
-
-            <p x-show="!isLoading && isError" class="is-size-5 has-text-centered has-text-danger mt-6">
-                Error getting passes
-            </p>
-
-        </div>
-
-        <a href="#" class="button is-floating is-primary">
-            <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
-        </a>
     </div>
+
+    <div x-data="passList" id="passList">
+        <p x-show="isLoading" class="is-size-5 has-text-centered mt-6 mb-4">
+            Getting passes...
+            <progress class="progress is-primary">50%</progress>
+        </p>
+
+        <template x-if="passes != null && passes.length > 0">
+            <template x-for="pass in passes">
+                <div
+                    x-data="passListItem(pass)"
+                    class="box is-rounded p-2 mb-3 pass-row"
+                    role="click"
+                    @click="goToDetailUrl"
+                    :data-location="detailUrl"
+                >
+                    <div class="p-1 pass-item pass-month-day">
+                        <p class="value" x-text="pass.start_pt.getMonthDay"></p>
+                    </div>
+                    <div class="p-1 pass-item pass-time">
+                        <p class="value" x-text="pass.start_pt.getTimeMinutes"></p>
+                    </div>
+                    <div class="p-1 pass-item pass-duration">
+                        <p class="value" x-text="pass.duration"></p>
+                    </div>
+                    <div class="p-1 pass-item pass-max-el">
+                        <p class="value" x-text="pass.elevation + '&deg;'"></p>
+                    </div>
+                </div>
+            </template>
+        </template>
+
+        <p x-show="!isLoading && passes !== null && passes.length == 0" class="is-size-5 has-text-centered mt-6">
+            No passes found
+        </p>
+
+        <p x-show="!isLoading && isError" class="is-size-5 has-text-centered has-text-danger mt-6">
+            Error getting passes
+        </p>
+
+    </div>
+
+    <a href="#" class="button is-floating is-primary">
+        <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
+    </a>
 
 </div>
 {% endblock content %}
@@ -113,23 +118,11 @@
         return data;
     }
 
-    const getPassDetailUrl = (satellite, location, pass) => {
-        const params = {
-            satid: satellite.id,
-            satname: satellite.name,
-            name: location.name,
-            lat: location.lat,
-            lon: location.lon,
-            h: location.h,
-            aosdt: pass.aos.datetime,
-        }
-        const url = '/passes/detail/?' + new URLSearchParams(params).toString()
-        return url
-    };
-
     document.addEventListener('alpine:init', () => {
         Alpine.data('passList', () => ({
             passes: null,
+            satellite: null,
+            location: null,
             isLoading: true,
             isError: false,
             init() {
@@ -142,14 +135,35 @@
                     h: url.searchParams.get('h') ? url.searchParams.get('h') : 0,
                 };
                 fetchPasses(params)
-                    .then((data) => {
+                    .then((resp) => {
                         this.isLoading = false;
-                        this.passes = data;
+                        this.satellite = resp.satellite;
+                        this.location = resp.location;
+                        this.passes = resp.overpasses.map(pass => new Passpredict.Pass(pass));
                     })
                     .catch(error => {
                         this.isLoading = false;
                         this.isError = true;
                     })
+            },
+        }));
+        Alpine.data('passListItem', (pass) => ({
+            pass: pass,
+            detailUrl: null,
+            init() {
+                const params = {
+                    satid: this.satellite.id,
+                    satname: this.satellite.name,
+                    name: this.location.name,
+                    lat: this.location.lat,
+                    lon: this.location.lon,
+                    h: this.location.h,
+                    aosdt: this.pass.start_pt.date.toISOString(),
+                }
+                this.detailUrl = '/passes/detail/?' + new URLSearchParams(params).toString();
+            },
+            goToDetailUrl() {
+                window.location.assign(this.detailUrl);
             },
         }))
     })

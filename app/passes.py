@@ -6,6 +6,7 @@ import typing
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.exceptions import HTTPException
+from dateutil.parser import isoparse
 
 from app.settings import MAX_DAYS
 from app.resources import templates, mapbox_tile_token
@@ -45,7 +46,7 @@ async def get_pass_detail(request):
     db = request.app.state.db
     cache = request.app.state.cache
     aos_dt_str = request.query_params.get('aosdt')
-    aos = datetime.fromisoformat(aos_dt_str)
+    aos = isoparse(aos_dt_str)  # create datetime object
     aos_dt_utc = aos.astimezone(timezone.utc)
     pass_ = await _get_pass_detail(satellite.id, aos_dt_utc, location.lat, location.lon, location.h, db, cache)
     pass_list_url = request.url_for('passes:get_passes')
