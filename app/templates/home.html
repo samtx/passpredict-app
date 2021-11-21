@@ -32,8 +32,8 @@
                     <input
                         x-model="query"
                         name="locationQuery"
-                        @input.debounce.50ms="queryData()"
-                        @focus="queryData()"
+                        @input.debounce.50ms="search()"
+                        @focus="search()"
                         @keydown.arrow-down="focusNextResult()"
                         @keydown.arrow-up="focusPreviousResult()"
                         @keydown.enter.stop.prevent="selectResult()"
@@ -42,7 +42,7 @@
                         placeholder="New York, NY"
                         required
                     />
-                    <!-- <div
+                    <div
                         class="autocomplete-result"
                         x-show="open"
                     >
@@ -53,7 +53,7 @@
                         @keydown.enter.stop.prevent="selectResult()"
                         tabindex="-1"
                         >
-                        <template x-for="(item, index) in data" :key="index">
+                        <template x-for="(item, index) in results" :key="index">
                             <li
                             class="autocomplete-result-item"
                             :id="name + '-result-' + index"
@@ -67,20 +67,20 @@
                             ></li>
                         </template>
                         </ul>
-                    </div> -->
+                    </div>
 
-                    <!-- <div class="latlon-result" x-show="(selectedIndex != null) && !open">
-                        <span class="latlon">Latitude:</span> <span x-text="getValue('lat')"></span>&deg;
+                    <div class="latlon-result" x-show="(selectedIndex != null) && !open">
+                        <span class="latlon">Latitude:</span> <span x-text="getValueFixed('lat', 4)"></span>&deg;
                         &nbsp; &nbsp;
-                        <span class="latlon">Longitude:</span> <span x-text="getValue('lon')"></span>&deg;
-                    </div> -->
+                        <span class="latlon">Longitude:</span> <span x-text="getValueFixed('lon', 4)"></span>&deg;
+                    </div>
 
                 </div>
 
-                <!-- <input type="hidden" name="lat" :value="getValue('lat')" />
+                <input type="hidden" name="lat" :value="getValue('lat')" />
                 <input type="hidden" name="lon" :value="getValue('lon')" />
                 <input type="hidden" name="h" :value="getValue('h')" />
-                <input type="hidden" name="name" :value="getValue('name')" /> -->
+                <input type="hidden" name="name" :value="getValue('name')" />
 
                 <div class="field">
                     <label for="satid" class="label">Select satellite</label>
@@ -116,9 +116,11 @@
 
     document.addEventListener('alpine:init', () => {
         Alpine.data('locationAutocomplete', () => {
-            let locationAutocomplete = Passpredict.Autocomplete();
-            locationAutocomplete.fetchData = queryLocationAPI;
-            console.log('from inside alpine.data ', locationAutocomplete);
+            const config = {
+                threshold: 1,
+                searchFunction: queryLocationAPI,
+            };
+            let locationAutocomplete = Passpredict.Autocomplete(config);
             return locationAutocomplete;
         });
     })

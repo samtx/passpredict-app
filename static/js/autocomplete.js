@@ -1,7 +1,7 @@
-export default () => {
+export default (config) => {
     let ac = {
         query: "",
-        data: [],
+        results: [],
         selectedIndex: null,
         focusedIndex: null,
         open: false,
@@ -9,25 +9,23 @@ export default () => {
         // default config
         threshold: 3,
 
-        async fetchData(q) {},
+        async searchFunction(q) {
+            return []
+        },
 
         init() {
             return
         },
 
-        initData() {
-            return [{lat:0, lon:0, h:0, name:""}];
-        },
-
         reset() {
             this.query = "";
             this.selectedIndex = null;
-            this.data = this.initData();
+            this.results = [];
             this.open = false;
             this.focusedIndex = null;
         },
 
-        queryData() {
+        search() {
             console.log(`query=${this.query}`);
             if (this.query.length == 0) {
                 this.selectedIndex = null;
@@ -36,8 +34,8 @@ export default () => {
                 return null;
             };
             this.open = true;
-            this.fetchData(this.query).then(data => this.data = data );
-            console.log(this.data);
+            this.searchFunction(this.query).then(results => this.results = results );
+            console.log(this.results);
         },
 
         closeListbox() {
@@ -65,7 +63,7 @@ export default () => {
                 this.focusedIndex = 0;
                 return
             }
-            if (this.focusedIndex == this.data.length - 1) {
+            if (this.focusedIndex == this.results.length - 1) {
                 // this.focusedIndex = null;
                 return
             }
@@ -88,7 +86,7 @@ export default () => {
         selectResult() {
             if (!this.open) return this.toggleResultsVisibility();
             this.selectedIndex = this.focusedIndex;
-            this.query = this.data[this.selectedIndex].name;
+            this.query = this.results[this.selectedIndex].name;
             // Add selected query to localstorage
             localStorage.setItem('location-query', this.query);
             localStorage.setItem('location-lat', this.getValue('lat'));
@@ -102,7 +100,7 @@ export default () => {
             if (this.selectedIndex == null) {
                 return "";
             }
-            return this.data[this.selectedIndex][key];
+            return this.results[this.selectedIndex][key];
         },
 
         getValueFixed(key, n = 0) {
@@ -112,5 +110,9 @@ export default () => {
         },
     };
 
+    // Initialize configuration
+    if (config) {
+        ac = Object.assign(ac, config);
+    }
     return ac;
 }
