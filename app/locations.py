@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
 from app import settings
+from app.resources import mapbox_server_token
 
 origins = ["*"] if settings.DEBUG else ['passpredict.com', 'www.passpredict.com']
 
@@ -52,7 +53,7 @@ async def location(q: str, request: Request):
 
 class Geocoder:
     params = {
-        "access_token":  settings.MAPBOX_SECRET_TOKEN,
+        "access_token":  mapbox_server_token,
         'autocomplete': True,
         'types': [
             "postcode",

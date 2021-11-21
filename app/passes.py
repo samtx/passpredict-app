@@ -9,7 +9,7 @@ from starlette.exceptions import HTTPException
 from dateutil.parser import isoparse
 
 from app.settings import MAX_DAYS
-from app.resources import templates, mapbox_tile_token
+from app.resources import templates, mapbox_client_token
 from app.core.schemas import Location, Satellite
 from app.core.passes import _get_pass_detail
 
@@ -66,7 +66,7 @@ async def get_pass_detail(request):
         'pass_list_url': pass_list_url,
         'satellite_coordinates': [[lon, lat] for lon, lat in zip(pass_.satellite.longitude, pass_.satellite.latitude)],
         'visibility_circle': [],
-        'access_token': mapbox_tile_token,
+        'access_token': mapbox_client_token,
     }
     return templates.TemplateResponse('pass_detail.html', context)
 

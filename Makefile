@@ -50,6 +50,7 @@ deploy-local-foreground:
 	@echo "starting new container in foreground..."
 	docker run --name $(CONTAINER_NAME) \
 		-p 8000:8000 \
+		--network host \
 		--env-file=/home/sam/passpredict-api/.env-docker \
 		$(LOCAL_TAG)
 
