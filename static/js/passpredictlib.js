@@ -340,14 +340,3 @@ const filterVisibleOnlyPasses = (visibleOnly, passes) => {
     }
     return filteredPasses;
 };
-
-
-// visibleOnlyCheckbox.addEventListener('change', function(event) {
-//     let notVisiblePasses = document.querySelector('.not-visible');
-//     if (this.checked) {
-//         notVisiblePasses.hidden = true;
-//     }
-//     else {
-//         notVisiblePasses.hidden = false;
-//     }
-// })

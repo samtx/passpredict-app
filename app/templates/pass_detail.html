@@ -51,25 +51,25 @@
         <div class="table">
             <div class="table-body">
                 {% for ptname, pt in zip(['Begin','Max','End'], [pass.aos, pass.tca, pass.los]) %}
-                <div class="table-row">
-                    <div class="table-cell table-point-name">{{ ptname }}</div>
-                    <div class="table-row-mobile">
-                        <div class="table-header-cell">Time</div>
-                        <div class="table-cell table-time">{{ pt.datetime|strftime('%X') }}</div>
+                    <div class="table-row">
+                        <div class="table-cell table-point-name">{{ ptname }}</div>
+                        <div class="table-row-mobile">
+                            <div class="table-header-cell">Time</div>
+                            <div class="table-cell table-time">{{ pt.datetime|strftime('%X') }}</div>
+                        </div>
+                        <div class="table-row-mobile">
+                            <div class="table-header-cell">Azimuth</div>
+                            <div class="table-cell table-azimuth">{{ pt.az|round|int }}&deg;</div>
+                        </div>
+                        <div class="table-row-mobile">
+                            <div class="table-header-cell">Elevation</div>
+                            <div class="table-cell table-elevation">{{ pt.el|round|int }}&deg;</div>
+                        </div>
+                        <div class="table-row-mobile">
+                            <div class="table-header-cell">Range</div>
+                            <div class="table-cell table-range">{{ pt.range|round|int }} km</div>
+                        </div>
                     </div>
-                    <div class="table-row-mobile">
-                        <div class="table-header-cell">Azimuth</div>
-                        <div class="table-cell table-azimuth">{{ pt.az|round|int }}&deg;</div>
-                    </div>
-                    <div class="table-row-mobile">
-                        <div class="table-header-cell">Elevation</div>
-                        <div class="table-cell table-elevation">{{ pt.el|round|int }}&deg;</div>
-                    </div>
-                    <div class="table-row-mobile">
-                        <div class="table-header-cell">Range</div>
-                        <div class="table-cell table-range">{{ pt.range|round|int }} km</div>
-                    </div>
-                </div>
                 {% endfor %}
             </div>
         </div>

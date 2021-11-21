@@ -51,34 +51,107 @@
         </article>
     </div>
 
-    <div id="passListHeader" class="p-2 mb-1">
+    <!-- Alpine JS Component for returning pass results from backend API -->
+    <div
+        x-data="passList"
+        id="passListHeader"
+        class="p-2 mb-1"
+    >
         <p class="pass-item pass-month-day">Date</p>
         <p class="pass-item pass-time">Time</p>
         <p class="pass-item pass-duration">Duration</p>
         <p class="pass-item pass-max-el">Max Elevation</p>
-    </div>
-    <div id="passList">
-        <p class="is-size-5 has-text-centered mt-6 mb-4">
-            Getting passes...
-            <progress class="progress is-primary">50%</progress>
-        </p>
 
-        <!-- if filteredPasses.length > 0 -->
-        <!-- for each pass in filteredPasses -->
-        <div class="pass-list-item"></div>
-        <!-- else -->
-        <p class="is-size-5 has-text-centered mt-6">
-            No passes found
-        </p>
-    </div>
+        <div id="passList">
+            <p x-show="isLoading" class="is-size-5 has-text-centered mt-6 mb-4">
+                Getting passes...
+                <progress class="progress is-primary">50%</progress>
+            </p>
 
-    <a href="#" class="button is-floating is-primary">
-        <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
-    </a>
+            <template x-if="passes != null && passes.length > 0">
+                <template x-for="pass in passes">
+                    <div class="box is-rounded p-2 mb-3 pass-row">
+                        <div class="p-1 pass-item pass-month-day">
+                            <p class="value" x-text="pass.start_pt.getMonthDay"></p>
+                        </div>
+                        <div class="p-1 pass-item pass-time">
+                            <p class="value" x-text="pass.start_pt.getTimeMinutes"></p>
+                        </div>
+                        <div class="p-1 pass-item pass-duration">
+                            <p class="value" x-text="pass.duration"></p>
+                        </div>
+                        <div class="p-1 pass-item pass-max-el">
+                            <p class="value" x-text="pass.elevation + '&deg;'"></p>
+                        </div>
+                    </div>
+                </template>
+            </template>
+
+            <p x-show="!isLoading && passes !== null && passes.length == 0" class="is-size-5 has-text-centered mt-6">
+                No passes found
+            </p>
+
+            <p x-show="!isLoading && isError" class="is-size-5 has-text-centered has-text-danger mt-6">
+                Error getting passes
+            </p>
+
+        </div>
+
+        <a href="#" class="button is-floating is-primary">
+            <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
+        </a>
+    </div>
 
 </div>
 {% endblock content %}
-<!--
+
 {% block javascript %}
-<script src="{{ url_for('static', path='dist/passes.js') }}"></script>
-{% endblock javascript %} -->
+<script>
+    const fetchPasses = async (params) => {
+        const response = await fetch('/api/passes/?' + new URLSearchParams(params).toString());
+        const data = await response.json();
+        return data;
+    }
+
+    const getPassDetailUrl = (satellite, location, pass) => {
+        const params = {
+            satid: satellite.id,
+            satname: satellite.name,
+            name: location.name,
+            lat: location.lat,
+            lon: location.lon,
+            h: location.h,
+            aosdt: pass.aos.datetime,
+        }
+        const url = '/passes/detail/?' + new URLSearchParams(params).toString()
+        return url
+    };
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('passList', () => ({
+            passes: null,
+            isLoading: true,
+            isError: false,
+            init() {
+                const url = new URL(window.location.href.toLowerCase());
+                const name = url.searchParams.get('name');  // location name
+                const params = {
+                    satid: url.searchParams.get('satid'),
+                    lat: url.searchParams.get('lat'),
+                    lon: url.searchParams.get('lon'),
+                    h: url.searchParams.get('h') ? url.searchParams.get('h') : 0,
+                };
+                fetchPasses(params)
+                    .then((data) => {
+                        this.isLoading = false;
+                        this.passes = data;
+                    })
+                    .catch(error => {
+                        this.isLoading = false;
+                        this.isError = true;
+                    })
+            },
+        }))
+    })
+</script>
+{% endblock javascript %}

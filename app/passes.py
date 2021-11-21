@@ -1,13 +1,14 @@
 from datetime import date, datetime, timedelta, timezone
 import logging
 import urllib.parse
+import typing
 
 from starlette.routing import Route
 from starlette.requests import Request
+from starlette.exceptions import HTTPException
 
 from app.settings import MAX_DAYS
 from app.resources import templates, mapbox_tile_token
-from app.api import app as api_app
 from app.core.schemas import Location, Satellite
 from app.core.passes import _get_pass_detail
 
@@ -77,11 +78,27 @@ def _get_location_query_params(request: Request) -> Location:
     lat = request.query_params.get('lat')
     lon = request.query_params.get('lon')
     h = request.query_params.get('h', 0.0)
+    lat, lon, h = _convert_coordinates_to_floats(lat, lon, h)
     name = name.title()
-    lat = round(float(lat), 4)
-    lon = round(float(lon), 4)
-    h = round(float(h), 0)
+    lat = round(lat, 4)
+    lon = round(lon, 4)
+    h = round(h, 0)
     return Location(lat=lat, lon=lon, h=h, name=name)
+
+
+def _convert_coordinates_to_floats(lat: str, lon: str, h: str) -> typing.Tuple[float, float, float]:
+    """ Convert coordinates to valid floats """
+    lat2 = _convert_string_number_to_float(lat)
+    lon2 = _convert_string_number_to_float(lon)
+    h2 = _convert_string_number_to_float(h)
+    return (lat2, lon2, h2)
+
+
+def _convert_string_number_to_float(x: str) -> float:
+    try:
+        return float(x)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Location coordinates not found")
 
 
 def _get_satellite_query_params(request: Request) -> Satellite:

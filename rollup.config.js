@@ -23,7 +23,7 @@ export default [
             file:  staticDir + 'dist/bundle.js',
             sourcemap: true,
             format: 'umd',
-            external: ['alpinejs']
+            name: 'Passpredict',
         },
         plugins: [
             mapboxToken && replace({

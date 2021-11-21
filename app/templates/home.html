@@ -22,11 +22,8 @@
         >
             <!-- Reference: https://github.com/danharrin/alpine-tailwind-components/blob/151fd18324f6a596ad93907e98cc87ca0dc893de/select/index.html -->
             <div
-                x-data="passesFormComponent()"
-                x-init="init()"
-                @reset="reset()"
-                id="locationSearch"
-                @click.away="closeListbox()"
+                x-data="locationAutocomplete"
+                @click.outside="closeListbox()"
                 @keydown.escape="closeListbox()"
                 class="form-group"
             >
@@ -35,12 +32,11 @@
                     <input
                         x-model="query"
                         name="locationQuery"
-                        @input.debounce.50ms="fetchLocations()"
-                        @focus="fetchLocations()"
+                        @input.debounce.50ms="fetch()"
+                        @focus="fetch()"
                         @keydown.arrow-down="focusNextResult()"
                         @keydown.arrow-up="focusPreviousResult()"
                         @keydown.enter.stop.prevent="selectResult()"
-                        @reset="reset()"
                         type="search"
                         class="input"
                         placeholder="New York, NY"
@@ -68,22 +64,23 @@
                             :aria-selected="focusedIndex === index"
                             :class="{ 'focused-result' : index === focusedIndex }"
                             x-html="item.name"
-                            x-on="class='location-result-item'"
                             ></li>
                         </template>
                         </ul>
                     </div>
-                    <div class="latlon-result" x-show="(selectedIndex != null) && !open">
-                        <span class="latlon">Latitude:</span> <span x-text="selectedIndex ? parseFloat(data[selectedIndex].lat).toFixed(4) : 'n/a' "></span>&deg;
+
+                    <!-- <div class="latlon-result" x-show="(selectedIndex != null) && !open">
+                        <span class="latlon">Latitude:</span> <span x-text="getValue('lat')"></span>&deg;
                         &nbsp; &nbsp;
-                        <span class="latlon">Longitude:</span> <span x-text="selectedIndex ? parseFloat(data[selectedIndex].lon).toFixed(4) : 'n/a' "></span>&deg;
-                    </div>
+                        <span class="latlon">Longitude:</span> <span x-text="getValue('lon')"></span>&deg;
+                    </div> -->
+
                 </div>
 
-                <input type="hidden" name="lat" x-bind:value="data[selectedIndex].lat" />
-                <input type="hidden" name="lon" x-bind:value="data[selectedIndex].lon" />
-                <input type="hidden" name="h" x-bind:value="data[selectedIndex].h" />
-                <input type="hidden" name="name" x-bind:value="data[selectedIndex].name" />
+                <!-- <input type="hidden" name="lat" :value="getValue('lat')" />
+                <input type="hidden" name="lon" :value="getValue('lon')" />
+                <input type="hidden" name="h" :value="getValue('h')" />
+                <input type="hidden" name="name" :value="getValue('name')" /> -->
 
                 <div class="field">
                     <label for="satid" class="label">Select satellite</label>
@@ -99,7 +96,7 @@
 
                 <div class="buttons">
                     <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
-                    <button id="reset" type="reset" @click="reset()" class="button">Reset</button>
+                    <button id="reset" class="button">Reset</button>
                 </div>
 
             </div>
@@ -107,3 +104,25 @@
     </main>
 
 {% endblock content %}
+
+{% block javascript %}
+<script>
+    const queryLocationAPI = async (search_text) => {
+        const response = await fetch("locations/?" + new URLSearchParams({q: search_text}).toString());
+        const data = await response.json();
+        const locations = data['locations'];
+        return locations;
+    }
+
+    locationAutocomplete = new Passpredict.Autocomplete({});
+    locationAutocomplete.fetchData = queryLocationAPI;
+    locationAutocomplete.query = "";
+    console.log(locationAutocomplete.query)
+    console.log(locationAutocomplete.data)
+    console.log(locationAutocomplete)
+
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('locationAutocomplete', locationAutocomplete);
+    })
+</script>
+{% endblock javascript %}
