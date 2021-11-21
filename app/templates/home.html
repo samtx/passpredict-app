@@ -32,8 +32,8 @@
                     <input
                         x-model="query"
                         name="locationQuery"
-                        @input.debounce.50ms="fetch()"
-                        @focus="fetch()"
+                        @input.debounce.50ms="queryData()"
+                        @focus="queryData()"
                         @keydown.arrow-down="focusNextResult()"
                         @keydown.arrow-up="focusPreviousResult()"
                         @keydown.enter.stop.prevent="selectResult()"
@@ -42,7 +42,7 @@
                         placeholder="New York, NY"
                         required
                     />
-                    <div
+                    <!-- <div
                         class="autocomplete-result"
                         x-show="open"
                     >
@@ -67,7 +67,7 @@
                             ></li>
                         </template>
                         </ul>
-                    </div>
+                    </div> -->
 
                     <!-- <div class="latlon-result" x-show="(selectedIndex != null) && !open">
                         <span class="latlon">Latitude:</span> <span x-text="getValue('lat')"></span>&deg;
@@ -114,15 +114,13 @@
         return locations;
     }
 
-    locationAutocomplete = new Passpredict.Autocomplete({});
-    locationAutocomplete.fetchData = queryLocationAPI;
-    locationAutocomplete.query = "";
-    console.log(locationAutocomplete.query)
-    console.log(locationAutocomplete.data)
-    console.log(locationAutocomplete)
-
     document.addEventListener('alpine:init', () => {
-        Alpine.data('locationAutocomplete', locationAutocomplete);
+        Alpine.data('locationAutocomplete', () => {
+            let locationAutocomplete = Passpredict.Autocomplete();
+            locationAutocomplete.fetchData = queryLocationAPI;
+            console.log('from inside alpine.data ', locationAutocomplete);
+            return locationAutocomplete;
+        });
     })
 </script>
 {% endblock javascript %}
