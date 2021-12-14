@@ -1,8 +1,6 @@
 
 import Autocomplete from './autocomplete.js';
 
-console.log('alright then')
-
 
 const setNavbarMenuListener = () => {
     // Reference: https://bulma.io/documentation/components/navbar/#navbar-menu
@@ -98,11 +96,6 @@ const regExpEscape = (s) => {
     return s.replace(/[-\\^$*+?.()|[\]{}]/g, "\\$&")
 }
 
-const markQuerySubstring = (query, string) => {
-    query = regExpEscape(query);
-    string = string.replace(new RegExp(query, 'gmi'), `<strong>${query}</strong>`);
-    return string
-}
 
 const padZeros = (n, size) => {
     let nstr = n.toString();
@@ -111,20 +104,6 @@ const padZeros = (n, size) => {
     }
     return nstr
 }
-
-const setPassesFormListeners = (form) => {
-    // select satellite id from previous search
-    const satelliteSelect = document.querySelector("select[name=satid]");
-    const prevSatId = localStorage.getItem("satid");
-    if (prevSatId) {
-        satelliteSelect.value = prevSatId;
-    };
-    form.addEventListener("submit", () => {
-        const satname = satelliteSelect.options[satelliteSelect.selectedIndex].text;
-        form.satname.value = satname
-        localStorage.setItem("satid", satelliteSelect.value);
-    });
-};
 
 
 export { Autocomplete, Pass, Point, regExpEscape, padZeros };
