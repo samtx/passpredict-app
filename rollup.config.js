@@ -2,6 +2,8 @@ import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 import replace from '@rollup/plugin-replace';
+import svelte from 'rollup-plugin-svelte';
+import resolve from '@rollup/plugin-node-resolve';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -26,6 +28,7 @@ export default [
             name: 'Passpredict',
         },
         plugins: [
+            svelte({}),
             mapboxToken && replace({
                 preventAssignment: true,
                 values: {
@@ -34,7 +37,9 @@ export default [
             }),
             commonjs(),
             filesize(),
+            resolve({ browser: true }),
             production && terser(),
+
         ]
     },
 ];

@@ -28,8 +28,8 @@ def get_passes(request: Request):
     end_date = start_date + timedelta(days=days)
     context = {
         'request': request,
-        'satellite': satellite,
-        'location': location,
+        'satellite': satellite.dict(),
+        'location': location.dict(),
         'days': days,
         'start_date': start_date,
         'end_date': end_date,

@@ -11,172 +11,21 @@
         </h1>
     </header>
 
-    <div class="results-header">
-        <div class="results-header-left">
-            <div class="location-header">
-                <span class="has-text-weight-semibold">Location: </span>
-                {% if location.name %}
-                    {{ location.name }}
-                {% endif %}
-                <div class="is-size-7">
-                    <span class="has-text-weight-medium">Latitude:</span>&nbsp;{{ location.lat }}&deg;&nbsp;
-                    <span class="has-text-weight-medium">Longitude:</span>&nbsp;{{ location.lon }}&deg;
-                </div>
-            </div>
-            <div class="satellite-header">
-                <span class="has-text-weight-semibold">Satellite:</span>&nbsp;{{ satellite.name }}
-                <div class="is-size-7">
-                    <span class="has-text-weight-medium">NORAD ID:</span>&nbsp;{{ satellite.id }}
-                </div>
-            </div>
-            <div class="date-header">
-                <span class="has-text-weight-semibold">Dates:</span>&nbsp;{{ start_date|strftime("%x") }}&nbsp;-&nbsp; {{ end_date|strftime("%x") }}
-            </div>
-        </div>
-        <div class="results-header-right">
-            <a class="button is-primary" href="{{ url_for('home') }}">Search Again</a>
-
-            <!-- <label for="visibleOnly" class="checkbox">
-                <input id="visibleOnly" type="checkbox" checked />
-                Visible Only
-            </label> -->
-        </div>
-    </div>
-
-    <!-- Alpine JS Component for returning pass results from backend API -->
-    <div
-        id="passListHeader"
-        class="p-2 mb-1"
-    >
-        <p class="pass-item pass-month-day">Date</p>
-        <p class="pass-item pass-time">Time</p>
-        <p class="pass-item pass-duration">Duration</p>
-        <p class="pass-item pass-max-el">Max Elevation</p>
-    </div>
-
-    <div x-data="passList" id="passList">
-        <p x-show="isLoading" class="is-size-5 has-text-centered mt-6 mb-4">
-            Getting passes...
-            <progress class="progress is-primary">50%</progress>
-        </p>
-
-        <template x-if="passes != null && passes.length > 0">
-            <template x-for="pass in passes">
-                <div
-                    x-data="passListItem(pass)"
-                    class="box is-rounded p-2 mb-3 pass-row"
-                    role="click"
-                    @click="goToDetailUrl"
-                    :data-location="detailUrl"
-                >
-                    <div class="p-1 pass-item pass-month-day">
-                        <p class="value" x-text="monthDay"></p>
-                    </div>
-                    <div class="p-1 pass-item pass-time">
-                        <p class="value" x-html="timeHtml"></p>
-
-                    </div>
-                    <div class="p-1 pass-item pass-duration">
-                        <p class="value" x-text="pass.duration"></p>
-                    </div>
-                    <div class="p-1 pass-item pass-max-el">
-                        <p class="value" x-text="pass.elevation + '&deg;'"></p>
-                    </div>
-                </div>
-            </template>
-        </template>
-
-        <p x-show="!isLoading && passes !== null && passes.length == 0" class="is-size-5 has-text-centered mt-6">
-            No passes found
-        </p>
-
-        <p x-show="!isLoading && isError" class="is-size-5 has-text-centered has-text-danger mt-6">
-            Error getting passes
-        </p>
-
-    </div>
-
-    <a href="#" class="button is-floating is-primary">
-        <img src="{{ url_for('static', path='img/fa-chevron-up.svg') }}" alt="Up">
-    </a>
+    <div id="pass-list"></div>
 
 </div>
 {% endblock content %}
 
 {% block javascript %}
 <script>
-    const fetchPasses = async (params) => {
-        const response = await fetch('/api/passes/?' + new URLSearchParams(params).toString());
-        const data = await response.json();
-        return data;
-    }
-
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('passList', () => ({
-            passes: null,
-            satellite: null,
-            location: null,
-            isLoading: true,
-            isError: false,
-            init() {
-                const url = new URL(window.location.href.toLowerCase());
-                const name = url.searchParams.get('name');  // location name
-                const params = {
-                    satid: url.searchParams.get('satid'),
-                    lat: url.searchParams.get('lat'),
-                    lon: url.searchParams.get('lon'),
-                    h: url.searchParams.get('h') ? url.searchParams.get('h') : 0,
-                };
-                fetchPasses(params)
-                    .then((resp) => {
-                        this.isLoading = false;
-                        this.satellite = resp.satellite;
-                        this.location = resp.location;
-                        this.passes = resp.overpasses.map(pass => new Passpredict.Pass(pass));
-                    })
-                    .catch(error => {
-                        this.isLoading = false;
-                        this.isError = true;
-                    })
-            },
-        }));
-        Alpine.data('passListItem', (pass) => ({
-            pass: pass,
-            detailUrl: null,
-            init() {
-                const params = {
-                    satid: this.satellite.id,
-                    satname: this.satellite.name,
-                    name: this.location.name,
-                    lat: this.location.lat,
-                    lon: this.location.lon,
-                    h: this.location.h,
-                    aosdt: this.pass.start_pt.date.toISOString(),
-                }
-                this.detailUrl = '/passes/detail/?' + new URLSearchParams(params).toString();
-            },
-            goToDetailUrl() {
-                window.location.assign(this.detailUrl);
-            },
-            get monthDay() {
-                return this.pass.start_pt.getMonthDay
-            },
-            get timeMinutes() {
-                return this.pass.start_pt.getTimeMinutesParts.minute;
-            },
-            get timeHour() {
-                return this.pass.start_pt.getTimeMinutesParts.hour;
-            },
-            get timePeriod() {
-                return this.pass.start_pt.getTimeMinutesParts.dayPeriod;
-            },
-            get timeHtml() {
-                return `
-                ${this.timeHour}:${this.timeMinutes} <span class='pass-time-ampm'>${this.timePeriod}</span>
-                `;
-            }
-
-        }))
-    })
+    const app = new Passpredict.PassList({
+        target: document.getElementById('pass-list'),
+        props: {
+            satellite: {{ satellite|tojson }},
+            location: {{ location|tojson }},
+            start_date: new Date("{{ start_date.isoformat() }}"),
+            end_date: new Date("{{ end_date.isoformat() }}"),
+        },
+    });
 </script>
 {% endblock javascript %}
