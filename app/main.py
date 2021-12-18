@@ -1,6 +1,7 @@
 # main.py
 import logging
 from urllib.parse import urlencode
+from functools import cache as functools_cache
 
 from starlette.applications import Starlette
 from starlette.responses import RedirectResponse
@@ -45,7 +46,7 @@ async def home(request: Request):
         response = RedirectResponse(url, status_code=HTTP_302_FOUND)
         return response
     logger.info(f'route /')
-    satellites = get_satellite_norad_ids()
+    satellites = _satellite_db()
     context = {
         'request': request,
         'satellites': satellites,
@@ -53,6 +54,12 @@ async def home(request: Request):
     }
     response = templates.TemplateResponse('home.html', context)
     return response
+
+@functools_cache
+def _satellite_db():
+    satellites = get_satellite_norad_ids()
+    db = [sat._asdict() for sat in satellites]
+    return db
 
 
 async def about(request: Request):

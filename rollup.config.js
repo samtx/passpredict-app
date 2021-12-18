@@ -4,6 +4,7 @@ import filesize from 'rollup-plugin-filesize';
 import replace from '@rollup/plugin-replace';
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
+import css from "rollup-plugin-import-css";
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -28,13 +29,19 @@ export default [
             name: 'Passpredict',
         },
         plugins: [
-            svelte({}),
+            svelte({
+                compilerOptions: {
+                    dev: production ? false : true,
+                },
+                emitCss: true
+            }),
             mapboxToken && replace({
                 preventAssignment: true,
                 values: {
                     MAPBOX_ACCESS_TOKEN: mapboxToken
                 },
             }),
+            css({ output: staticDir + 'dist/bundle.css' }),
             commonjs(),
             filesize(),
             resolve({ browser: true }),

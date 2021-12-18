@@ -1,16 +1,18 @@
 <script>
+import { location } from './stores.js';
+// import PassListItemMap from './PassListItemMap.svelte';
+
 export let pass;
 export let satellite;
-export let location;
 
 const detailUrl = '/passes/detail/?' + new URLSearchParams(
     {
         satid: satellite.id,
         satname: satellite.name,
-        name: location.name,
-        lat: location.lat,
-        lon: location.lon,
-        h: location.h,
+        name: $location.name,
+        lat: $location.lat,
+        lon: $location.lon,
+        h: $location.h,
         aosdt: pass.start_pt.date.toISOString(),
     }
 ).toString();
@@ -23,7 +25,6 @@ const monthDay = pass.start_pt.getMonthDay;
 const timeMinutes = pass.start_pt.getTimeMinutesParts.minute;
 const timeHour = pass.start_pt.getTimeMinutesParts.hour;
 const timePeriod = pass.start_pt.getTimeMinutesParts.dayPeriod;
-const timeHtml = `${timeHour}:${timeMinutes} <span class='pass-time-ampm'>${timePeriod}</span>`;
 
 </script>
 
@@ -48,4 +49,7 @@ const timeHtml = `${timeHour}:${timeMinutes} <span class='pass-time-ampm'>${time
     <div class="p-1 pass-item pass-max-el">
         <p class="value">{pass.elevation.toString()}&deg;</p>
     </div>
+
+    <!-- <PassListItemMap /> -->
+
 </div>

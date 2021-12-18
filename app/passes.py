@@ -2,6 +2,7 @@ from datetime import date, datetime, timedelta, timezone
 import logging
 import urllib.parse
 import typing
+from functools import cache
 
 from starlette.routing import Route
 from starlette.requests import Request
@@ -12,6 +13,8 @@ from app.settings import MAX_DAYS
 from app.resources import templates, mapbox_client_token
 from app.core.schemas import Location, Satellite
 from app.core.passes import _get_pass_detail
+from app.utils import get_satellite_norad_ids
+
 
 logger = logging.getLogger(__name__)
 
@@ -106,9 +109,17 @@ def _get_satellite_query_params(request: Request) -> Satellite:
     """
     Parse request object query parameters to get satellite object
     """
-    satname = request.query_params.get('satname')
     satid = request.query_params.get('satid')
+    satellites = _local_satellite_index_by_id()
+    satname = satellites[satid].name
     return Satellite(id=satid, name=satname)
+
+
+@cache
+def _local_satellite_index_by_id():
+    satellites = get_satellite_norad_ids()
+    index = {str(sat.id): sat for sat in satellites}
+    return index
 
 
 routes = [

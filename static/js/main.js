@@ -1,6 +1,6 @@
-
 import Autocomplete from './autocomplete.js';
 import PassList from './PassList.svelte';
+import HomeForm from './HomeForm.svelte';
 
 
 const setNavbarMenuListener = () => {
@@ -31,4 +31,4 @@ const regExpEscape = (s) => {
 }
 
 
-export { Autocomplete, PassList, regExpEscape };
+export { Autocomplete, PassList, HomeForm, regExpEscape };

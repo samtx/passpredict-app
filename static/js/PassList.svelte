@@ -1,6 +1,7 @@
 <script>
 import { format } from 'date-fns';
 import { Pass } from './passpredict.js';
+import { location as locationStore } from './stores.js';
 import PassListItem from './PassListItem.svelte';
 
 export let satellite;
@@ -8,20 +9,14 @@ export let location;
 export let start_date;
 export let end_date;
 
-let home_url = '/';
-let static_url = '/static/';
+const home_url = '/';
+const static_url = '/static/';
+const chevronUrl = static_url + 'img/fa-chevron-up.svg';
 
 let showMaps = true;
 let passes;
-const chevronUrl = static_url + 'img/fa-chevron-up.svg';
 
-
-async function fetchPasses(params) {
-    const response = await fetch('/api/passes/?' + new URLSearchParams(params).toString());
-    const data = await response.json();
-    passes = data.overpasses.map(pass => new Pass(pass));
-    return passes;
-}
+locationStore.set(location);
 
 let params = {
     satid: satellite.id,
@@ -30,7 +25,14 @@ let params = {
     h: location.h ? location.h : 0,
 };
 
-let promise = fetchPasses(params);
+async function fetchPasses() {
+    const response = await fetch('/api/passes/?' + new URLSearchParams(params).toString());
+    const data = await response.json();
+    passes = data.overpasses.map(pass => new Pass(pass));
+    return passes;
+}
+
+let promise  = fetchPasses();
 
 </script>
 
@@ -63,11 +65,8 @@ let promise = fetchPasses(params);
     </div>
     <div class="results-header-right">
         <a class="button is-primary" href={home_url}>Search Again</a>
-
-            <label for="showMaps" class="checkbox">
-                <input id="showMaps" type="checkbox" bind:checked={showMaps}/>
-                Show Maps
-            </label>
+        <label for="showMaps">Show Maps</label>
+        <input name="showMaps" type="checkbox" bind:checked={showMaps}/>
 
         <!-- <label for="visibleOnly" class="checkbox">
             <input id="visibleOnly" type="checkbox" checked />
@@ -91,7 +90,7 @@ let promise = fetchPasses(params);
 {:then passes}
     {#if passes.length > 0}
         {#each passes as pass (pass.start_pt.date)}
-            <PassListItem satellite={satellite} location={location} pass={pass} />
+            <PassListItem satellite={satellite} pass={pass} />
         {/each}
         <a href="#" class="button is-floating is-primary">
             <img src={chevronUrl} alt="Up">
