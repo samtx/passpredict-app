@@ -34,11 +34,22 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
     allow_headers=['*'],
+    expose_headers=['Cache-Control'],
 )
 app.include_router(
     passes.router,
     prefix='/passes',
 )
+
+
+@app.middleware("http")
+async def set_cache_control_header(request: Request, call_next):
+    """
+    Set Cache-Control header for API responses
+    """
+    response = await call_next(request)
+    response.headers['Cache-Control'] = "private, max-age=900"  # cache for 15 minutes
+    return response
 
 
 @app.get('/', include_in_schema=False)

@@ -74,6 +74,7 @@ async def get_passes(
     response_model_exclude_unset=True,
 )
 async def get_pass_detail(
+    background_tasks: BackgroundTasks,
     satid: int,
     aosdt: datetime.datetime,
     lat: float,
@@ -83,5 +84,12 @@ async def get_pass_detail(
     cache: Redis = Depends(get_cache),
 ):
     logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
-    data = await _get_pass_detail(satid, aosdt, lat, lon, h, db, cache)
+    # Check cache for data
+    key = f"passdetail:{satid}:aosdt{aosdt}:lat{lat}:lon{lon}:h{h}"
+    res = await cache.get(key)
+    if res:
+        data = pickle.loads(res)
+    else:
+        data = await _get_pass_detail(satid, aosdt, lat, lon, h, db, cache)
+        background_tasks.add_task(set_cache_with_pickle, cache, key, data, ttl=900)  # cache for 15 minutes
     return data
