@@ -89,7 +89,7 @@ let promise  = fetchPasses();
 </p>
 {:then passes}
     {#if passes.length > 0}
-        {#each passes as pass (pass.start_pt.date)}
+        {#each passes.slice(0,10) as pass (pass.start_pt.date)}
             <PassListItem satellite={satellite} pass={pass} />
         {/each}
         <a href="#" class="button is-floating is-primary">

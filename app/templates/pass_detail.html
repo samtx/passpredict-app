@@ -103,8 +103,10 @@
     <div id="groundtrack-map"></div>
 
 </div>
+{% endblock content %}
 
-<!--  Javascript  -->
+
+{% block javascript %}
 <script src='https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.js'></script>
 <script>
     mapboxgl.accessToken = "{{ access_token }}";
@@ -117,8 +119,7 @@
         container: 'groundtrack-map', // container ID
         style: 'mapbox://styles/mapbox/light-v10', // style URL, alternate: outdoors-v11
         center: [site.lon, site.lat], // starting position [lng, lat]
-        zoom: 4,  // starting zoom
-        interactive: false,
+        zoom: 3,  // starting zoom
     });
 
     map.on('load', () => {
@@ -153,5 +154,5 @@
         }).setLngLat([site.lon, site.lat])
         .addTo(map);
 </script>
+{% endblock javascript %}
 
-{% endblock content %}

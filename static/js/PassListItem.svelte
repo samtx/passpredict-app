@@ -1,21 +1,21 @@
 <script>
 import { location } from './stores.js';
-// import PassListItemMap from './PassListItemMap.svelte';
+import PassListItemMap from './PassListItemMap.svelte';
 
 export let pass;
 export let satellite;
 
-const detailUrl = '/passes/detail/?' + new URLSearchParams(
-    {
-        satid: satellite.id,
-        satname: satellite.name,
-        name: $location.name,
-        lat: $location.lat,
-        lon: $location.lon,
-        h: $location.h,
-        aosdt: pass.start_pt.date.toISOString(),
-    }
-).toString();
+let params = {
+    satid: satellite.id,
+    satname: satellite.name,
+    name: $location.name,
+    lat: $location.lat,
+    lon: $location.lon,
+    h: $location.h,
+    aosdt: pass.start_pt.date.toISOString(),
+}
+
+const detailUrl = '/passes/detail/?' + new URLSearchParams(params).toString();
 
 function goToDetailUrl() {
     window.location.assign(detailUrl);
@@ -50,6 +50,6 @@ const timePeriod = pass.start_pt.getTimeMinutesParts.dayPeriod;
         <p class="value">{pass.elevation.toString()}&deg;</p>
     </div>
 
-    <!-- <PassListItemMap /> -->
+    <PassListItemMap satid={params.satid} aosdt={params.aosdt} />
 
 </div>
