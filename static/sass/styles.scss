@@ -70,3 +70,14 @@ div#groundtrack-map {
     height: 500px;
     margin: 2em auto;
 }
+
+.autocomplete::after {
+    border-color: transparent !important;
+}
+
+.autocomplete-input {
+    padding-left: calc(0.75em - 1px) !important;
+    padding-right: calc(0.75em - 1px) !important;
+    padding-top: calc(0.5em - 1px) !important;
+    padding-bottom: calc(0.5em - 1px) !important;
+}

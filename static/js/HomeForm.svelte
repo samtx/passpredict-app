@@ -46,7 +46,7 @@ $: lonStr = stringToFixedFloat(lon, 4);
 </script>
 
 <style>
-    /* your styles go here */
+
 </style>
 
 <form method="POST" action={formActionUrl}>
@@ -57,10 +57,14 @@ $: lonStr = stringToFixedFloat(lon, 4);
             labelFieldName="name"
             localFiltering={false}
             placeholder="New York, NY"
+            inputId="location-search"
             minCharactersToSearch=1
             html5autocomplete={false}
+            dataFormType='other'
+            lpIgnore={true}
             hideArrow={true}
             bind:selectedItem={location}
+            className="is-arrowless"
         />
         {#if location}
             <div class="latlon-result">
