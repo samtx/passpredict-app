@@ -17,8 +17,12 @@ let lineColor = "#D2042D";
 let mapStyle = 'mapbox/light-v10';
 
 function setTileLayer(map) {
-    // Remove existing layer
-    map.eachLayer(layer => layer.remove());
+    // Remove existing tile layer
+    map.eachLayer((layer) => {
+        if (layer instanceof L.TileLayer){
+            layer.remove();
+        }
+    });
     // Add new layer
     L.tileLayer('https://api.mapbox.com/styles/v1/{styleId}/tiles/{tileSize}/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
@@ -65,6 +69,7 @@ function initMap(container) {
     });
     setTileLayer(m);
     setLocationMarker(m);
+    setSatelliteCoordinateLine(m);
     return m;
 }
 
@@ -90,12 +95,23 @@ async function fetchSatelliteCoordinates() {
     return {lat: data.satellite.latitude, lon: data.satellite.longitude};
 }
 
-// function setSatelliteCoordinateLine() {
-//     fetchSatelliteCoordinates().then((data) => {
+function setSatelliteCoordinateLine(map) {
+    fetchSatelliteCoordinates().then((coords) => {
+        let latlngs = [];
+        const n = coords.lat.length;
+        for (let i = 0; i < n; i++) {
+            latlngs.push([coords.lat[i], coords.lon[i]]);
+        };
+        map.eachLayer((layer) => {
+        if (layer instanceof L.Polyline){
+            layer.remove();
+        }
+    });
+        L.polyline(latlngs, {color: lineColor}).addTo(map);
+    })
+    return map;
 
-//     })
-
-// }
+}
 
 </script>
 
