@@ -5,14 +5,18 @@ import PassListItemMap from './PassListItemMap.svelte';
 export let pass;
 export let satellite;
 
+let satid = satellite.id;
+let aosdt = pass.start_pt.date.toISOString();
+let losdt = pass.end_pt.date.toISOString();
+
 let params = {
-    satid: satellite.id,
+    satid: satid,
     satname: satellite.name,
     name: $location.name,
     lat: $location.lat,
     lon: $location.lon,
     h: $location.h,
-    aosdt: pass.start_pt.date.toISOString(),
+    aosdt: aosdt,
 }
 
 const detailUrl = '/passes/detail/?' + new URLSearchParams(params).toString();
@@ -50,6 +54,6 @@ const timePeriod = pass.start_pt.getTimeMinutesParts.dayPeriod;
         <p class="value">{pass.elevation.toString()}&deg;</p>
     </div>
 
-    <PassListItemMap satid={params.satid} aosdt={params.aosdt} />
+    <PassListItemMap {satid} {aosdt} {losdt} />
 
 </div>

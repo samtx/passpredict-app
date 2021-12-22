@@ -9,6 +9,7 @@ from starlette import middleware
 from app import settings
 from app.resources import templates
 from . import passes
+from . import satellites
 
 
 description = """
@@ -39,6 +40,10 @@ app.add_middleware(
 app.include_router(
     passes.router,
     prefix='/passes',
+)
+app.include_router(
+    satellites.router,
+    prefix='/satellites',
 )
 
 

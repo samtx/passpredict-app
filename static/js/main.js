@@ -1,7 +1,7 @@
 import Autocomplete from './autocomplete.js';
 import PassList from './PassList.svelte';
 import HomeForm from './HomeForm.svelte';
-
+import { R_EARTH, getVisibilityCircle } from './passpredict.js';
 
 const setNavbarMenuListener = () => {
     // Reference: https://bulma.io/documentation/components/navbar/#navbar-menu
@@ -31,4 +31,4 @@ const regExpEscape = (s) => {
 }
 
 
-export { Autocomplete, PassList, HomeForm, regExpEscape };
+export { Autocomplete, PassList, HomeForm, regExpEscape, R_EARTH, getVisibilityCircle };

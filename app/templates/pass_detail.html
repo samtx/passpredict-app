@@ -115,11 +115,25 @@
         lat: {{ location.lat|tojson }}
     };
 
+    const visibilityRadius = {{ visibility_radius }};
+    const steps = 90;
+    const lonFirst = true;  // request coordinates in [lon, lat] format
+    // Make GeoJson polygon for visibility circle
+    // Assumes Earth is a sphere
+    let circleCoords = Passpredict.getVisibilityCircle(site, visibilityRadius, steps, lonFirst)
+    let bounds = new mapboxgl.LngLatBounds(circleCoords[0], circleCoords[1]);
+    for (const c of circleCoords){
+        bounds.extend(c);
+    }
+
     const map = new mapboxgl.Map({
         container: 'groundtrack-map', // container ID
         style: 'mapbox://styles/mapbox/light-v10', // style URL, alternate: outdoors-v11
         center: [site.lon, site.lat], // starting position [lng, lat]
-        zoom: 3,  // starting zoom
+        bounds: bounds,  // starting bounding box of visibility circle
+    });
+    map.fitBounds(bounds, {
+        padding: 20
     });
 
     map.on('load', () => {
@@ -147,12 +161,49 @@
                 'line-width': 2
             }
         });
+        map.addSource('visibilityCircle', {
+            'type': 'geojson',
+            'data': {
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Polygon',
+                    'coordinates': [
+                        circleCoords // array of [lon, lat]
+                    ]
+                }
+            },
+        });
+        map.addLayer({
+            'id': 'visibilityCircle',
+            'type': 'fill',
+            'source': 'visibilityCircle',
+            'layout': {},
+            'paint': {
+                'fill-color': 'rgb(102, 102, 102)',
+                'fill-opacity': 0.2,
+            }
+        });
+        map.addLayer({
+            'id': 'visibilityCircleOutline',
+            'type': 'line',
+            'source': 'visibilityCircle',
+            'layout': {},
+            'paint': {
+                'line-color': '#666',
+                'line-width': 2,
+            }
+        });
     });
     const marker = new mapboxgl.Marker({
         color: "#6495ED",
         scale: 0.5,
         }).setLngLat([site.lon, site.lat])
         .addTo(map);
+
+
+
+
+
 </script>
 {% endblock javascript %}
 

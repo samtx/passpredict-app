@@ -14,6 +14,7 @@ from .schemas import (
     SingleSatOverpassResult,
     Point,
     PassDetailResult,
+    SatelliteLatLng,
 )
 
 
@@ -109,3 +110,17 @@ def passpoint_serializer(passpoint, tz: ZoneInfo):
         el=el,
         range=range_
     )
+
+
+def satellite_latlng_serializer(
+    satid,
+    llh,
+) -> SatelliteLatLng:
+    """
+    Serialize the satellite coordinates
+    """
+    latlng = [[round(lat, 6), round(lon, 6)] for (lat, lon) in zip(llh.latitude, llh.longitude)]
+    timestamp = [d.timestamp() for d in llh.datetime]
+    height = round(llh.altitude.mean(), 3)
+    res = SatelliteLatLng(satid=satid, latlng=latlng, timestamp=timestamp, height=height)
+    return res

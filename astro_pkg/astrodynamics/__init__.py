@@ -3,6 +3,7 @@ from .core import (
     predict_single_satellite_overpasses,
     predict_next_overpass,
     get_next_pass_detail,
+    get_satellite_llh,
 )
 
 from ._time import (
@@ -32,6 +33,10 @@ from .observers import (
     PredictedPass,
 )
 
+from .constants import (
+    R_EARTH,
+)
+
 __all__ = [
     'predict_all_visible_satellite_overpasses',
     'predict_single_satellite_overpasses',
@@ -48,4 +53,5 @@ __all__ = [
     'SatellitePredictor',
     'PredictedPass',
     'Observer',
+    'R_EARTH',
 ]

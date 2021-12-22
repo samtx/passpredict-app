@@ -7,12 +7,14 @@ from functools import cache
 from starlette.routing import Route
 from starlette.requests import Request
 from starlette.exceptions import HTTPException
+from starlette.concurrency import run_in_threadpool
 from dateutil.parser import isoparse
 
 from app.settings import MAX_DAYS
 from app.resources import templates, mapbox_client_token
 from app.core.schemas import Location, Satellite
-from app.core.passes import _get_pass_detail
+from app.core.passes import _get_pass_detail, get_visibility_radius, Coordinate
+from app.core.satellites import _get_satellite_latlng
 from app.utils import get_satellite_norad_ids
 
 
@@ -61,6 +63,16 @@ async def get_pass_detail(request):
         'satname': satellite.name,
         'name': location.name,
     })
+    aos_llh = await _get_satellite_latlng(
+        satid=satellite.id,
+        aosdt=aos_dt_utc,
+        losdt=aos_dt_utc,
+        dtsec=1,
+        db=db,
+        cache=cache,
+    )
+    aos_coordinate = Coordinate(aos_llh.latlng[0][0], aos_llh.latlng[0][1])
+    visibility_radius = get_visibility_radius(location, aos_coordinate)
     context = {
         'request': request,
         'satellite': satellite,
@@ -68,7 +80,7 @@ async def get_pass_detail(request):
         'pass': pass_.overpass,
         'pass_list_url': pass_list_url,
         'satellite_coordinates': [[lon, lat] for lon, lat in zip(pass_.satellite.longitude, pass_.satellite.latitude)],
-        'visibility_circle': [],
+        'visibility_radius': visibility_radius,
         'access_token': mapbox_client_token,
     }
     return templates.TemplateResponse('pass_detail.html', context)

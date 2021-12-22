@@ -65,8 +65,8 @@ let promise  = fetchPasses();
     </div>
     <div class="results-header-right">
         <a class="button is-primary" href={home_url}>Search Again</a>
-        <label for="showMaps">Show Maps</label>
-        <input name="showMaps" type="checkbox" bind:checked={showMaps}/>
+        <!-- <label for="showMaps">Show Maps</label>
+        <input name="showMaps" type="checkbox" bind:checked={showMaps}/> -->
 
         <!-- <label for="visibleOnly" class="checkbox">
             <input id="visibleOnly" type="checkbox" checked />
@@ -89,7 +89,7 @@ let promise  = fetchPasses();
 </p>
 {:then passes}
     {#if passes.length > 0}
-        {#each passes.slice(0,10) as pass (pass.start_pt.date)}
+        {#each passes as pass (pass.start_pt.date)}
             <PassListItem satellite={satellite} pass={pass} />
         {/each}
         <a href="#" class="button is-floating is-primary">

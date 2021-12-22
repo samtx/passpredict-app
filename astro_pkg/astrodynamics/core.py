@@ -57,3 +57,16 @@ def get_next_pass_detail(
     observer = Observer(location, satellite, aos_at_dg=min_elevation, tolerance_s=1.0)
     pass_detail, llh = observer.get_next_pass_detail(date_start)
     return pass_detail, llh
+
+
+def get_satellite_llh(
+    satellite: SatellitePredictor,
+    date_start: datetime.datetime,
+    date_end: datetime.datetime,
+    dt_seconds: float = 1,
+):
+    assert dt_seconds > 0, "dt_seconds must be greater than 0"
+    time_step = datetime.timedelta(seconds=dt_seconds)
+    n_steps = int((date_end - date_start).total_seconds() / dt_seconds) + 1
+    llh = satellite.get_position_detail(date_start, n_steps, time_step)
+    return llh

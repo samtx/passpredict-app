@@ -2,13 +2,18 @@
 import { location } from './stores.js';
 import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { getVisibilityCircle, R_EARTH } from './passpredict.js';
+// import circle from '@turf/circle';
 
 // Ref: https://github.com/allyoucanmap/piano-map/blob/master/src/Map.svelte
 
 export let satid;
 export let aosdt;
+export let losdt;
 
 let map;
+let latlng;
+let visibilityRadius;
 
 let markerColor = "#6495ED";
 let lineColor = "#D2042D";
@@ -82,35 +87,54 @@ function mapAction(container) {
     }
 }
 
-async function fetchSatelliteCoordinates() {
-    let params = {
+async function fetchSatelliteLatLng() {
+    const params = {
         satid: satid,
-        lat: $location.lat,
-        lon: $location.lon,
-        h: $location.h,
         aosdt: aosdt,
+        losdt: losdt,
+        dtsec: 30,
     }
-    let resp = await fetch('/api/passes/detail/?' + new URLSearchParams(params).toString());
-    let data = await resp.json();
-    return {lat: data.satellite.latitude, lon: data.satellite.longitude};
+    const resp = await fetch('/api/satellites/latlng/?' + new URLSearchParams(params).toString());
+    const data = await resp.json();
+    return data;
 }
 
 function setSatelliteCoordinateLine(map) {
-    fetchSatelliteCoordinates().then((coords) => {
-        let latlngs = [];
-        const n = coords.lat.length;
-        for (let i = 0; i < n; i++) {
-            latlngs.push([coords.lat[i], coords.lon[i]]);
-        };
+    fetchSatelliteLatLng().then((data) => {
         map.eachLayer((layer) => {
-        if (layer instanceof L.Polyline){
-            layer.remove();
-        }
-    });
-        L.polyline(latlngs, {color: lineColor}).addTo(map);
+            if (layer instanceof L.Polyline){
+                layer.remove();
+            }
+        });
+        latlng = data.latlng;
+        visibilityRadius = data.radius;
+        const satline = L.polyline(latlng, {color: lineColor});
+        const aospt = {lat: latlng[0][0], lon: latlng[0][1]};
+        const r = distance($location, aospt);
+        const circleLatlng = getVisibilityCircle($location, r, 120);
+        const circle = L.polygon(circleLatlng, {
+            color: '#666',
+            weight: 2,
+            fillColor: 'rgb(102, 102, 102)',
+            fillOpacity: 0.2,
+        });
+        map.fitBounds(circle.getBounds());
+        circle.addTo(map);
+        satline.addTo(map);
     })
     return map;
+}
 
+
+function distance(point1, point2) {
+    // Compute direct distance between two coordinates. Assume Earth is a sphere.
+    const deg2rad = Math.PI / 180;
+    const theta1 = (90 - point1.lat) * deg2rad;
+    const theta2 = (90 - point2.lat) * deg2rad;
+    const phi1 = point1.lon * deg2rad;
+    const phi2 = point2.lon * deg2rad;
+    const d = R_EARTH * Math.sqrt(2 - 2*(Math.sin(theta1)*Math.sin(theta2)*Math.cos(phi1 - phi2) + Math.cos(theta1)*Math.cos(theta2)));
+    return d;
 }
 
 </script>

@@ -3,7 +3,7 @@ from enum import Enum
 from math import floor
 from typing import List
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, conlist
 
 
 class OrdinalDirection(int, Enum):
@@ -61,6 +61,13 @@ class SatelliteDetail(Satellite):
     latitude: List[float]
     longitude: List[float]
     altitude: List[float] = Field(None, description="Satellite altitude in km")
+
+
+class SatelliteLatLng(BaseModel):
+    satid: int
+    timestamp: List[float] = Field(..., description="Unix timestamp in seconds in Jan 1 1970 UTC" )
+    latlng: List[conlist(float, min_items=2, max_items=2)]
+    height: float = Field(None, description="Average alititude of satellite [km]")
 
 
 class Point(BaseModel):

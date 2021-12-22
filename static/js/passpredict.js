@@ -1,3 +1,5 @@
+const R_EARTH = 6378.137;  // Radius of Earth [km]  WGS-84
+
 class Point {
     constructor(obj) {
         this.date = new Date(obj.datetime);  // datetime string
@@ -71,4 +73,54 @@ const padZeros = (n, size) => {
     return nstr
 }
 
-export { Pass, Point };
+
+function getVisibilityCircle(location, radius, steps, lnglat = false) {
+    // Compute visibility circle for ground station
+    // Ref: iss.astroviewer.net
+
+    function limit(x) {
+        if (x > 1.0) {
+            return 1.0;
+        }
+        if (x < -1.0) {
+            return -1.0;
+        }
+        return x;
+    }
+
+    steps = Math.floor(steps);
+    const deg2rad = Math.PI / 180.0;
+    const points = new Array(steps + 1);
+    let omega = 0.0;
+    const cosLocLat = Math.cos(location.lat * deg2rad);
+    const sinLocLat = Math.sin(location.lat * deg2rad);
+    const alpha = radius / R_EARTH;
+    const sinAlpha = Math.sin(alpha);
+    const cosAlpha = Math.cos(alpha);
+    const deltaOmega = 2.0 * Math.PI / steps;
+    for (let i = 0; i <= Math.floor(0.5 * steps); i++) {
+        let cosOmega = Math.cos(omega);
+        let sinLat = cosOmega * cosLocLat * sinAlpha  +  sinLocLat * cosAlpha;
+        sinLat = limit(sinLat);
+        let cosLat = Math.sqrt(1.0 - sinLat*sinLat);
+        let cosDeltaLon = (cosAlpha - sinLocLat*sinLat) / (cosLocLat * cosLat);
+        cosDeltaLon = limit(cosDeltaLon);
+        let lat = Math.asin(sinLat) / deg2rad;
+        let deltaLon = Math.acos(cosDeltaLon) / deg2rad;
+        let lonEast = location.lon + deltaLon;
+        let lonWest = location.lon - deltaLon;
+        if (lnglat) {
+            points[i] = [lonEast, lat];
+            points[steps - i] = [lonWest, lat];
+        }
+        else {
+            points[i] = [lat, lonEast];
+            points[steps - i] = [lat, lonWest];
+        }
+        omega += deltaOmega;
+    }
+    // points.push(points[0]);
+    return points;
+}
+
+export { Pass, Point, getVisibilityCircle, R_EARTH };
