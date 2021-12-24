@@ -9,6 +9,14 @@
 {% block content %}
 <div class="container is-max-desktop px-3 pt-2">
 
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+          <li><a href="{{ url_for('home') }}">Home</a></li>
+          <li><a href="{{ pass_list_url }}">Pass List</a></li>
+          <li class="is-active"><a href="#" aria-current="page">Pass Detail</a></li>
+        </ul>
+    </nav>
+
     <header>
         <h1 class="title has-text-centered mb-3">
             Satellite Pass Detail

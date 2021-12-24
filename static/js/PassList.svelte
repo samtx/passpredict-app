@@ -75,12 +75,12 @@ let promise  = fetchPasses();
     </div>
 </div>
 
-<div id="passListHeader" class="p-2 mb-1">
+<!-- <div id="passListHeader" class="p-2 mb-1">
     <p class="pass-item pass-month-day">Date</p>
     <p class="pass-item pass-time">Time</p>
     <p class="pass-item pass-duration">Duration</p>
     <p class="pass-item pass-max-el">Max Elevation</p>
-</div>
+</div> -->
 
 {#await promise}
 <p class="is-size-5 has-text-centered mt-6 mb-4">
