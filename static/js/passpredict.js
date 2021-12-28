@@ -39,6 +39,7 @@ class Pass {
         this.total_seconds = obj.duration;
         this.type = obj.type;
         this.brightness = obj.brightness ? obj.brightness : "";
+        this.satid = obj.satid;
     }
 
     get quality() {

@@ -12,7 +12,6 @@ let losdt = pass.end_pt.date.toISOString();
 
 let params = {
     satid: satid,
-    satname: satellite.name,
     name: $location.name,
     lat: $location.lat,
     lon: $location.lon,
@@ -33,8 +32,6 @@ const timePeriod = pass.start_pt.getTimeMinutesParts.dayPeriod;
 const durationStringArray = pass.duration.split(':');
 const durationMinutes = durationStringArray[0];
 const durationSeconds = durationStringArray[1];
-
-
 </script>
 
 <style lang="scss">
@@ -68,15 +65,15 @@ const durationSeconds = durationStringArray[1];
 //     flex-grow: 1;
 // }
 
-table {
+table.pass-data {
     display: inline-table;
     border: 0;
     border-collapse: collapse;
     font-size: 0.9em;
-}
 
-td {
-    padding-right: 0.4em;
+    & td {
+        padding-right: 0.4em;
+    }
 }
 
 // .pass-data-row {
@@ -89,67 +86,43 @@ td {
     margin: 1em 0;
 }
 
-.pass-month-day {
-    flex-basis: 10%;
-}
-
-.pass-time {
-    flex-basis: 20%;
-}
-
 .pass-time-ampm {
     font-size: 0.75em;
 };
-
-.pass-duration {
-    flex-basis: 15%;
-}
-
-.pass-max-el {
-    flex-basis: 10%;
-}
 
 @media screen and (min-width: 550px) {
     .pass-time-ampm {
         font-size: 1em;
     };
 
-    table {
-        font-size: 1em;
-    }
-
-    td {
-        padding-right: 1em;
-    }
-
     .pass-data {
+        font-size: 1em;
         margin: 0 2em;
+
+        & td {
+            padding-right: 1em;
+        }
     }
 
     .pass-map {
         width: 200px;
         height: 175px;
         flex-grow: 1;
+        margin: 0;
     }
 }
 
 </style>
 
-
-<div
-    class="box is-rounded p-2 mb-3 pass-row"
-    on:click={goToDetailUrl}
-    data-location={detailUrl}
->
-
-    {#if showMaps}
+{#if showMaps}
+    <div class="box is-rounded p-2 mb-3 pass-row" on:click={goToDetailUrl} data-location={detailUrl}>
         <table class="pass-data">
             <tr>
                 <td class="data-header">Date:</td>
                 <td>{monthDay}, {timeHour}:{timeMinutes} <span class='pass-time-ampm'>{timePeriod}</span></td>
             </tr>
             <tr>
-                <td class="data-header">Pass duration:</td>
+                <td class="data-header">Duration:</td>
                 <td>{durationMinutes} min, {durationSeconds} sec</td>
             </tr>
             <tr>
@@ -160,19 +133,11 @@ td {
         <div class="pass-map">
             <PassListItemMap {satid} {aosdt} {losdt} height="100%" width="100%" />
         </div>
-    {:else}
-        <div class="p-1 pass-item pass-month-day">
-            <p class="value">{monthDay}</p>
-        </div>
-        <div class="p-1 pass-item pass-time">
-            <p class="value">{timeHour}:{timeMinutes} <span class='pass-time-ampm'>{timePeriod}</span></p>
-        </div>
-        <div class="p-1 pass-item pass-duration">
-            <p class="value">{pass.duration}</p>
-        </div>
-        <div class="p-1 pass-item pass-max-el">
-            <p class="value">{pass.elevation.toString()}&deg;</p>
-        </div>
-    {/if}
-
-</div>
+    </div>
+{:else}
+    <tr on:click={goToDetailUrl} data-location={detailUrl}>
+        <td>{monthDay}, {timeHour}:{timeMinutes} <span class='pass-time-ampm'>{timePeriod}</span></td>
+        <td>{pass.duration}</td>
+        <td>{pass.elevation.toString()}&deg;</td>
+    </tr>
+{/if}

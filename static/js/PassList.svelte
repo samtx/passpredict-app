@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { Pass } from './passpredict.js';
 import { location as locationStore } from './stores.js';
 import PassListItem from './PassListItem.svelte';
+import PassListDataTable from './PassListDataTable.svelte';
 
 export let satellite;
 export let location;
@@ -37,7 +38,7 @@ let promise  = fetchPasses();
 </script>
 
 <style lang="scss">
-@use "static/sass/_variables.scss";
+@import "static/sass/_variables.scss";
 
 .results-header {
     display: flex;
@@ -93,12 +94,6 @@ let promise  = fetchPasses();
     </div>
 </div>
 
-<!-- <div id="passListHeader" class="p-2 mb-1">
-    <p class="pass-item pass-month-day">Date</p>
-    <p class="pass-item pass-time">Time</p>
-    <p class="pass-item pass-duration">Duration</p>
-    <p class="pass-item pass-max-el">Max Elevation</p>
-</div> -->
 
 {#await promise}
 <p class="is-size-5 has-text-centered mt-6 mb-4">
@@ -107,10 +102,14 @@ let promise  = fetchPasses();
 </p>
 {:then passes}
     {#if passes.length > 0}
-        {#each passes as pass (pass.start_pt.date)}
-            <PassListItem {satellite} {pass} {showMaps} />
-        {/each}
-        <a href="#" class="button is-floating is-primary">
+        {#if showMaps}
+            {#each passes as pass (pass.start_pt.date)}
+                    <PassListItem {satellite} {pass} {showMaps} />
+            {/each}
+        {:else}
+            <PassListDataTable {passes} />
+        {/if}
+        <a href="" class="button is-floating is-primary">
             <img src={chevronUrl} alt="Up">
         </a>
     {:else}
