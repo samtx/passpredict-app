@@ -4,6 +4,8 @@ import { Pass } from './passpredict.js';
 import { location as locationStore } from './stores.js';
 import PassListItem from './PassListItem.svelte';
 import PassListDataTable from './PassListDataTable.svelte';
+import Switch from '@smui/switch';
+import "svelte-material-ui/bare.css";
 
 export let satellite;
 export let location;
@@ -85,7 +87,7 @@ let promise  = fetchPasses();
     <div class="results-header-right">
         <a class="button is-primary" href={home_url}>Search Again</a>
         <label for="showMaps">Show Maps</label>
-        <input name="showMaps" type="checkbox" bind:checked={showMaps}/>
+        <Switch name="showMaps" bind:checked={showMaps} icons={false}/>
 
         <!-- <label for="visibleOnly" class="checkbox">
             <input id="visibleOnly" type="checkbox" checked />
@@ -104,7 +106,7 @@ let promise  = fetchPasses();
     {#if passes.length > 0}
         {#if showMaps}
             {#each passes as pass (pass.start_pt.date)}
-                    <PassListItem {satellite} {pass} {showMaps} />
+                <PassListItem {satellite} {pass} {showMaps} />
             {/each}
         {:else}
             <PassListDataTable {passes} />
