@@ -36,6 +36,7 @@
         "sass": "^1.32.13",
         "simple-svelte-autocomplete": "github:samtx/simple-svelte-autocomplete",
         "svelte": "^3.44.3",
+        "svelte-preprocess": "^4.10.1",
         "terser": "^5.7.0",
         "watch": "^1.0.2"
     },

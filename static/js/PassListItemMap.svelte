@@ -10,6 +10,8 @@ import { getVisibilityCircle, R_EARTH } from './passpredict.js';
 export let satid;
 export let aosdt;
 export let losdt;
+export let height;
+export let width;
 
 let map;
 let latlng;
@@ -87,6 +89,12 @@ function mapAction(container) {
     }
 }
 
+function resizeMap() {
+    if(map) { 
+        map.invalidateSize(); 
+    }
+}
+
 async function fetchSatelliteLatLng() {
     const params = {
         satid: satid,
@@ -108,7 +116,10 @@ function setSatelliteCoordinateLine(map) {
         });
         latlng = data.latlng;
         visibilityRadius = data.radius;
-        const satline = L.polyline(latlng, {color: lineColor});
+        const satline = L.polyline(latlng, {
+            color: lineColor,
+            weight: 2,
+        });
         const aospt = {lat: latlng[0][0], lon: latlng[0][1]};
         const r = distance($location, aospt);
         const circleLatlng = getVisibilityCircle($location, r, 120);
@@ -140,10 +151,8 @@ function distance(point1, point2) {
 </script>
 
 <style>
-.map {
-    width: 250px;
-    height: 250px;
-}
 </style>
 
-<div class="map" use:mapAction></div>
+<svelte:window on:resize={resizeMap} />
+
+<div class="map" style="width:{width}; height:{height}" use:mapAction></div>

@@ -1,13 +1,10 @@
 :root {
     font-size: clamp(1.1em, 2vw, 1.25em);
-    --primary-light: hsl(171, 100%, 96%);
-    --primary-dark: hsl(171, 100%, 29%);
 }
 
 @import "_variables.scss";
 @import "_bulma.scss";
-@import "autocomplete.scss";
-@import "passes.scss";
+// @import "autocomplete.scss";
 @import "passdetail.scss";
 
 #api-home h3 {

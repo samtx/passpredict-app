@@ -5,6 +5,7 @@ import replace from '@rollup/plugin-replace';
 import svelte from 'rollup-plugin-svelte';
 import resolve from '@rollup/plugin-node-resolve';
 import css from "rollup-plugin-import-css";
+import preprocess from 'svelte-preprocess';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -33,6 +34,7 @@ export default [
                 compilerOptions: {
                     dev: production ? false : true,
                 },
+                preprocess: preprocess(),
                 emitCss: true
             }),
             mapboxToken && replace({

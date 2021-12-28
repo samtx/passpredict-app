@@ -36,8 +36,26 @@ let promise  = fetchPasses();
 
 </script>
 
-<style>
-    /* your styles go here */
+<style lang="scss">
+@use "static/sass/_variables.scss";
+
+.results-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    flex-wrap: wrap;
+}
+
+.results-header-left {
+    flex-grow: 4;
+}
+
+.results-header-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 </style>
 
 
@@ -65,8 +83,8 @@ let promise  = fetchPasses();
     </div>
     <div class="results-header-right">
         <a class="button is-primary" href={home_url}>Search Again</a>
-        <!-- <label for="showMaps">Show Maps</label>
-        <input name="showMaps" type="checkbox" bind:checked={showMaps}/> -->
+        <label for="showMaps">Show Maps</label>
+        <input name="showMaps" type="checkbox" bind:checked={showMaps}/>
 
         <!-- <label for="visibleOnly" class="checkbox">
             <input id="visibleOnly" type="checkbox" checked />
@@ -90,7 +108,7 @@ let promise  = fetchPasses();
 {:then passes}
     {#if passes.length > 0}
         {#each passes as pass (pass.start_pt.date)}
-            <PassListItem satellite={satellite} pass={pass} />
+            <PassListItem {satellite} {pass} {showMaps} />
         {/each}
         <a href="#" class="button is-floating is-primary">
             <img src={chevronUrl} alt="Up">

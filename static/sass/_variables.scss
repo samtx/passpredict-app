@@ -1,2 +1,19 @@
 $navbar-height: 1.75rem;
 $mobile-large: 426px;
+
+// The container horizontal gap, which acts as the offset for breakpoints
+$gap: 32px;
+// 960, 1152, and 1344 have been chosen because they are divisible by both 12 and 16
+$tablet: 769px;
+
+$mobile-large: 425px;
+
+// 960px container + 4rem
+$desktop: 960px + (2 * $gap);
+
+:root {
+    --primary-light: hsl(171, 100%, 96%);
+    --primary-dark: hsl(171, 100%, 29%);    
+    --desktop: $desktop;
+    --tablet: $tablet;
+}
