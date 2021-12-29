@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} Pass Predict {% endblock title %}
+{% block title %}User-friendly satellite observation and prediction | Pass Predict{% endblock title %}
+
+{% block meta %}
+<meta name="description" content="User-friendly satellite observation and predictions.
+Predict when the International Space Station will pass over your location." />
+{% endblock meta %}
 
 {% block content %}
 
@@ -8,12 +13,16 @@
         <h1 class="title is-size-1">
             Pass Predict
         </h1>
-        <h3 class="subtitle is-size-3">
-            See a Satellite!
-        </h3>
+        <h4 class="subtitle is-size-4">
+            User-friendly satellite overpass predictions
+        </h4>
     </header>
 
     <main>
+        <p class="mt-3">
+            Enter your obversing location and select a satellite to compute predicted overpasses.
+        </p>
+
         <div id="passes-form"></div>
     </main>
 

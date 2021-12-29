@@ -10,6 +10,9 @@
         {% endblock title %}
     </title>
 
+    {% block meta %}
+    {% endblock meta %}
+
     <!-- <link rel="shortcut icon" href="{{ url_for('static', path='img/satellite.png') }}" type="image/x-icon"> -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', path='img/apple-touch-icon.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', path='img/favicon-32x32.png') }}">
@@ -21,7 +24,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', path='dist/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='dist/bundle.css') }}">
-
 
     {% block javascript_head %}
     {% endblock javascript_head %}

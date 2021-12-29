@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %} Passes {% endblock title %}
+{% block title %}{{ satellite.name }} Predicted Pass for {{ location.name }} on {{ pass.aos.datetime|strftime("%x") }}{% endblock title %}
+
+{% block meta %}
+<meta name="description" content="Predicted overpass for {{ satellite.name }} over {{ location.name }}
+on {{ pass.aos.datetime|strftime('%x') }}" />
+{% endblock meta %}
 
 {% block javascript_head %}
 <link href='https://api.mapbox.com/mapbox-gl-js/v2.6.0/mapbox-gl.css' rel='stylesheet' />
