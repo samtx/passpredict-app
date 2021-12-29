@@ -69,7 +69,7 @@ table.pass-data {
     display: inline-table;
     border: 0;
     border-collapse: collapse;
-    font-size: 0.9em;
+    // font-size: 0.9em;
 
     & td {
         padding-right: 0.4em;
@@ -82,7 +82,7 @@ table.pass-data {
 
 .pass-map {
     width: 90vw;
-    height: 40vh;
+    height: 25vh;
     margin: 1em 0;
 }
 
@@ -97,7 +97,7 @@ table.pass-data {
 
     .pass-data {
         font-size: 1em;
-        margin: 0 2em;
+        margin-left: 1em;
 
         & td {
             padding-right: 1em;
@@ -108,7 +108,7 @@ table.pass-data {
         width: 200px;
         height: 175px;
         flex-grow: 1;
-        margin: 0;
+        margin: 0 0 0 30%;
     }
 }
 

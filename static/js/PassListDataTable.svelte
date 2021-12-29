@@ -1,6 +1,6 @@
 <script>
     import { location } from './stores.js';
-    
+
     export let passes;
 
 
@@ -17,17 +17,23 @@
     }
 
     function goToDetailUrl(event) {
-        const url = event.target.getAttribute("data-location");
+        // Bubble up to parent nodes to find data-location attribute
+        let url;
+        let node = event.target;
+        do {
+            url = node.getAttribute('data-location');
+            node = node.parentElement;
+        } while (url == null);
         window.location.assign(url);
     };
-    
+
     const monthDay = (pass) => pass.start_pt.getMonthDay;
     const timeMinutes = (pass) => pass.start_pt.getTimeMinutesParts.minute;
     const timeHour = (pass) => pass.start_pt.getTimeMinutesParts.hour;
     const timePeriod = (pass) => pass.start_pt.getTimeMinutesParts.dayPeriod;
 
 </script>
-    
+
 <style lang="scss">
 @import "static/sass/_variables.scss";
 
@@ -50,28 +56,41 @@
     }
 
     & td, th {
-        padding: 0.5em 1.5em;
+        padding: 0.5em 0.5em;
     }
 }
 
 .pass-time-ampm {
     font-size: 0.75em;
 };
-    
+
 @media screen and (min-width: 550px) {
     .pass-time-ampm {
         font-size: 1em;
     };
+
+    .data-table td, .data-table th {
+        padding: 0.5em 1.5em;
+    }
+
+    #header-duration::after {
+        content: "ation";
+    }
+
+    #header-maxel::after {
+        content: "evation";
+    }
 }
 
+
 </style>
-    
+
 <table class="data-table">
     <thead>
         <tr>
-            <th>Date</th>
-            <th>Duration</th>
-            <th>Max Elevation</th>
+            <th id="header-date">Date</th>
+            <th id="header-duration">Dur</th>
+            <th id="header-maxel">Max El</th>
         </tr>
     </thead>
     {#each passes as pass (pass.start_pt.date)}
@@ -82,6 +101,5 @@
         </tr>
     {/each}
 </table>
-    
-    
-    
+
+

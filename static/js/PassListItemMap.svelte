@@ -90,8 +90,8 @@ function mapAction(container) {
 }
 
 function resizeMap() {
-    if(map) { 
-        map.invalidateSize(); 
+    if(map) {
+        map.invalidateSize();
     }
 }
 
@@ -129,7 +129,7 @@ function setSatelliteCoordinateLine(map) {
             fillColor: 'rgb(102, 102, 102)',
             fillOpacity: 0.2,
         });
-        map.fitBounds(circle.getBounds());
+        map.fitBounds(circle.getBounds().pad(0.005));
         circle.addTo(map);
         satline.addTo(map);
     })
