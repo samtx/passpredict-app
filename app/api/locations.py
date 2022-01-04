@@ -1,28 +1,14 @@
 import urllib.parse
 import pickle
 
-from pydantic import BaseModel, Field
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from fastapi import APIRouter, Request, HTTPException
 import httpx
 
-from app import settings
 from app.resources import mapbox_server_token
 
-origins = ["*"] if settings.DEBUG else ['passpredict.com', 'www.passpredict.com']
 
-
-app = FastAPI(
-    title="Pass Predict Location API",
-    version="0.1.0",
-    debug=settings.DEBUG
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_headers=['*'],
-)
+router = APIRouter()
 
 
 class Location(BaseModel):
@@ -35,7 +21,7 @@ class LocationResult(BaseModel):
     locations: list[Location]
 
 
-@app.get('/', response_model=LocationResult)
+@router.get('/', response_model=LocationResult)
 async def location(q: str, request: Request):
     """
     Geocode query string to get list of coordinates

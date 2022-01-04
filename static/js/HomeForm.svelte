@@ -13,8 +13,13 @@ let lon;
 let h;
 let satid;
 
+function resetForm() {
+    satid = undefined;
+    location = undefined;
+}
+
 async function queryLocationAPI(search_text) {
-    const response = await fetch("locations/?" + new URLSearchParams({q: search_text}).toString());
+    const response = await fetch("api/locations/?" + new URLSearchParams({q: search_text}).toString());
     const data = await response.json();
     return data.locations;
 }
@@ -59,7 +64,7 @@ $: lonStr = stringToFixedFloat(lon, 4);
             placeholder="New York, NY"
             inputId="location-search"
             minCharactersToSearch=1
-            html5autocomplete={false}
+            html5autocomplete={true}
             dataFormType='other'
             lpIgnore={true}
             hideArrow={true}
@@ -93,7 +98,7 @@ $: lonStr = stringToFixedFloat(lon, 4);
 
     <div class="buttons">
         <button id="submit" type="submit" class="button is-primary mr-5">Submit</button>
-        <button id="reset" class="button">Reset</button>
+        <button id="reset" type="button" class="button" on:click|stopPropagation={resetForm}>Reset</button>
     </div>
 
 </form>

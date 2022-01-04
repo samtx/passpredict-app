@@ -3,13 +3,13 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import markdown
-from starlette.background import BackgroundTasks
-from starlette import middleware
 
 from app import settings
-from app.resources import templates
+from app.resources import templates, db, cache
 from . import passes
 from . import satellites
+from . import locations
+from . import v1
 
 
 description = """
@@ -20,32 +20,26 @@ Base URL: `https://passpredict.com/api`
 Please note: This website and API are in active development and the endpoints are subject to change without notice.
 """
 
+origins = ["*"] if settings.DEBUG else ['passpredict.com', 'www.passpredict.com']
+
 
 app = FastAPI(
     title="Pass Predict API",
     description=description,
     version="0.1.0",
-    # contact={
-    #     "name": "Sam Friedman",
-    #     "url": "https://passpredict.com/api/contact",
-    # },
     debug=settings.DEBUG
 )
+
+# Add Public API Version 1 application
+app.mount("/v1", v1.app)
+
+# Add middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=origins,
     allow_headers=['*'],
     expose_headers=['Cache-Control'],
 )
-app.include_router(
-    passes.router,
-    prefix='/passes',
-)
-app.include_router(
-    satellites.router,
-    prefix='/satellites',
-)
-
 
 @app.middleware("http")
 async def set_cache_control_header(request: Request, call_next):
@@ -55,6 +49,21 @@ async def set_cache_control_header(request: Request, call_next):
     response = await call_next(request)
     response.headers['Cache-Control'] = "private, max-age=900"  # cache for 15 minutes
     return response
+
+
+# Add routes
+app.include_router(
+    passes.router,
+    prefix='/passes',
+)
+app.include_router(
+    satellites.router,
+    prefix='/satellites',
+)
+app.include_router(
+    locations.router,
+    prefix='/locations',
+)
 
 
 @app.get('/', include_in_schema=False)
@@ -89,6 +98,3 @@ async def home(request: Request):
         'content': content,
     }
     return templates.TemplateResponse('api-home.html', context)
-
-
-# def render_markdown()

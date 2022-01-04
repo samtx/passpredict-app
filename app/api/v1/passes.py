@@ -29,6 +29,14 @@ def get_cache(request: Request):
     return request.app.state.cache
 
 
+async def set_cache_with_pickle(cache, key, value, ttl=None):
+    """
+    Add value to cache with ttl. To be used as Background task
+    """
+    pickled_value = pickle.dumps(value)
+    await cache.set(key, pickled_value, ex=ttl)
+
+
 @router.get(
     '/',
     response_model=SingleSatOverpassResult,
@@ -44,7 +52,7 @@ async def get_passes(
     db: Database = Depends(get_db),
     cache: Redis = Depends(get_cache),
 ):
-    logger.info(f'route api/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
+    logger.info(f'route api/v1/passes/{satid},lat={lat},lon={lon},h={h},days={days}')
     # Create cache key
     today = datetime.datetime.now(datetime.timezone.utc)
     main_key = f'passes:{satid}:lat{lat}:lon{lon}:h{h}:days{days}:start{today.strftime("%Y%m%d")}'
@@ -54,8 +62,9 @@ async def get_passes(
         data = pickle.loads(result)
     else:
         data = await _get_passes(satid, lat, lon, h, today, days, db, cache)
-        # cache results
-        background_tasks.add_task(set_cache_with_pickle, cache, main_key, data, ttl=28800)  # cache for 8 hours
+        # cache results for 30 minutes
+        background_tasks.add_task(set_cache_with_pickle, cache, main_key, data, ttl=12)
+        # await cache.set(main_key, pickle.dumps(data), ex=12)
     return data
 
 
@@ -74,7 +83,7 @@ async def get_pass_detail(
     db: Database = Depends(get_db),
     cache: Redis = Depends(get_cache),
 ):
-    logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
+    logger.info(f'route api/v1/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
     # Check cache for data
     key = f"passdetail:{satid}:aosdt{aosdt}:lat{lat}:lon{lon}:h{h}"
     res = await cache.get(key)

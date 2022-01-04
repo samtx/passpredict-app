@@ -13,12 +13,12 @@ dotenv.config();
 const staticDir = 'static/';
 
 const production = process.env.NODE_ENV == 'production';
-const mapboxToken = production ? process.env.MAPBOX_ACCESS_TOKEN : process.env.MAPBOX_DEFAULT_TOKEN
 if (production) {
     console.log('Production mode')
 } else {
     console.log('Development mode')
 }
+const mapboxToken = production ? process.env.MAPBOX_ACCESS_TOKEN : process.env.MAPBOX_DEFAULT_TOKEN
 
 export default [
     {

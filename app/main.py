@@ -13,8 +13,7 @@ from app.utils import get_satellite_norad_ids
 from app.resources import cache, db, templates, static_app
 from app import settings
 from app import passes
-from app import locations
-from app.api import app as api_app
+from . import api
 
 
 logging.basicConfig(
@@ -54,6 +53,7 @@ async def home(request: Request):
     }
     response = templates.TemplateResponse('home.html', context)
     return response
+
 
 @functools_cache
 def _satellite_db():
@@ -95,8 +95,7 @@ routes = [
     Route('/about', about, name='about'),
     Route('/help', help, name='help'),
     Mount('/passes', routes=passes.routes, name='passes'),
-    Mount('/api', app=api_app, name='api'),
-    Mount('/locations', app=locations.app, name='location'),
+    Mount('/api', app=api.app, name='api'),
     Mount('/static', app=static_app, name='static'),
 ]
 
@@ -107,9 +106,10 @@ app = Starlette(
     on_startup=[connect_to_db_and_cache],
     on_shutdown=[disconnect_from_db_and_cache],
 )
+
+
 # attach database and cache connections onto application state
 app.state.db = db
 app.state.cache = cache
-api_app.state.db = db
-api_app.state.cache = cache
-locations.app.state.cache = cache
+api.app.state.db = db
+api.app.state.cache = cache

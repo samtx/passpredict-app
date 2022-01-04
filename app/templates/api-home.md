@@ -1,7 +1,7 @@
 The prediction algorithm is available as a CORS-enabled developer API.
-OpenAPI documentation can be found at [passpredict.com/api/docs](/api/docs).
+OpenAPI documentation can be found at [passpredict.com/api/v1/docs](/api/v1/docs).
 
-Base URL: `https://passpredict.com/api`
+Base URL: `https://passpredict.com/api/v1`
 
 Endpoints:
 
@@ -19,7 +19,7 @@ Parameters:
 
 Example request:
 ```
-GET /api/passes/?satid=25544&lat=38.32&lon=-97.4 HTTP/1.1
+GET /api/v1/passes/?satid=25544&lat=38.32&lon=-97.4 HTTP/1.1
 Accept: */*
 Accept-Encoding: gzip, deflate
 Connection: keep-alive
@@ -87,7 +87,7 @@ Parameters:
 
 Example request:
 ```
-GET /api/passes/detail/?satid=25544&aosdt=2021-10-16T15%3A00%3A00.000000-05%3A00&lat=38.32&lon=-97.4 HTTP/1.1
+GET /api/v1/passes/detail/?satid=25544&aosdt=2021-10-16T15%3A00%3A00.000000-05%3A00&lat=38.32&lon=-97.4 HTTP/1.1
 Accept: */*
 Accept-Encoding: gzip, deflate
 Connection: keep-alive
