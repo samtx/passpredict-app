@@ -13,24 +13,24 @@ common_kw = {
         'astrodynamics/ast2body',
         np.get_include()
     ],
-    'extra_compile_args': ['-O3'],
-    'language': 'c++'
+    'extra_compile_args': ['-O2'],
     # define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
 }
-source_files = []
-source_files += glob.glob('astrodynamics/sofa/*.c')
-source_files += glob.glob('astrodynamics/sgp4/*.cpp')
-source_files += glob.glob('astrodynamics/ast2body/*.cpp')
 
 ext = [
     Extension(
         'astrodynamics._time',
-        ['astrodynamics/_time.pyx'] + source_files,
+        ['astrodynamics/_time.pyx'] + glob.glob('astrodynamics/sgp4/*.cpp'),
         **common_kw
     ),
     Extension(
         'astrodynamics._rotations',
-        ['astrodynamics/_rotations.pyx'],
+        ['astrodynamics/_rotations.pyx'] + glob.glob('astrodynamics/sofa/*.c'),
+        **common_kw
+    ),
+    Extension(
+        'astrodynamics._solar',
+        ['astrodynamics/_solar.pyx'],
         **common_kw
     ),
 ]

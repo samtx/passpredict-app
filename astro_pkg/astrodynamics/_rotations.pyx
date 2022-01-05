@@ -1,10 +1,20 @@
 # cython: boundscheck=False, wraparound=False
 # cython: language_level=3
+# distutils: language = c
 
 from libc.math cimport sin, cos, sqrt, atan, atan2, asin, pi, pow
 
 import numpy as np
 cimport numpy as np
+
+cdef extern from "sofa.h":
+    cdef double iauGmst82(double dj1, double dj2)
+    cdef double iauEqeq94(double date1, double date2)
+    cdef double iauObl80(double date1, double date2)
+    cdef void iauNut80(double date1, double date2, double *dpsi, double *deps)
+    cdef void iauNumat(double epsa, double dpsi, double deps, double rmatn[3][3])
+    cdef int iauJd2cal(double dj1, double dj2, int *iy, int *im, int *id, double *fd)
+    cdef int iauDat(int iy, int im, int id, double fd, double *deltat)
 
 
 def razel(
@@ -70,3 +80,24 @@ def ecef_to_llh(double[:] recef):
     lat = lat * 180.0 / pi  # convert from radians to degrees
     lon = lon * 180.0 / pi
     return lat, lon, h
+
+
+cpdef double jd2tt(double jd):
+    """
+    Convert julian date to terrestial time. Don't apply corrections for UT1
+    """
+    cdef double day_fraction, delta_at, tai, tt
+    cdef int err, year, month, day
+
+    # Find terrestial time, ignore delta_UT1
+    err = iauJd2cal(jd, 0.0, &year, &month, &day, &day_fraction)
+    # Have some error checking here, if err != 0
+    err = iauDat(year, month, day, day_fraction, &delta_at)
+    tai = jd + delta_at/86400.0
+    tt = tai + 32.184/86400.0
+    #tt -= DJ00;   // Leave terrestial time in J2000 format
+    return tt
+
+
+def mod2ecef():
+    pass

@@ -1,7 +1,8 @@
 # cython: boundscheck=False, wraparound=False
 # cython: language_level=3
+# distutils: language = c++
 
-from libc.math cimport round as c_round
+from libc.math cimport round as c_round, fmod, floor, fabs
 
 import datetime
 
