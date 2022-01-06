@@ -2,10 +2,11 @@
 # cython: language_level=3
 # distutils: language = c
 
-from libc.math cimport sin, cos, sqrt, atan, atan2, asin, pi, pow
+from libc.math cimport sin, cos, sqrt, atan, atan2, asin, pi, pow, fmod
 
 import numpy as np
 cimport numpy as np
+
 
 cdef extern from "sofa.h":
     cdef double iauGmst82(double dj1, double dj2)
@@ -15,6 +16,15 @@ cdef extern from "sofa.h":
     cdef void iauNumat(double epsa, double dpsi, double deps, double rmatn[3][3])
     cdef int iauJd2cal(double dj1, double dj2, int *iy, int *im, int *id, double *fd)
     cdef int iauDat(int iy, int im, int id, double fd, double *deltat)
+    cdef int iauUtctai(double utc1, double utc2, double *tai1, double *tai2)
+    cdef int iauTaitt(double tai1, double tai2, double *tt1, double *tt2)
+    cdef int iauD2dtf(const char *scale, int ndp, double d1, double d2, int *iy, int *im, int *id, int ihmsf[4])
+    cdef void iauIr(double r[3][3])
+    cdef void iauRz(double psi, double r[3][3])
+    cdef void iauTr(double r[3][3], double rt[3][3])
+    cdef void iauRxr(double a[3][3], double b[3][3], double atb[3][3])
+    cdef void iauRxp(double r[3][3], double p[3], double rp[3])
+
 
 
 def razel(
@@ -86,18 +96,71 @@ cpdef double jd2tt(double jd):
     """
     Convert julian date to terrestial time. Don't apply corrections for UT1
     """
-    cdef double day_fraction, delta_at, tai, tt
-    cdef int err, year, month, day
-
+    cdef double tt1
+    cdef double tt2
+    cdef double tt
     # Find terrestial time, ignore delta_UT1
-    err = iauJd2cal(jd, 0.0, &year, &month, &day, &day_fraction)
-    # Have some error checking here, if err != 0
-    err = iauDat(year, month, day, day_fraction, &delta_at)
-    tai = jd + delta_at/86400.0
-    tt = tai + 32.184/86400.0
-    #tt -= DJ00;   // Leave terrestial time in J2000 format
+    jd2tt2(jd, &tt1, &tt2)
+    tt = tt1 + tt2
     return tt
 
 
-def mod2ecef():
-    pass
+cdef void jd2tt2(double jd, double* tt1, double* tt2):
+    """
+    Convert julian date to terrestial time. Don't apply corrections for UT1
+    """
+    cdef double tai1, tai2
+    cdef int err
+    # Find terrestial time, ignore delta_UT1
+    err = iauUtctai(jd, 0.0, &tai1, &tai2)
+    err = iauTaitt(tai1, tai2, tt1, tt2)
+    return
+
+
+cpdef mod2ecef(double jd, double[::1] rmod, double[::1] recef):
+    """
+    Convert MOD to ECEF coordinates
+
+    N = nutation rotation matrix
+    G = z-rotation matrix by gast
+
+    r_mod = [NG]r_ecef
+    --> r_ecef = [NG]^T r_mod
+
+
+    """
+    cdef double dp80, de80, epsa, tt1, tt2, ee, gast
+    cdef double N[3][3], G[3][3], NG[3][3], NGT[3][3]
+    cdef double twopi = 2*pi
+
+    # get terrestial time
+    jd2tt2(jd, &tt1, &tt2)
+    # get nutation values
+    iauNut80(tt1, tt2, &dp80, &de80)
+    # mean obliquity
+    epsa = iauObl80(tt1, tt2)
+    # build nutation rotation matrix
+    iauNumat(epsa, dp80, de80, N)
+    # equation of equinoxes
+    ee = iauEqeq94(tt1, tt2)
+    # greenwich apparent sidereal time
+    gast = iauGmst82(jd, 0.0) + ee
+    # normalize gast into 0 <= gast < 2pi
+    gast = fmod(gast, twopi)
+    if gast < 0:
+        gast += twopi
+    iauIr(G)  # initialize G matrix with identity
+    iauRz(gast, G)   # rotate on the Z axis by gast radians
+    """
+    Rotate on Z axis
+    (  + cos(psi)   + sin(psi)     0  )
+    (                                 )
+    (  - sin(psi)   + cos(psi)     0  )
+    (                                 )
+    (       0            0         1  )
+    """
+
+    # Create rotation matrix, multiply NG, then transpose
+    iauRxr(N, G, NG)
+    # iauTr(NG, NG)
+    iauRxp(NG, &rmod[0], &recef[0])

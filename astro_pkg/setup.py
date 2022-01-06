@@ -38,6 +38,6 @@ ext = [
 setup(
     name="astrodynamics",
     packages=['astrodynamics'],
-    ext_modules = cythonize(ext, language_level="3"),#, gdb_debug=True),#, annotate=True),
+    ext_modules = cythonize(ext, language_level="3", gdb_debug=True, annotate=True),
     zip_safe = False,
 )

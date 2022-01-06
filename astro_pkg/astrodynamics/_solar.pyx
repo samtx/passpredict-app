@@ -7,36 +7,60 @@ cimport cython
 
 from .constants import R_EARTH
 
+from ._rotations import mod2ecef
+
 
 @cython.boundscheck(False)
 @cython.wraparound(False)
-cpdef sun_pos(double jd):
-    """Compute the Sun position vector
+cpdef void sun_pos_mod(double jd, double[::1] rmod):
+    """
+    Compute the Sun position vector.
+    Return position vector in MOD coordinate frame
     References:
         Vallado, p. 279, Alg. 29
         Vallado software, AST2BODY.FOR, subroutine SUN
     """
-    cdef double t_ut1, lmda_Msun, t_tdb, M_sun, lmda_eclp, r_sun_mag, eps
+    cdef double t_ut1, lmda_Msun, t_tdb, M_sun, lmda_eclp, lmda_eclp_rad, r_sun_mag, eps
     cdef double DEG2RAD = pi / 180.0   # degrees to radians
     cdef double AU_KM = 149597870.700  # AU to km
     r = np.empty(3, dtype=np.double)
     cdef double[::1] r_view = r
 
-    t_ut1 = (jd - 2451545.0) / 36525
+    jdld = np.longdouble(jd)
+    t_ut1 = (jdld - 2451545.0) / 36525
     t_tdb = t_ut1
-    lmda_Msun = (280.4606184 + 36000.77005361 * t_tdb) % 360
-    # M_sun = (357.5291092 + 35999.05034*t_tdb) % 360
-    M_sun = (357.5277233 + 35999.05034 * t_tdb) % 360
-    lmda_eclp = lmda_Msun + 1.914666471 * sin(M_sun * DEG2RAD)
-    lmda_eclp += 0.019994643 * sin(2 * M_sun * DEG2RAD)
-    r_sun_mag = 1.000140612 - 0.016708617 * cos(M_sun * DEG2RAD)
-    r_sun_mag -= 0.000139589 * cos(2 * M_sun * DEG2RAD)
-    eps = 23.439291 - 0.0130042 * t_tdb
-    sinlmda = sin(lmda_eclp * DEG2RAD)
-    r_view[0] = r_sun_mag * cos(lmda_eclp * DEG2RAD) * AU_KM
-    r_view[1] = r_sun_mag * cos(eps * DEG2RAD) * sinlmda * AU_KM
-    r_view[2] = r_sun_mag * sin(eps * DEG2RAD) * sinlmda * AU_KM
-    return r
+    # lmda_Msun = (280.4606184 + 36000.77005361 * t_tdb) % 360
+    lmda_Msun = (280.460 + 36000.771*t_tdb)
+    M_sun = (357.5291092 + 35999.05034*t_tdb) * DEG2RAD
+    # M_sun = (357.5277233 + 35999.05034 * t_tdb) % 360
+    lmda_eclp = lmda_Msun + 1.914666471*sin(M_sun) + 0.019994643*sin(2*M_sun)
+    r_sun_mag = 1.000140612 - 0.016708617*cos(M_sun) - 0.000139589*cos(2*M_sun)
+    eps = (23.439291 - 0.0130042*t_tdb) * DEG2RAD
+    lmda_eclp_rad = lmda_eclp * DEG2RAD
+    sinlmda = sin(lmda_eclp_rad)
+    rmod[0] = r_sun_mag * cos(lmda_eclp_rad) * AU_KM
+    rmod[1] = r_sun_mag * cos(eps) * sinlmda * AU_KM
+    rmod[2] = r_sun_mag * sin(eps) * sinlmda * AU_KM
+
+
+@cython.boundscheck(False)
+@cython.wraparound(False)
+cpdef sun_pos(double jd):
+    """
+    Compute the Sun position vector.
+    Return position vector in ECEF coordinate frame
+    References:
+        Vallado, p. 279, Alg. 29
+        Vallado software, AST2BODY.FOR, subroutine SUN
+    """
+    rmod = np.empty(3, dtype=np.double)
+    recef = np.empty(3, dtype=np.double)
+    cdef double[::1] rmod_view = rmod
+    cdef double[::1] recef_view = recef
+
+    sun_pos_mod(jd, rmod_view)
+    mod2ecef(jd, rmod_view, recef_view)
+    return recef
 
 
 cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):
