@@ -135,9 +135,6 @@ class Observer(LocationPredictor):
         self.max_elevation_gt = radians(max([max_elevation_gt, aos_at_dg]))
         self.set_minimum_elevation(aos_at_dg)
         self.set_tolerance(tolerance_s)
-        self.location_lat_rad = radians(self.location.latitude_deg)
-        self.location_lon_rad = radians(self.location.longitude_deg)
-        self.location_ecef = np.array(self.location.position_ecef)
 
     @property
     def predictor(self):
@@ -274,6 +271,9 @@ class Observer(LocationPredictor):
             los_dt = self._find_los(tca_dt)
         else:
             aos_dt = los_dt = None
+        # Find visual pass details
+
+
         return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation)
 
     def _find_tca(self, ascending_date, descending_date):
@@ -341,7 +341,7 @@ class Observer(LocationPredictor):
         """
         satellite_ecef = self.predictor.get_only_position(datetime)
         range_, az, el = _rotations.razel(
-            self.location_lat_rad, self.location_lon_rad, self.location_ecef, satellite_ecef
+            self.location.latitude_rad, self.location.longitude_rad, self.location.recef, satellite_ecef
         )
         return RangeAzEl(range_, az, el)
 

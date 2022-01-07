@@ -1,11 +1,14 @@
 # test_solar.py
 import math
+import datetime
 
 import numpy as np
 from numpy.linalg import norm
-from numpy.testing import assert_allclose, assert_almost_equal
 
 from astrodynamics import _solar
+from astrodynamics import Location
+from astrodynamics import _rotations
+from astrodynamics.time import julian_date_from_datetime
 
 import pytest
 from pytest import approx
@@ -48,7 +51,6 @@ def test_sun_pos(jd, r_true, tol):
     assert rel < tol
 
 
-
 def test_sun_sat_angle():
     """
     Vallado, Eg. 11-6, p.913
@@ -69,3 +71,33 @@ def test_sun_sat_orthogonal_distance():
     zeta = 76.0407 * math.pi/180.0  # deg
     dist = _solar.sun_sat_orthogonal_distance(r, zeta)
     assert dist == approx(6564.6870, abs=1e-4)
+
+
+@pytest.mark.parametrize(
+    'hr_dt, el_expected',
+    [
+        (8, 30.67),
+        (9, 45.36),
+        (10, 60.16),
+        (11, 74.64),
+        (12, 84.55),
+        (13, 73.5),
+        (14, 58.96),
+        (15, 44.14),
+        (16, 29.26),
+        (19, -15.55)
+    ]
+)
+def test_sun_location_elevation_datetime_from_orbitpredictor(hr_dt, el_expected):
+    """
+    Test sun elevation angles relative to location.
+    Uses test suite from orbit_predictor/tests/test_azimuth_elevation.py
+    https://github.com/satellogic/orbit-predictor/blob/master/tests/test_azimuth_elevation.py
+    """
+    location = Location("", 0, 0, 0)
+    d = datetime.datetime(2016, 9, 8) + datetime.timedelta(hours=hr_dt)
+    jd, jdfr = julian_date_from_datetime(d)
+    jd = jd + jdfr
+    sun_recef = _solar.sun_pos(jd)
+    el = _rotations.elevation_at(location.latitude_rad, location.longitude_rad, location.recef, sun_recef)
+    assert el == approx(el_expected, abs=0.25)

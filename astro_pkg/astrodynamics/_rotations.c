@@ -1997,10 +1997,10 @@ static int __Pyx_ValidateAndInit_memviewslice(
                 PyObject *original_obj);
 
 /* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *, int writable_flag);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_double(PyObject *, int writable_flag);
 
 /* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_double(PyObject *, int writable_flag);
+static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *, int writable_flag);
 
 /* RealImag.proto */
 #if CYTHON_CCOMPLEX
@@ -2196,6 +2196,7 @@ static PyObject *contiguous = 0;
 static PyObject *indirect_contiguous = 0;
 static int __pyx_memoryview_thread_locks_used;
 static PyThread_type_lock __pyx_memoryview_thread_locks[8];
+static void __pyx_f_13astrodynamics_10_rotations_ecef_to_rhosez(double, double, __Pyx_memviewslice, __Pyx_memviewslice, double *); /*proto*/
 static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double, int __pyx_skip_dispatch); /*proto*/
 static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double, double *, double *); /*proto*/
 static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double, __Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
@@ -2259,14 +2260,12 @@ static const char __pyx_k_el[] = "el";
 static const char __pyx_k_id[] = "id";
 static const char __pyx_k_jd[] = "jd";
 static const char __pyx_k_np[] = "np";
-static const char __pyx_k_rx[] = "rx";
-static const char __pyx_k_ry[] = "ry";
-static const char __pyx_k_rz[] = "rz";
 static const char __pyx_k_esq[] = "esq";
 static const char __pyx_k_lat[] = "lat";
 static const char __pyx_k_lon[] = "lon";
 static const char __pyx_k_new[] = "__new__";
 static const char __pyx_k_obj[] = "obj";
+static const char __pyx_k_rho[] = "rho";
 static const char __pyx_k_base[] = "base";
 static const char __pyx_k_dict[] = "__dict__";
 static const char __pyx_k_epsq[] = "epsq";
@@ -2291,9 +2290,6 @@ static const char __pyx_k_razel[] = "razel";
 static const char __pyx_k_recef[] = "recef";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_start[] = "start";
-static const char __pyx_k_top_e[] = "top_e";
-static const char __pyx_k_top_s[] = "top_s";
-static const char __pyx_k_top_z[] = "top_z";
 static const char __pyx_k_az_deg[] = "az_deg";
 static const char __pyx_k_el_deg[] = "el_deg";
 static const char __pyx_k_encode[] = "encode";
@@ -2325,6 +2321,7 @@ static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_MemoryError[] = "MemoryError";
 static const char __pyx_k_PickleError[] = "PickleError";
 static const char __pyx_k_ecef_to_llh[] = "ecef_to_llh";
+static const char __pyx_k_elevation_at[] = "elevation_at";
 static const char __pyx_k_pyx_checksum[] = "__pyx_checksum";
 static const char __pyx_k_stringsource[] = "stringsource";
 static const char __pyx_k_location_ecef[] = "location_ecef";
@@ -2336,12 +2333,8 @@ static const char __pyx_k_allocate_buffer[] = "allocate_buffer";
 static const char __pyx_k_dtype_is_object[] = "dtype_is_object";
 static const char __pyx_k_pyx_PickleError[] = "__pyx_PickleError";
 static const char __pyx_k_setstate_cython[] = "__setstate_cython__";
-static const char __pyx_k_cos_location_lat[] = "cos_location_lat";
-static const char __pyx_k_cos_location_lon[] = "cos_location_lon";
 static const char __pyx_k_location_lat_rad[] = "location_lat_rad";
 static const char __pyx_k_location_lon_rad[] = "location_lon_rad";
-static const char __pyx_k_sin_location_lat[] = "sin_location_lat";
-static const char __pyx_k_sin_location_lon[] = "sin_location_lon";
 static const char __pyx_k_pyx_unpickle_Enum[] = "__pyx_unpickle_Enum";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_strided_and_direct[] = "<strided and direct>";
@@ -2410,13 +2403,12 @@ static PyObject *__pyx_n_s_class;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_kp_s_contiguous_and_direct;
 static PyObject *__pyx_kp_s_contiguous_and_indirect;
-static PyObject *__pyx_n_s_cos_location_lat;
-static PyObject *__pyx_n_s_cos_location_lon;
 static PyObject *__pyx_n_s_dict;
 static PyObject *__pyx_n_s_dtype_is_object;
 static PyObject *__pyx_n_s_ecef_to_llh;
 static PyObject *__pyx_n_s_el;
 static PyObject *__pyx_n_s_el_deg;
+static PyObject *__pyx_n_s_elevation_at;
 static PyObject *__pyx_n_s_encode;
 static PyObject *__pyx_n_s_enumerate;
 static PyObject *__pyx_n_s_epsq;
@@ -2471,16 +2463,12 @@ static PyObject *__pyx_n_s_recef;
 static PyObject *__pyx_n_s_reduce;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_reduce_ex;
+static PyObject *__pyx_n_s_rho;
 static PyObject *__pyx_n_s_rmod;
-static PyObject *__pyx_n_s_rx;
-static PyObject *__pyx_n_s_ry;
-static PyObject *__pyx_n_s_rz;
 static PyObject *__pyx_n_s_satellite_ecef;
 static PyObject *__pyx_n_s_setstate;
 static PyObject *__pyx_n_s_setstate_cython;
 static PyObject *__pyx_n_s_shape;
-static PyObject *__pyx_n_s_sin_location_lat;
-static PyObject *__pyx_n_s_sin_location_lon;
 static PyObject *__pyx_n_s_size;
 static PyObject *__pyx_n_s_start;
 static PyObject *__pyx_n_s_step;
@@ -2492,17 +2480,15 @@ static PyObject *__pyx_kp_s_stringsource;
 static PyObject *__pyx_n_s_struct;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_thet;
-static PyObject *__pyx_n_s_top_e;
-static PyObject *__pyx_n_s_top_s;
-static PyObject *__pyx_n_s_top_z;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef); /* proto */
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_recef); /* proto */
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_4jd2tt(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd); /* proto */
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_6mod2ecef(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd, __Pyx_memviewslice __pyx_v_rmod, __Pyx_memviewslice __pyx_v_recef); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_elevation_at(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_2razel(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_4ecef_to_llh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_recef); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_6jd2tt(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_8mod2ecef(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd, __Pyx_memviewslice __pyx_v_rmod, __Pyx_memviewslice __pyx_v_recef); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -2576,17 +2562,338 @@ static PyObject *__pyx_tuple__20;
 static PyObject *__pyx_tuple__21;
 static PyObject *__pyx_tuple__23;
 static PyObject *__pyx_tuple__25;
-static PyObject *__pyx_tuple__26;
 static PyObject *__pyx_tuple__27;
 static PyObject *__pyx_tuple__28;
 static PyObject *__pyx_tuple__29;
 static PyObject *__pyx_tuple__30;
+static PyObject *__pyx_tuple__31;
+static PyObject *__pyx_tuple__32;
 static PyObject *__pyx_codeobj__22;
 static PyObject *__pyx_codeobj__24;
-static PyObject *__pyx_codeobj__31;
+static PyObject *__pyx_codeobj__26;
+static PyObject *__pyx_codeobj__33;
 /* Late includes */
 
-/* "astrodynamics/_rotations.pyx":30
+/* "astrodynamics/_rotations.pyx":29
+ * 
+ * 
+ * cdef void ecef_to_rhosez(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+
+static void __pyx_f_13astrodynamics_10_rotations_ecef_to_rhosez(double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef, double *__pyx_v_rho_sez) {
+  double __pyx_v_rx;
+  double __pyx_v_ry;
+  double __pyx_v_rz;
+  double __pyx_v_sin_location_lat;
+  double __pyx_v_cos_location_lat;
+  double __pyx_v_sin_location_lon;
+  double __pyx_v_cos_location_lon;
+  __Pyx_RefNannyDeclarations
+  Py_ssize_t __pyx_t_1;
+  Py_ssize_t __pyx_t_2;
+  __Pyx_RefNannySetupContext("ecef_to_rhosez", 0);
+
+  /* "astrodynamics/_rotations.pyx":43
+ *     cdef double sin_location_lon, cos_location_lon
+ * 
+ *     rx = satellite_ecef[0] - location_ecef[0]             # <<<<<<<<<<<<<<
+ *     ry = satellite_ecef[1] - location_ecef[1]
+ *     rz = satellite_ecef[2] - location_ecef[2]
+ */
+  __pyx_t_1 = 0;
+  __pyx_t_2 = 0;
+  __pyx_v_rx = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_satellite_ecef.data) + __pyx_t_1)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_location_ecef.data) + __pyx_t_2)) ))));
+
+  /* "astrodynamics/_rotations.pyx":44
+ * 
+ *     rx = satellite_ecef[0] - location_ecef[0]
+ *     ry = satellite_ecef[1] - location_ecef[1]             # <<<<<<<<<<<<<<
+ *     rz = satellite_ecef[2] - location_ecef[2]
+ * 
+ */
+  __pyx_t_2 = 1;
+  __pyx_t_1 = 1;
+  __pyx_v_ry = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_satellite_ecef.data) + __pyx_t_2)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_location_ecef.data) + __pyx_t_1)) ))));
+
+  /* "astrodynamics/_rotations.pyx":45
+ *     rx = satellite_ecef[0] - location_ecef[0]
+ *     ry = satellite_ecef[1] - location_ecef[1]
+ *     rz = satellite_ecef[2] - location_ecef[2]             # <<<<<<<<<<<<<<
+ * 
+ *     sin_location_lat = sin(location_lat_rad)
+ */
+  __pyx_t_1 = 2;
+  __pyx_t_2 = 2;
+  __pyx_v_rz = ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_satellite_ecef.data) + __pyx_t_1)) ))) - (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_location_ecef.data) + __pyx_t_2)) ))));
+
+  /* "astrodynamics/_rotations.pyx":47
+ *     rz = satellite_ecef[2] - location_ecef[2]
+ * 
+ *     sin_location_lat = sin(location_lat_rad)             # <<<<<<<<<<<<<<
+ *     cos_location_lat = cos(location_lat_rad)
+ *     sin_location_lon = sin(location_lon_rad)
+ */
+  __pyx_v_sin_location_lat = sin(__pyx_v_location_lat_rad);
+
+  /* "astrodynamics/_rotations.pyx":48
+ * 
+ *     sin_location_lat = sin(location_lat_rad)
+ *     cos_location_lat = cos(location_lat_rad)             # <<<<<<<<<<<<<<
+ *     sin_location_lon = sin(location_lon_rad)
+ *     cos_location_lon = cos(location_lon_rad)
+ */
+  __pyx_v_cos_location_lat = cos(__pyx_v_location_lat_rad);
+
+  /* "astrodynamics/_rotations.pyx":49
+ *     sin_location_lat = sin(location_lat_rad)
+ *     cos_location_lat = cos(location_lat_rad)
+ *     sin_location_lon = sin(location_lon_rad)             # <<<<<<<<<<<<<<
+ *     cos_location_lon = cos(location_lon_rad)
+ * 
+ */
+  __pyx_v_sin_location_lon = sin(__pyx_v_location_lon_rad);
+
+  /* "astrodynamics/_rotations.pyx":50
+ *     cos_location_lat = cos(location_lat_rad)
+ *     sin_location_lon = sin(location_lon_rad)
+ *     cos_location_lon = cos(location_lon_rad)             # <<<<<<<<<<<<<<
+ * 
+ *     rho_sez[0] = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
+ */
+  __pyx_v_cos_location_lon = cos(__pyx_v_location_lon_rad);
+
+  /* "astrodynamics/_rotations.pyx":52
+ *     cos_location_lon = cos(location_lon_rad)
+ * 
+ *     rho_sez[0] = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)             # <<<<<<<<<<<<<<
+ *     rho_sez[1] = -sin_location_lon * rx + cos_location_lon * ry
+ *     rho_sez[2] = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
+ */
+  (__pyx_v_rho_sez[0]) = ((((__pyx_v_sin_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_sin_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) - (__pyx_v_cos_location_lat * __pyx_v_rz));
+
+  /* "astrodynamics/_rotations.pyx":53
+ * 
+ *     rho_sez[0] = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
+ *     rho_sez[1] = -sin_location_lon * rx + cos_location_lon * ry             # <<<<<<<<<<<<<<
+ *     rho_sez[2] = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
+ * 
+ */
+  (__pyx_v_rho_sez[1]) = (((-__pyx_v_sin_location_lon) * __pyx_v_rx) + (__pyx_v_cos_location_lon * __pyx_v_ry));
+
+  /* "astrodynamics/_rotations.pyx":54
+ *     rho_sez[0] = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
+ *     rho_sez[1] = -sin_location_lon * rx + cos_location_lon * ry
+ *     rho_sez[2] = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  (__pyx_v_rho_sez[2]) = ((((__pyx_v_cos_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_cos_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) + (__pyx_v_sin_location_lat * __pyx_v_rz));
+
+  /* "astrodynamics/_rotations.pyx":29
+ * 
+ * 
+ * cdef void ecef_to_rhosez(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+}
+
+/* "astrodynamics/_rotations.pyx":57
+ * 
+ * 
+ * def elevation_at(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_1elevation_at(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_13astrodynamics_10_rotations_elevation_at[] = "\n    Get elevation of satellite relative for observing location\n    ";
+static PyMethodDef __pyx_mdef_13astrodynamics_10_rotations_1elevation_at = {"elevation_at", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_10_rotations_1elevation_at, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_10_rotations_elevation_at};
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_1elevation_at(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  double __pyx_v_location_lat_rad;
+  double __pyx_v_location_lon_rad;
+  __Pyx_memviewslice __pyx_v_location_ecef = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_satellite_ecef = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("elevation_at (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_location_lat_rad,&__pyx_n_s_location_lon_rad,&__pyx_n_s_location_ecef,&__pyx_n_s_satellite_ecef,0};
+    PyObject* values[4] = {0,0,0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
+        case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        CYTHON_FALLTHROUGH;
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_location_lat_rad)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_location_lon_rad)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("elevation_at", 1, 4, 4, 1); __PYX_ERR(0, 57, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  2:
+        if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_location_ecef)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("elevation_at", 1, 4, 4, 2); __PYX_ERR(0, 57, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_satellite_ecef)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("elevation_at", 1, 4, 4, 3); __PYX_ERR(0, 57, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "elevation_at") < 0)) __PYX_ERR(0, 57, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+    }
+    __pyx_v_location_lat_rad = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_location_lat_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 58, __pyx_L3_error)
+    __pyx_v_location_lon_rad = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_location_lon_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 59, __pyx_L3_error)
+    __pyx_v_location_ecef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_location_ecef.memview)) __PYX_ERR(0, 60, __pyx_L3_error)
+    __pyx_v_satellite_ecef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_satellite_ecef.memview)) __PYX_ERR(0, 61, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("elevation_at", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 57, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("astrodynamics._rotations.elevation_at", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_elevation_at(__pyx_self, __pyx_v_location_lat_rad, __pyx_v_location_lon_rad, __pyx_v_location_ecef, __pyx_v_satellite_ecef);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_elevation_at(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef) {
+  double __pyx_v_rho[3];
+  double __pyx_v_range_;
+  double __pyx_v_el;
+  double __pyx_v_el_deg;
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  double __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("elevation_at", 0);
+
+  /* "astrodynamics/_rotations.pyx":68
+ *     cdef double rho[3]
+ *     cdef double range_, el, el_deg
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)             # <<<<<<<<<<<<<<
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+ *     el = asin(rho[2] / range_)
+ */
+  __pyx_f_13astrodynamics_10_rotations_ecef_to_rhosez(__pyx_v_location_lat_rad, __pyx_v_location_lon_rad, __pyx_v_location_ecef, __pyx_v_satellite_ecef, __pyx_v_rho);
+
+  /* "astrodynamics/_rotations.pyx":69
+ *     cdef double range_, el, el_deg
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])             # <<<<<<<<<<<<<<
+ *     el = asin(rho[2] / range_)
+ *     # convert radians to degrees
+ */
+  __pyx_v_range_ = sqrt(((((__pyx_v_rho[0]) * (__pyx_v_rho[0])) + ((__pyx_v_rho[1]) * (__pyx_v_rho[1]))) + ((__pyx_v_rho[2]) * (__pyx_v_rho[2]))));
+
+  /* "astrodynamics/_rotations.pyx":70
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+ *     el = asin(rho[2] / range_)             # <<<<<<<<<<<<<<
+ *     # convert radians to degrees
+ *     el_deg = el * 180.0 / pi
+ */
+  if (unlikely(__pyx_v_range_ == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 70, __pyx_L1_error)
+  }
+  __pyx_v_el = asin(((__pyx_v_rho[2]) / __pyx_v_range_));
+
+  /* "astrodynamics/_rotations.pyx":72
+ *     el = asin(rho[2] / range_)
+ *     # convert radians to degrees
+ *     el_deg = el * 180.0 / pi             # <<<<<<<<<<<<<<
+ *     return el_deg
+ * 
+ */
+  __pyx_t_1 = (__pyx_v_el * 180.0);
+  if (unlikely(M_PI == 0)) {
+    PyErr_SetString(PyExc_ZeroDivisionError, "float division");
+    __PYX_ERR(0, 72, __pyx_L1_error)
+  }
+  __pyx_v_el_deg = (__pyx_t_1 / ((double)M_PI));
+
+  /* "astrodynamics/_rotations.pyx":73
+ *     # convert radians to degrees
+ *     el_deg = el * 180.0 / pi
+ *     return el_deg             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __Pyx_XDECREF(__pyx_r);
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_el_deg); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 73, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_r = __pyx_t_2;
+  __pyx_t_2 = 0;
+  goto __pyx_L0;
+
+  /* "astrodynamics/_rotations.pyx":57
+ * 
+ * 
+ * def elevation_at(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_AddTraceback("astrodynamics._rotations.elevation_at", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_location_ecef, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_satellite_ecef, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "astrodynamics/_rotations.pyx":76
  * 
  * 
  * def razel(             # <<<<<<<<<<<<<<
@@ -2595,10 +2902,10 @@ static PyObject *__pyx_codeobj__31;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_1razel(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_13astrodynamics_10_rotations_razel[] = "\n    Get range, azimuth, and elevation of satellite relative for observing location\n    ";
-static PyMethodDef __pyx_mdef_13astrodynamics_10_rotations_1razel = {"razel", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_10_rotations_1razel, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_10_rotations_razel};
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_1razel(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_3razel(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_13astrodynamics_10_rotations_2razel[] = "\n    Get range, azimuth, and elevation of satellite relative for observing location\n    ";
+static PyMethodDef __pyx_mdef_13astrodynamics_10_rotations_3razel = {"razel", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_10_rotations_3razel, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_10_rotations_2razel};
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_3razel(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   double __pyx_v_location_lat_rad;
   double __pyx_v_location_lon_rad;
   __Pyx_memviewslice __pyx_v_location_ecef = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -2636,23 +2943,23 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_1razel(PyObject *__pyx_se
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_location_lon_rad)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 1); __PYX_ERR(0, 30, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 1); __PYX_ERR(0, 76, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_location_ecef)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 2); __PYX_ERR(0, 30, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 2); __PYX_ERR(0, 76, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_satellite_ecef)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 3); __PYX_ERR(0, 30, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, 3); __PYX_ERR(0, 76, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "razel") < 0)) __PYX_ERR(0, 30, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "razel") < 0)) __PYX_ERR(0, 76, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -2662,37 +2969,28 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_1razel(PyObject *__pyx_se
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
       values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
     }
-    __pyx_v_location_lat_rad = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_location_lat_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L3_error)
-    __pyx_v_location_lon_rad = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_location_lon_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L3_error)
-    __pyx_v_location_ecef = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_location_ecef.memview)) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_satellite_ecef = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_satellite_ecef.memview)) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_location_lat_rad = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_location_lat_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 77, __pyx_L3_error)
+    __pyx_v_location_lon_rad = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_location_lon_rad == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 78, __pyx_L3_error)
+    __pyx_v_location_ecef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_location_ecef.memview)) __PYX_ERR(0, 79, __pyx_L3_error)
+    __pyx_v_satellite_ecef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[3], PyBUF_WRITABLE); if (unlikely(!__pyx_v_satellite_ecef.memview)) __PYX_ERR(0, 80, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 30, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("razel", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 76, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("astrodynamics._rotations.razel", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_razel(__pyx_self, __pyx_v_location_lat_rad, __pyx_v_location_lon_rad, __pyx_v_location_ecef, __pyx_v_satellite_ecef);
+  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_2razel(__pyx_self, __pyx_v_location_lat_rad, __pyx_v_location_lon_rad, __pyx_v_location_ecef, __pyx_v_satellite_ecef);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef) {
-  double __pyx_v_rx;
-  double __pyx_v_ry;
-  double __pyx_v_rz;
-  double __pyx_v_sin_location_lat;
-  double __pyx_v_cos_location_lat;
-  double __pyx_v_sin_location_lon;
-  double __pyx_v_cos_location_lon;
-  double __pyx_v_top_s;
-  double __pyx_v_top_e;
-  double __pyx_v_top_z;
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_2razel(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_location_lat_rad, double __pyx_v_location_lon_rad, __Pyx_memviewslice __pyx_v_location_ecef, __Pyx_memviewslice __pyx_v_satellite_ecef) {
+  double __pyx_v_rho[3];
   double __pyx_v_range_;
   double __pyx_v_el;
   double __pyx_v_az;
@@ -2700,203 +2998,114 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObj
   double __pyx_v_az_deg;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  Py_ssize_t __pyx_t_1;
-  Py_ssize_t __pyx_t_2;
-  double __pyx_t_3;
+  double __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
-  PyObject *__pyx_t_6 = NULL;
-  PyObject *__pyx_t_7 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("razel", 0);
 
-  /* "astrodynamics/_rotations.pyx":45
+  /* "astrodynamics/_rotations.pyx":87
+ *     cdef double rho[3]
  *     cdef double range_, el, az, el_deg, az_deg
- * 
- *     rx = satellite_ecef[0] - location_ecef[0]             # <<<<<<<<<<<<<<
- *     ry = satellite_ecef[1] - location_ecef[1]
- *     rz = satellite_ecef[2] - location_ecef[2]
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)             # <<<<<<<<<<<<<<
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+ *     el = asin(rho[2] / range_)
  */
-  __pyx_t_1 = 0;
-  __pyx_t_2 = 0;
-  __pyx_v_rx = ((*((double *) ( /* dim=0 */ (__pyx_v_satellite_ecef.data + __pyx_t_1 * __pyx_v_satellite_ecef.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_location_ecef.data + __pyx_t_2 * __pyx_v_location_ecef.strides[0]) ))));
+  __pyx_f_13astrodynamics_10_rotations_ecef_to_rhosez(__pyx_v_location_lat_rad, __pyx_v_location_lon_rad, __pyx_v_location_ecef, __pyx_v_satellite_ecef, __pyx_v_rho);
 
-  /* "astrodynamics/_rotations.pyx":46
- * 
- *     rx = satellite_ecef[0] - location_ecef[0]
- *     ry = satellite_ecef[1] - location_ecef[1]             # <<<<<<<<<<<<<<
- *     rz = satellite_ecef[2] - location_ecef[2]
- * 
+  /* "astrodynamics/_rotations.pyx":88
+ *     cdef double range_, el, az, el_deg, az_deg
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])             # <<<<<<<<<<<<<<
+ *     el = asin(rho[2] / range_)
+ *     az = atan2(-rho[1], rho[0]) + pi
  */
-  __pyx_t_2 = 1;
-  __pyx_t_1 = 1;
-  __pyx_v_ry = ((*((double *) ( /* dim=0 */ (__pyx_v_satellite_ecef.data + __pyx_t_2 * __pyx_v_satellite_ecef.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_location_ecef.data + __pyx_t_1 * __pyx_v_location_ecef.strides[0]) ))));
+  __pyx_v_range_ = sqrt(((((__pyx_v_rho[0]) * (__pyx_v_rho[0])) + ((__pyx_v_rho[1]) * (__pyx_v_rho[1]))) + ((__pyx_v_rho[2]) * (__pyx_v_rho[2]))));
 
-  /* "astrodynamics/_rotations.pyx":47
- *     rx = satellite_ecef[0] - location_ecef[0]
- *     ry = satellite_ecef[1] - location_ecef[1]
- *     rz = satellite_ecef[2] - location_ecef[2]             # <<<<<<<<<<<<<<
- * 
- *     sin_location_lat = sin(location_lat_rad)
- */
-  __pyx_t_1 = 2;
-  __pyx_t_2 = 2;
-  __pyx_v_rz = ((*((double *) ( /* dim=0 */ (__pyx_v_satellite_ecef.data + __pyx_t_1 * __pyx_v_satellite_ecef.strides[0]) ))) - (*((double *) ( /* dim=0 */ (__pyx_v_location_ecef.data + __pyx_t_2 * __pyx_v_location_ecef.strides[0]) ))));
-
-  /* "astrodynamics/_rotations.pyx":49
- *     rz = satellite_ecef[2] - location_ecef[2]
- * 
- *     sin_location_lat = sin(location_lat_rad)             # <<<<<<<<<<<<<<
- *     cos_location_lat = cos(location_lat_rad)
- *     sin_location_lon = sin(location_lon_rad)
- */
-  __pyx_v_sin_location_lat = sin(__pyx_v_location_lat_rad);
-
-  /* "astrodynamics/_rotations.pyx":50
- * 
- *     sin_location_lat = sin(location_lat_rad)
- *     cos_location_lat = cos(location_lat_rad)             # <<<<<<<<<<<<<<
- *     sin_location_lon = sin(location_lon_rad)
- *     cos_location_lon = cos(location_lon_rad)
- */
-  __pyx_v_cos_location_lat = cos(__pyx_v_location_lat_rad);
-
-  /* "astrodynamics/_rotations.pyx":51
- *     sin_location_lat = sin(location_lat_rad)
- *     cos_location_lat = cos(location_lat_rad)
- *     sin_location_lon = sin(location_lon_rad)             # <<<<<<<<<<<<<<
- *     cos_location_lon = cos(location_lon_rad)
- * 
- */
-  __pyx_v_sin_location_lon = sin(__pyx_v_location_lon_rad);
-
-  /* "astrodynamics/_rotations.pyx":52
- *     cos_location_lat = cos(location_lat_rad)
- *     sin_location_lon = sin(location_lon_rad)
- *     cos_location_lon = cos(location_lon_rad)             # <<<<<<<<<<<<<<
- * 
- *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
- */
-  __pyx_v_cos_location_lon = cos(__pyx_v_location_lon_rad);
-
-  /* "astrodynamics/_rotations.pyx":54
- *     cos_location_lon = cos(location_lon_rad)
- * 
- *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)             # <<<<<<<<<<<<<<
- *     top_e = -sin_location_lon * rx + cos_location_lon * ry
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
- */
-  __pyx_v_top_s = ((((__pyx_v_sin_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_sin_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) - (__pyx_v_cos_location_lat * __pyx_v_rz));
-
-  /* "astrodynamics/_rotations.pyx":55
- * 
- *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
- *     top_e = -sin_location_lon * rx + cos_location_lon * ry             # <<<<<<<<<<<<<<
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
- * 
- */
-  __pyx_v_top_e = (((-__pyx_v_sin_location_lon) * __pyx_v_rx) + (__pyx_v_cos_location_lon * __pyx_v_ry));
-
-  /* "astrodynamics/_rotations.pyx":56
- *     top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
- *     top_e = -sin_location_lon * rx + cos_location_lon * ry
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)             # <<<<<<<<<<<<<<
- * 
- *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
- */
-  __pyx_v_top_z = ((((__pyx_v_cos_location_lat * __pyx_v_cos_location_lon) * __pyx_v_rx) + ((__pyx_v_cos_location_lat * __pyx_v_sin_location_lon) * __pyx_v_ry)) + (__pyx_v_sin_location_lat * __pyx_v_rz));
-
-  /* "astrodynamics/_rotations.pyx":58
- *     top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
- * 
- *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)             # <<<<<<<<<<<<<<
- *     el = asin(top_z / range_)
- *     az = atan2(-top_e, top_s) + pi
- */
-  __pyx_v_range_ = sqrt((((__pyx_v_top_s * __pyx_v_top_s) + (__pyx_v_top_e * __pyx_v_top_e)) + (__pyx_v_top_z * __pyx_v_top_z)));
-
-  /* "astrodynamics/_rotations.pyx":59
- * 
- *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
- *     el = asin(top_z / range_)             # <<<<<<<<<<<<<<
- *     az = atan2(-top_e, top_s) + pi
- * 
+  /* "astrodynamics/_rotations.pyx":89
+ *     ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+ *     el = asin(rho[2] / range_)             # <<<<<<<<<<<<<<
+ *     az = atan2(-rho[1], rho[0]) + pi
+ *     # convert radians to degrees
  */
   if (unlikely(__pyx_v_range_ == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 59, __pyx_L1_error)
+    __PYX_ERR(0, 89, __pyx_L1_error)
   }
-  __pyx_v_el = asin((__pyx_v_top_z / __pyx_v_range_));
+  __pyx_v_el = asin(((__pyx_v_rho[2]) / __pyx_v_range_));
 
-  /* "astrodynamics/_rotations.pyx":60
- *     range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
- *     el = asin(top_z / range_)
- *     az = atan2(-top_e, top_s) + pi             # <<<<<<<<<<<<<<
- * 
+  /* "astrodynamics/_rotations.pyx":90
+ *     range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+ *     el = asin(rho[2] / range_)
+ *     az = atan2(-rho[1], rho[0]) + pi             # <<<<<<<<<<<<<<
  *     # convert radians to degrees
+ *     el_deg = el * 180.0 / pi
  */
-  __pyx_v_az = (atan2((-__pyx_v_top_e), __pyx_v_top_s) + M_PI);
+  __pyx_v_az = (atan2((-(__pyx_v_rho[1])), (__pyx_v_rho[0])) + M_PI);
 
-  /* "astrodynamics/_rotations.pyx":63
- * 
+  /* "astrodynamics/_rotations.pyx":92
+ *     az = atan2(-rho[1], rho[0]) + pi
  *     # convert radians to degrees
  *     el_deg = el * 180.0 / pi             # <<<<<<<<<<<<<<
  *     az_deg = az * 180.0 / pi
- * 
+ *     return (range_, az_deg, el_deg)
  */
-  __pyx_t_3 = (__pyx_v_el * 180.0);
+  __pyx_t_1 = (__pyx_v_el * 180.0);
   if (unlikely(M_PI == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 63, __pyx_L1_error)
+    __PYX_ERR(0, 92, __pyx_L1_error)
   }
-  __pyx_v_el_deg = (__pyx_t_3 / ((double)M_PI));
+  __pyx_v_el_deg = (__pyx_t_1 / ((double)M_PI));
 
-  /* "astrodynamics/_rotations.pyx":64
+  /* "astrodynamics/_rotations.pyx":93
  *     # convert radians to degrees
  *     el_deg = el * 180.0 / pi
  *     az_deg = az * 180.0 / pi             # <<<<<<<<<<<<<<
- * 
  *     return (range_, az_deg, el_deg)
+ * 
  */
-  __pyx_t_3 = (__pyx_v_az * 180.0);
+  __pyx_t_1 = (__pyx_v_az * 180.0);
   if (unlikely(M_PI == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 64, __pyx_L1_error)
+    __PYX_ERR(0, 93, __pyx_L1_error)
   }
-  __pyx_v_az_deg = (__pyx_t_3 / ((double)M_PI));
+  __pyx_v_az_deg = (__pyx_t_1 / ((double)M_PI));
 
-  /* "astrodynamics/_rotations.pyx":66
+  /* "astrodynamics/_rotations.pyx":94
+ *     el_deg = el * 180.0 / pi
  *     az_deg = az * 180.0 / pi
- * 
  *     return (range_, az_deg, el_deg)             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_range_); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_range_); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_az_deg); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 94, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = PyFloat_FromDouble(__pyx_v_el_deg); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 94, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_az_deg); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 66, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 94, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyFloat_FromDouble(__pyx_v_el_deg); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 66, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyTuple_New(3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 66, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_7);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
+  __Pyx_GIVEREF(__pyx_t_3);
+  PyTuple_SET_ITEM(__pyx_t_5, 1, __pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
-  PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4);
-  __Pyx_GIVEREF(__pyx_t_5);
-  PyTuple_SET_ITEM(__pyx_t_7, 1, __pyx_t_5);
-  __Pyx_GIVEREF(__pyx_t_6);
-  PyTuple_SET_ITEM(__pyx_t_7, 2, __pyx_t_6);
+  PyTuple_SET_ITEM(__pyx_t_5, 2, __pyx_t_4);
+  __pyx_t_2 = 0;
+  __pyx_t_3 = 0;
   __pyx_t_4 = 0;
+  __pyx_r = __pyx_t_5;
   __pyx_t_5 = 0;
-  __pyx_t_6 = 0;
-  __pyx_r = __pyx_t_7;
-  __pyx_t_7 = 0;
   goto __pyx_L0;
 
-  /* "astrodynamics/_rotations.pyx":30
+  /* "astrodynamics/_rotations.pyx":76
  * 
  * 
  * def razel(             # <<<<<<<<<<<<<<
@@ -2906,10 +3115,10 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObj
 
   /* function exit code */
   __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
-  __Pyx_XDECREF(__pyx_t_6);
-  __Pyx_XDECREF(__pyx_t_7);
   __Pyx_AddTraceback("astrodynamics._rotations.razel", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2920,7 +3129,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "astrodynamics/_rotations.pyx":69
+/* "astrodynamics/_rotations.pyx":97
  * 
  * 
  * def ecef_to_llh(double[:] recef):             # <<<<<<<<<<<<<<
@@ -2929,10 +3138,10 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_razel(CYTHON_UNUSED PyObj
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_3ecef_to_llh(PyObject *__pyx_self, PyObject *__pyx_arg_recef); /*proto*/
-static char __pyx_doc_13astrodynamics_10_rotations_2ecef_to_llh[] = "\n    Convert ECEF coordinates to latitude, longitude, and altitude\n    Uses WGS84 constants\n    Based on orbit_predictor.coordinate_systems.ecef_to_llh\n    ";
-static PyMethodDef __pyx_mdef_13astrodynamics_10_rotations_3ecef_to_llh = {"ecef_to_llh", (PyCFunction)__pyx_pw_13astrodynamics_10_rotations_3ecef_to_llh, METH_O, __pyx_doc_13astrodynamics_10_rotations_2ecef_to_llh};
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_3ecef_to_llh(PyObject *__pyx_self, PyObject *__pyx_arg_recef) {
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_5ecef_to_llh(PyObject *__pyx_self, PyObject *__pyx_arg_recef); /*proto*/
+static char __pyx_doc_13astrodynamics_10_rotations_4ecef_to_llh[] = "\n    Convert ECEF coordinates to latitude, longitude, and altitude\n    Uses WGS84 constants\n    Based on orbit_predictor.coordinate_systems.ecef_to_llh\n    ";
+static PyMethodDef __pyx_mdef_13astrodynamics_10_rotations_5ecef_to_llh = {"ecef_to_llh", (PyCFunction)__pyx_pw_13astrodynamics_10_rotations_5ecef_to_llh, METH_O, __pyx_doc_13astrodynamics_10_rotations_4ecef_to_llh};
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_5ecef_to_llh(PyObject *__pyx_self, PyObject *__pyx_arg_recef) {
   __Pyx_memviewslice __pyx_v_recef = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -2941,7 +3150,7 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_3ecef_to_llh(PyObject *__
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("ecef_to_llh (wrapper)", 0);
   assert(__pyx_arg_recef); {
-    __pyx_v_recef = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_arg_recef, PyBUF_WRITABLE); if (unlikely(!__pyx_v_recef.memview)) __PYX_ERR(0, 69, __pyx_L3_error)
+    __pyx_v_recef = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_arg_recef, PyBUF_WRITABLE); if (unlikely(!__pyx_v_recef.memview)) __PYX_ERR(0, 97, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -2949,14 +3158,14 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_3ecef_to_llh(PyObject *__
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(__pyx_self, __pyx_v_recef);
+  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_4ecef_to_llh(__pyx_self, __pyx_v_recef);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_recef) {
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_4ecef_to_llh(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_recef) {
   double __pyx_v_a;
   double __pyx_v_b;
   double __pyx_v_p;
@@ -2984,7 +3193,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("ecef_to_llh", 0);
 
-  /* "astrodynamics/_rotations.pyx":76
+  /* "astrodynamics/_rotations.pyx":104
  *     """
  *      # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
  *     cdef double a = 6378.1370             # <<<<<<<<<<<<<<
@@ -2993,7 +3202,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  */
   __pyx_v_a = 6378.1370;
 
-  /* "astrodynamics/_rotations.pyx":77
+  /* "astrodynamics/_rotations.pyx":105
  *      # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
  *     cdef double a = 6378.1370
  *     cdef double b = 6356.752314             # <<<<<<<<<<<<<<
@@ -3002,7 +3211,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  */
   __pyx_v_b = 6356.752314;
 
-  /* "astrodynamics/_rotations.pyx":80
+  /* "astrodynamics/_rotations.pyx":108
  *     cdef double p, thet, esq, epsq, lat, lon, h, n
  * 
  *     p = sqrt(recef[0]*recef[0] + recef[1]*recef[1])             # <<<<<<<<<<<<<<
@@ -3015,7 +3224,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_4 = 1;
   __pyx_v_p = sqrt((((*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_1 * __pyx_v_recef.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_2 * __pyx_v_recef.strides[0]) )))) + ((*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_3 * __pyx_v_recef.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_4 * __pyx_v_recef.strides[0]) ))))));
 
-  /* "astrodynamics/_rotations.pyx":81
+  /* "astrodynamics/_rotations.pyx":109
  * 
  *     p = sqrt(recef[0]*recef[0] + recef[1]*recef[1])
  *     thet = atan(recef[2] * a / (p * b))             # <<<<<<<<<<<<<<
@@ -3027,11 +3236,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_6 = (__pyx_v_p * __pyx_v_b);
   if (unlikely(__pyx_t_6 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 81, __pyx_L1_error)
+    __PYX_ERR(0, 109, __pyx_L1_error)
   }
   __pyx_v_thet = atan((__pyx_t_5 / __pyx_t_6));
 
-  /* "astrodynamics/_rotations.pyx":82
+  /* "astrodynamics/_rotations.pyx":110
  *     p = sqrt(recef[0]*recef[0] + recef[1]*recef[1])
  *     thet = atan(recef[2] * a / (p * b))
  *     esq = 1.0 - (b / a)*(b / a)             # <<<<<<<<<<<<<<
@@ -3040,15 +3249,15 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  */
   if (unlikely(__pyx_v_a == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 82, __pyx_L1_error)
+    __PYX_ERR(0, 110, __pyx_L1_error)
   }
   if (unlikely(__pyx_v_a == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 82, __pyx_L1_error)
+    __PYX_ERR(0, 110, __pyx_L1_error)
   }
   __pyx_v_esq = (1.0 - ((__pyx_v_b / __pyx_v_a) * (__pyx_v_b / __pyx_v_a)));
 
-  /* "astrodynamics/_rotations.pyx":83
+  /* "astrodynamics/_rotations.pyx":111
  *     thet = atan(recef[2] * a / (p * b))
  *     esq = 1.0 - (b / a)*(b / a)
  *     epsq = (a / b)*(a / b) - 1.0             # <<<<<<<<<<<<<<
@@ -3057,15 +3266,15 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  */
   if (unlikely(__pyx_v_b == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 83, __pyx_L1_error)
+    __PYX_ERR(0, 111, __pyx_L1_error)
   }
   if (unlikely(__pyx_v_b == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 83, __pyx_L1_error)
+    __PYX_ERR(0, 111, __pyx_L1_error)
   }
   __pyx_v_epsq = (((__pyx_v_a / __pyx_v_b) * (__pyx_v_a / __pyx_v_b)) - 1.0);
 
-  /* "astrodynamics/_rotations.pyx":85
+  /* "astrodynamics/_rotations.pyx":113
  *     epsq = (a / b)*(a / b) - 1.0
  * 
  *     lat = atan((recef[2] + epsq * b * pow(sin(thet), 3)) / (p - esq * a * pow(cos(thet), 3)))             # <<<<<<<<<<<<<<
@@ -3077,11 +3286,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_5 = (__pyx_v_p - ((__pyx_v_esq * __pyx_v_a) * pow(cos(__pyx_v_thet), 3.0)));
   if (unlikely(__pyx_t_5 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 85, __pyx_L1_error)
+    __PYX_ERR(0, 113, __pyx_L1_error)
   }
   __pyx_v_lat = atan((__pyx_t_6 / __pyx_t_5));
 
-  /* "astrodynamics/_rotations.pyx":86
+  /* "astrodynamics/_rotations.pyx":114
  * 
  *     lat = atan((recef[2] + epsq * b * pow(sin(thet), 3)) / (p - esq * a * pow(cos(thet), 3)))
  *     lon = atan2(recef[1], recef[0])             # <<<<<<<<<<<<<<
@@ -3092,7 +3301,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_3 = 0;
   __pyx_v_lon = atan2((*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_4 * __pyx_v_recef.strides[0]) ))), (*((double *) ( /* dim=0 */ (__pyx_v_recef.data + __pyx_t_3 * __pyx_v_recef.strides[0]) ))));
 
-  /* "astrodynamics/_rotations.pyx":87
+  /* "astrodynamics/_rotations.pyx":115
  *     lat = atan((recef[2] + epsq * b * pow(sin(thet), 3)) / (p - esq * a * pow(cos(thet), 3)))
  *     lon = atan2(recef[1], recef[0])
  *     n = a*a / sqrt(a*a*cos(lat)*cos(lat) + b*b*sin(lat)*sin(lat))             # <<<<<<<<<<<<<<
@@ -3103,11 +3312,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_6 = sqrt(((((__pyx_v_a * __pyx_v_a) * cos(__pyx_v_lat)) * cos(__pyx_v_lat)) + (((__pyx_v_b * __pyx_v_b) * sin(__pyx_v_lat)) * sin(__pyx_v_lat))));
   if (unlikely(__pyx_t_6 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 87, __pyx_L1_error)
+    __PYX_ERR(0, 115, __pyx_L1_error)
   }
   __pyx_v_n = (__pyx_t_5 / __pyx_t_6);
 
-  /* "astrodynamics/_rotations.pyx":88
+  /* "astrodynamics/_rotations.pyx":116
  *     lon = atan2(recef[1], recef[0])
  *     n = a*a / sqrt(a*a*cos(lat)*cos(lat) + b*b*sin(lat)*sin(lat))
  *     h = p / cos(lat) - n             # <<<<<<<<<<<<<<
@@ -3117,11 +3326,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_6 = cos(__pyx_v_lat);
   if (unlikely(__pyx_t_6 == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 88, __pyx_L1_error)
+    __PYX_ERR(0, 116, __pyx_L1_error)
   }
   __pyx_v_h = ((__pyx_v_p / __pyx_t_6) - __pyx_v_n);
 
-  /* "astrodynamics/_rotations.pyx":90
+  /* "astrodynamics/_rotations.pyx":118
  *     h = p / cos(lat) - n
  * 
  *     lat = lat * 180.0 / pi  # convert from radians to degrees             # <<<<<<<<<<<<<<
@@ -3131,11 +3340,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_6 = (__pyx_v_lat * 180.0);
   if (unlikely(M_PI == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 90, __pyx_L1_error)
+    __PYX_ERR(0, 118, __pyx_L1_error)
   }
   __pyx_v_lat = (__pyx_t_6 / ((double)M_PI));
 
-  /* "astrodynamics/_rotations.pyx":91
+  /* "astrodynamics/_rotations.pyx":119
  * 
  *     lat = lat * 180.0 / pi  # convert from radians to degrees
  *     lon = lon * 180.0 / pi             # <<<<<<<<<<<<<<
@@ -3145,11 +3354,11 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_6 = (__pyx_v_lon * 180.0);
   if (unlikely(M_PI == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 91, __pyx_L1_error)
+    __PYX_ERR(0, 119, __pyx_L1_error)
   }
   __pyx_v_lon = (__pyx_t_6 / ((double)M_PI));
 
-  /* "astrodynamics/_rotations.pyx":92
+  /* "astrodynamics/_rotations.pyx":120
  *     lat = lat * 180.0 / pi  # convert from radians to degrees
  *     lon = lon * 180.0 / pi
  *     return lat, lon, h             # <<<<<<<<<<<<<<
@@ -3157,13 +3366,13 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_lat); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(__pyx_v_lat); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = PyFloat_FromDouble(__pyx_v_lon); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_8 = PyFloat_FromDouble(__pyx_v_lon); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = PyFloat_FromDouble(__pyx_v_h); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_9 = PyFloat_FromDouble(__pyx_v_h); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = PyTuple_New(3); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 92, __pyx_L1_error)
+  __pyx_t_10 = PyTuple_New(3); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 120, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_7);
@@ -3178,7 +3387,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   __pyx_t_10 = 0;
   goto __pyx_L0;
 
-  /* "astrodynamics/_rotations.pyx":69
+  /* "astrodynamics/_rotations.pyx":97
  * 
  * 
  * def ecef_to_llh(double[:] recef):             # <<<<<<<<<<<<<<
@@ -3201,7 +3410,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
   return __pyx_r;
 }
 
-/* "astrodynamics/_rotations.pyx":95
+/* "astrodynamics/_rotations.pyx":123
  * 
  * 
  * cpdef double jd2tt(double jd):             # <<<<<<<<<<<<<<
@@ -3209,7 +3418,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_2ecef_to_llh(CYTHON_UNUSE
  *     Convert julian date to terrestial time. Don't apply corrections for UT1
  */
 
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_5jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd); /*proto*/
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_7jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd); /*proto*/
 static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_v_tt1;
   double __pyx_v_tt2;
@@ -3218,7 +3427,7 @@ static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTH
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("jd2tt", 0);
 
-  /* "astrodynamics/_rotations.pyx":103
+  /* "astrodynamics/_rotations.pyx":131
  *     cdef double tt
  *     # Find terrestial time, ignore delta_UT1
  *     jd2tt2(jd, &tt1, &tt2)             # <<<<<<<<<<<<<<
@@ -3227,7 +3436,7 @@ static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTH
  */
   __pyx_f_13astrodynamics_10_rotations_jd2tt2(__pyx_v_jd, (&__pyx_v_tt1), (&__pyx_v_tt2));
 
-  /* "astrodynamics/_rotations.pyx":104
+  /* "astrodynamics/_rotations.pyx":132
  *     # Find terrestial time, ignore delta_UT1
  *     jd2tt2(jd, &tt1, &tt2)
  *     tt = tt1 + tt2             # <<<<<<<<<<<<<<
@@ -3236,7 +3445,7 @@ static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTH
  */
   __pyx_v_tt = (__pyx_v_tt1 + __pyx_v_tt2);
 
-  /* "astrodynamics/_rotations.pyx":105
+  /* "astrodynamics/_rotations.pyx":133
  *     jd2tt2(jd, &tt1, &tt2)
  *     tt = tt1 + tt2
  *     return tt             # <<<<<<<<<<<<<<
@@ -3246,7 +3455,7 @@ static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTH
   __pyx_r = __pyx_v_tt;
   goto __pyx_L0;
 
-  /* "astrodynamics/_rotations.pyx":95
+  /* "astrodynamics/_rotations.pyx":123
  * 
  * 
  * cpdef double jd2tt(double jd):             # <<<<<<<<<<<<<<
@@ -3261,9 +3470,9 @@ static double __pyx_f_13astrodynamics_10_rotations_jd2tt(double __pyx_v_jd, CYTH
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_5jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd); /*proto*/
-static char __pyx_doc_13astrodynamics_10_rotations_4jd2tt[] = "\n    Convert julian date to terrestial time. Don't apply corrections for UT1\n    ";
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_5jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd) {
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_7jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd); /*proto*/
+static char __pyx_doc_13astrodynamics_10_rotations_6jd2tt[] = "\n    Convert julian date to terrestial time. Don't apply corrections for UT1\n    ";
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_7jd2tt(PyObject *__pyx_self, PyObject *__pyx_arg_jd) {
   double __pyx_v_jd;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
@@ -3272,7 +3481,7 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_5jd2tt(PyObject *__pyx_se
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("jd2tt (wrapper)", 0);
   assert(__pyx_arg_jd); {
-    __pyx_v_jd = __pyx_PyFloat_AsDouble(__pyx_arg_jd); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 95, __pyx_L3_error)
+    __pyx_v_jd = __pyx_PyFloat_AsDouble(__pyx_arg_jd); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 123, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -3280,14 +3489,14 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_5jd2tt(PyObject *__pyx_se
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_4jd2tt(__pyx_self, ((double)__pyx_v_jd));
+  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_6jd2tt(__pyx_self, ((double)__pyx_v_jd));
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_4jd2tt(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd) {
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_6jd2tt(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3296,7 +3505,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_4jd2tt(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("jd2tt", 0);
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_13astrodynamics_10_rotations_jd2tt(__pyx_v_jd, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 95, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_13astrodynamics_10_rotations_jd2tt(__pyx_v_jd, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -3313,7 +3522,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_4jd2tt(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "astrodynamics/_rotations.pyx":108
+/* "astrodynamics/_rotations.pyx":136
  * 
  * 
  * cdef void jd2tt2(double jd, double* tt1, double* tt2):             # <<<<<<<<<<<<<<
@@ -3328,7 +3537,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("jd2tt2", 0);
 
-  /* "astrodynamics/_rotations.pyx":115
+  /* "astrodynamics/_rotations.pyx":143
  *     cdef int err
  *     # Find terrestial time, ignore delta_UT1
  *     err = iauUtctai(jd, 0.0, &tai1, &tai2)             # <<<<<<<<<<<<<<
@@ -3337,7 +3546,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
  */
   __pyx_v_err = iauUtctai(__pyx_v_jd, 0.0, (&__pyx_v_tai1), (&__pyx_v_tai2));
 
-  /* "astrodynamics/_rotations.pyx":116
+  /* "astrodynamics/_rotations.pyx":144
  *     # Find terrestial time, ignore delta_UT1
  *     err = iauUtctai(jd, 0.0, &tai1, &tai2)
  *     err = iauTaitt(tai1, tai2, tt1, tt2)             # <<<<<<<<<<<<<<
@@ -3346,7 +3555,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
  */
   __pyx_v_err = iauTaitt(__pyx_v_tai1, __pyx_v_tai2, __pyx_v_tt1, __pyx_v_tt2);
 
-  /* "astrodynamics/_rotations.pyx":117
+  /* "astrodynamics/_rotations.pyx":145
  *     err = iauUtctai(jd, 0.0, &tai1, &tai2)
  *     err = iauTaitt(tai1, tai2, tt1, tt2)
  *     return             # <<<<<<<<<<<<<<
@@ -3355,7 +3564,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
  */
   goto __pyx_L0;
 
-  /* "astrodynamics/_rotations.pyx":108
+  /* "astrodynamics/_rotations.pyx":136
  * 
  * 
  * cdef void jd2tt2(double jd, double* tt1, double* tt2):             # <<<<<<<<<<<<<<
@@ -3368,7 +3577,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
   __Pyx_RefNannyFinishContext();
 }
 
-/* "astrodynamics/_rotations.pyx":120
+/* "astrodynamics/_rotations.pyx":148
  * 
  * 
  * cpdef mod2ecef(double jd, double[::1] rmod, double[::1] recef):             # <<<<<<<<<<<<<<
@@ -3376,7 +3585,7 @@ static void __pyx_f_13astrodynamics_10_rotations_jd2tt2(double __pyx_v_jd, doubl
  *     Convert MOD to ECEF coordinates
  */
 
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_7mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_9mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
 static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd, __Pyx_memviewslice __pyx_v_rmod, __Pyx_memviewslice __pyx_v_recef, CYTHON_UNUSED int __pyx_skip_dispatch) {
   double __pyx_v_dp80;
   double __pyx_v_de80;
@@ -3396,16 +3605,16 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
   Py_ssize_t __pyx_t_3;
   __Pyx_RefNannySetupContext("mod2ecef", 0);
 
-  /* "astrodynamics/_rotations.pyx":134
- *     cdef double dp80, de80, epsa, tt1, tt2, ee, gast
- *     cdef double N[3][3], G[3][3], NG[3][3], NGT[3][3]
+  /* "astrodynamics/_rotations.pyx":165
+ *     cdef double NG[3][3]
+ *     cdef double NGT[3][3]
  *     cdef double twopi = 2*pi             # <<<<<<<<<<<<<<
  * 
  *     # get terrestial time
  */
   __pyx_v_twopi = (2.0 * M_PI);
 
-  /* "astrodynamics/_rotations.pyx":137
+  /* "astrodynamics/_rotations.pyx":168
  * 
  *     # get terrestial time
  *     jd2tt2(jd, &tt1, &tt2)             # <<<<<<<<<<<<<<
@@ -3414,7 +3623,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   __pyx_f_13astrodynamics_10_rotations_jd2tt2(__pyx_v_jd, (&__pyx_v_tt1), (&__pyx_v_tt2));
 
-  /* "astrodynamics/_rotations.pyx":139
+  /* "astrodynamics/_rotations.pyx":170
  *     jd2tt2(jd, &tt1, &tt2)
  *     # get nutation values
  *     iauNut80(tt1, tt2, &dp80, &de80)             # <<<<<<<<<<<<<<
@@ -3423,7 +3632,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   iauNut80(__pyx_v_tt1, __pyx_v_tt2, (&__pyx_v_dp80), (&__pyx_v_de80));
 
-  /* "astrodynamics/_rotations.pyx":141
+  /* "astrodynamics/_rotations.pyx":172
  *     iauNut80(tt1, tt2, &dp80, &de80)
  *     # mean obliquity
  *     epsa = iauObl80(tt1, tt2)             # <<<<<<<<<<<<<<
@@ -3432,7 +3641,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   __pyx_v_epsa = iauObl80(__pyx_v_tt1, __pyx_v_tt2);
 
-  /* "astrodynamics/_rotations.pyx":143
+  /* "astrodynamics/_rotations.pyx":174
  *     epsa = iauObl80(tt1, tt2)
  *     # build nutation rotation matrix
  *     iauNumat(epsa, dp80, de80, N)             # <<<<<<<<<<<<<<
@@ -3441,7 +3650,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   iauNumat(__pyx_v_epsa, __pyx_v_dp80, __pyx_v_de80, __pyx_v_N);
 
-  /* "astrodynamics/_rotations.pyx":145
+  /* "astrodynamics/_rotations.pyx":176
  *     iauNumat(epsa, dp80, de80, N)
  *     # equation of equinoxes
  *     ee = iauEqeq94(tt1, tt2)             # <<<<<<<<<<<<<<
@@ -3450,7 +3659,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   __pyx_v_ee = iauEqeq94(__pyx_v_tt1, __pyx_v_tt2);
 
-  /* "astrodynamics/_rotations.pyx":147
+  /* "astrodynamics/_rotations.pyx":178
  *     ee = iauEqeq94(tt1, tt2)
  *     # greenwich apparent sidereal time
  *     gast = iauGmst82(jd, 0.0) + ee             # <<<<<<<<<<<<<<
@@ -3459,7 +3668,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   __pyx_v_gast = (iauGmst82(__pyx_v_jd, 0.0) + __pyx_v_ee);
 
-  /* "astrodynamics/_rotations.pyx":149
+  /* "astrodynamics/_rotations.pyx":180
  *     gast = iauGmst82(jd, 0.0) + ee
  *     # normalize gast into 0 <= gast < 2pi
  *     gast = fmod(gast, twopi)             # <<<<<<<<<<<<<<
@@ -3468,7 +3677,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   __pyx_v_gast = fmod(__pyx_v_gast, __pyx_v_twopi);
 
-  /* "astrodynamics/_rotations.pyx":150
+  /* "astrodynamics/_rotations.pyx":181
  *     # normalize gast into 0 <= gast < 2pi
  *     gast = fmod(gast, twopi)
  *     if gast < 0:             # <<<<<<<<<<<<<<
@@ -3478,7 +3687,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
   __pyx_t_1 = ((__pyx_v_gast < 0.0) != 0);
   if (__pyx_t_1) {
 
-    /* "astrodynamics/_rotations.pyx":151
+    /* "astrodynamics/_rotations.pyx":182
  *     gast = fmod(gast, twopi)
  *     if gast < 0:
  *         gast += twopi             # <<<<<<<<<<<<<<
@@ -3487,7 +3696,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
     __pyx_v_gast = (__pyx_v_gast + __pyx_v_twopi);
 
-    /* "astrodynamics/_rotations.pyx":150
+    /* "astrodynamics/_rotations.pyx":181
  *     # normalize gast into 0 <= gast < 2pi
  *     gast = fmod(gast, twopi)
  *     if gast < 0:             # <<<<<<<<<<<<<<
@@ -3496,7 +3705,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   }
 
-  /* "astrodynamics/_rotations.pyx":152
+  /* "astrodynamics/_rotations.pyx":183
  *     if gast < 0:
  *         gast += twopi
  *     iauIr(G)  # initialize G matrix with identity             # <<<<<<<<<<<<<<
@@ -3505,7 +3714,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   iauIr(__pyx_v_G);
 
-  /* "astrodynamics/_rotations.pyx":153
+  /* "astrodynamics/_rotations.pyx":184
  *         gast += twopi
  *     iauIr(G)  # initialize G matrix with identity
  *     iauRz(gast, G)   # rotate on the Z axis by gast radians             # <<<<<<<<<<<<<<
@@ -3514,7 +3723,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   iauRz(__pyx_v_gast, __pyx_v_G);
 
-  /* "astrodynamics/_rotations.pyx":164
+  /* "astrodynamics/_rotations.pyx":195
  * 
  *     # Create rotation matrix, multiply NG, then transpose
  *     iauRxr(N, G, NG)             # <<<<<<<<<<<<<<
@@ -3523,7 +3732,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
  */
   iauRxr(__pyx_v_N, __pyx_v_G, __pyx_v_NG);
 
-  /* "astrodynamics/_rotations.pyx":166
+  /* "astrodynamics/_rotations.pyx":197
  *     iauRxr(N, G, NG)
  *     # iauTr(NG, NG)
  *     iauRxp(NG, &rmod[0], &recef[0])             # <<<<<<<<<<<<<<
@@ -3532,7 +3741,7 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
   __pyx_t_3 = 0;
   iauRxp(__pyx_v_NG, (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_rmod.data) + __pyx_t_2)) )))), (&(*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_recef.data) + __pyx_t_3)) )))));
 
-  /* "astrodynamics/_rotations.pyx":120
+  /* "astrodynamics/_rotations.pyx":148
  * 
  * 
  * cpdef mod2ecef(double jd, double[::1] rmod, double[::1] recef):             # <<<<<<<<<<<<<<
@@ -3548,9 +3757,9 @@ static PyObject *__pyx_f_13astrodynamics_10_rotations_mod2ecef(double __pyx_v_jd
 }
 
 /* Python wrapper */
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_7mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static char __pyx_doc_13astrodynamics_10_rotations_6mod2ecef[] = "\n    Convert MOD to ECEF coordinates\n\n    N = nutation rotation matrix\n    G = z-rotation matrix by gast\n\n    r_mod = [NG]r_ecef\n    --> r_ecef = [NG]^T r_mod\n\n\n    ";
-static PyObject *__pyx_pw_13astrodynamics_10_rotations_7mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_9mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static char __pyx_doc_13astrodynamics_10_rotations_8mod2ecef[] = "\n    Convert MOD to ECEF coordinates\n\n    N = nutation rotation matrix\n    G = z-rotation matrix by gast\n\n    r_mod = [NG]r_ecef\n    --> r_ecef = [NG]^T r_mod\n\n\n    ";
+static PyObject *__pyx_pw_13astrodynamics_10_rotations_9mod2ecef(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   double __pyx_v_jd;
   __Pyx_memviewslice __pyx_v_rmod = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_recef = { 0, 0, { 0 }, { 0 }, { 0 } };
@@ -3585,17 +3794,17 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_7mod2ecef(PyObject *__pyx
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rmod)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, 1); __PYX_ERR(0, 120, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, 1); __PYX_ERR(0, 148, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_recef)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, 2); __PYX_ERR(0, 120, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, 2); __PYX_ERR(0, 148, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "mod2ecef") < 0)) __PYX_ERR(0, 120, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "mod2ecef") < 0)) __PYX_ERR(0, 148, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3604,26 +3813,26 @@ static PyObject *__pyx_pw_13astrodynamics_10_rotations_7mod2ecef(PyObject *__pyx
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
       values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
     }
-    __pyx_v_jd = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 120, __pyx_L3_error)
-    __pyx_v_rmod = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rmod.memview)) __PYX_ERR(0, 120, __pyx_L3_error)
-    __pyx_v_recef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_recef.memview)) __PYX_ERR(0, 120, __pyx_L3_error)
+    __pyx_v_jd = __pyx_PyFloat_AsDouble(values[0]); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 148, __pyx_L3_error)
+    __pyx_v_rmod = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rmod.memview)) __PYX_ERR(0, 148, __pyx_L3_error)
+    __pyx_v_recef = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[2], PyBUF_WRITABLE); if (unlikely(!__pyx_v_recef.memview)) __PYX_ERR(0, 148, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 120, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("mod2ecef", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 148, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("astrodynamics._rotations.mod2ecef", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_6mod2ecef(__pyx_self, __pyx_v_jd, __pyx_v_rmod, __pyx_v_recef);
+  __pyx_r = __pyx_pf_13astrodynamics_10_rotations_8mod2ecef(__pyx_self, __pyx_v_jd, __pyx_v_rmod, __pyx_v_recef);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_13astrodynamics_10_rotations_6mod2ecef(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd, __Pyx_memviewslice __pyx_v_rmod, __Pyx_memviewslice __pyx_v_recef) {
+static PyObject *__pyx_pf_13astrodynamics_10_rotations_8mod2ecef(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd, __Pyx_memviewslice __pyx_v_rmod, __Pyx_memviewslice __pyx_v_recef) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -3632,9 +3841,9 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_6mod2ecef(CYTHON_UNUSED P
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("mod2ecef", 0);
   __Pyx_XDECREF(__pyx_r);
-  if (unlikely(!__pyx_v_rmod.memview)) { __Pyx_RaiseUnboundLocalError("rmod"); __PYX_ERR(0, 120, __pyx_L1_error) }
-  if (unlikely(!__pyx_v_recef.memview)) { __Pyx_RaiseUnboundLocalError("recef"); __PYX_ERR(0, 120, __pyx_L1_error) }
-  __pyx_t_1 = __pyx_f_13astrodynamics_10_rotations_mod2ecef(__pyx_v_jd, __pyx_v_rmod, __pyx_v_recef, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 120, __pyx_L1_error)
+  if (unlikely(!__pyx_v_rmod.memview)) { __Pyx_RaiseUnboundLocalError("rmod"); __PYX_ERR(0, 148, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_recef.memview)) { __Pyx_RaiseUnboundLocalError("recef"); __PYX_ERR(0, 148, __pyx_L1_error) }
+  __pyx_t_1 = __pyx_f_13astrodynamics_10_rotations_mod2ecef(__pyx_v_jd, __pyx_v_rmod, __pyx_v_recef, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
@@ -18404,8 +18613,8 @@ static PyTypeObject __pyx_type___pyx_memoryviewslice = {
 };
 
 static PyMethodDef __pyx_methods[] = {
-  {"jd2tt", (PyCFunction)__pyx_pw_13astrodynamics_10_rotations_5jd2tt, METH_O, __pyx_doc_13astrodynamics_10_rotations_4jd2tt},
-  {"mod2ecef", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_10_rotations_7mod2ecef, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_10_rotations_6mod2ecef},
+  {"jd2tt", (PyCFunction)__pyx_pw_13astrodynamics_10_rotations_7jd2tt, METH_O, __pyx_doc_13astrodynamics_10_rotations_6jd2tt},
+  {"mod2ecef", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_10_rotations_9mod2ecef, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_10_rotations_8mod2ecef},
   {0, 0, 0, 0}
 };
 
@@ -18489,13 +18698,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_kp_s_contiguous_and_direct, __pyx_k_contiguous_and_direct, sizeof(__pyx_k_contiguous_and_direct), 0, 0, 1, 0},
   {&__pyx_kp_s_contiguous_and_indirect, __pyx_k_contiguous_and_indirect, sizeof(__pyx_k_contiguous_and_indirect), 0, 0, 1, 0},
-  {&__pyx_n_s_cos_location_lat, __pyx_k_cos_location_lat, sizeof(__pyx_k_cos_location_lat), 0, 0, 1, 1},
-  {&__pyx_n_s_cos_location_lon, __pyx_k_cos_location_lon, sizeof(__pyx_k_cos_location_lon), 0, 0, 1, 1},
   {&__pyx_n_s_dict, __pyx_k_dict, sizeof(__pyx_k_dict), 0, 0, 1, 1},
   {&__pyx_n_s_dtype_is_object, __pyx_k_dtype_is_object, sizeof(__pyx_k_dtype_is_object), 0, 0, 1, 1},
   {&__pyx_n_s_ecef_to_llh, __pyx_k_ecef_to_llh, sizeof(__pyx_k_ecef_to_llh), 0, 0, 1, 1},
   {&__pyx_n_s_el, __pyx_k_el, sizeof(__pyx_k_el), 0, 0, 1, 1},
   {&__pyx_n_s_el_deg, __pyx_k_el_deg, sizeof(__pyx_k_el_deg), 0, 0, 1, 1},
+  {&__pyx_n_s_elevation_at, __pyx_k_elevation_at, sizeof(__pyx_k_elevation_at), 0, 0, 1, 1},
   {&__pyx_n_s_encode, __pyx_k_encode, sizeof(__pyx_k_encode), 0, 0, 1, 1},
   {&__pyx_n_s_enumerate, __pyx_k_enumerate, sizeof(__pyx_k_enumerate), 0, 0, 1, 1},
   {&__pyx_n_s_epsq, __pyx_k_epsq, sizeof(__pyx_k_epsq), 0, 0, 1, 1},
@@ -18550,16 +18758,12 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_reduce, __pyx_k_reduce, sizeof(__pyx_k_reduce), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_ex, __pyx_k_reduce_ex, sizeof(__pyx_k_reduce_ex), 0, 0, 1, 1},
+  {&__pyx_n_s_rho, __pyx_k_rho, sizeof(__pyx_k_rho), 0, 0, 1, 1},
   {&__pyx_n_s_rmod, __pyx_k_rmod, sizeof(__pyx_k_rmod), 0, 0, 1, 1},
-  {&__pyx_n_s_rx, __pyx_k_rx, sizeof(__pyx_k_rx), 0, 0, 1, 1},
-  {&__pyx_n_s_ry, __pyx_k_ry, sizeof(__pyx_k_ry), 0, 0, 1, 1},
-  {&__pyx_n_s_rz, __pyx_k_rz, sizeof(__pyx_k_rz), 0, 0, 1, 1},
   {&__pyx_n_s_satellite_ecef, __pyx_k_satellite_ecef, sizeof(__pyx_k_satellite_ecef), 0, 0, 1, 1},
   {&__pyx_n_s_setstate, __pyx_k_setstate, sizeof(__pyx_k_setstate), 0, 0, 1, 1},
   {&__pyx_n_s_setstate_cython, __pyx_k_setstate_cython, sizeof(__pyx_k_setstate_cython), 0, 0, 1, 1},
   {&__pyx_n_s_shape, __pyx_k_shape, sizeof(__pyx_k_shape), 0, 0, 1, 1},
-  {&__pyx_n_s_sin_location_lat, __pyx_k_sin_location_lat, sizeof(__pyx_k_sin_location_lat), 0, 0, 1, 1},
-  {&__pyx_n_s_sin_location_lon, __pyx_k_sin_location_lon, sizeof(__pyx_k_sin_location_lon), 0, 0, 1, 1},
   {&__pyx_n_s_size, __pyx_k_size, sizeof(__pyx_k_size), 0, 0, 1, 1},
   {&__pyx_n_s_start, __pyx_k_start, sizeof(__pyx_k_start), 0, 0, 1, 1},
   {&__pyx_n_s_step, __pyx_k_step, sizeof(__pyx_k_step), 0, 0, 1, 1},
@@ -18571,9 +18775,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_struct, __pyx_k_struct, sizeof(__pyx_k_struct), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_thet, __pyx_k_thet, sizeof(__pyx_k_thet), 0, 0, 1, 1},
-  {&__pyx_n_s_top_e, __pyx_k_top_e, sizeof(__pyx_k_top_e), 0, 0, 1, 1},
-  {&__pyx_n_s_top_s, __pyx_k_top_s, sizeof(__pyx_k_top_s), 0, 0, 1, 1},
-  {&__pyx_n_s_top_z, __pyx_k_top_z, sizeof(__pyx_k_top_z), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
@@ -18813,29 +19014,41 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
 
-  /* "astrodynamics/_rotations.pyx":30
+  /* "astrodynamics/_rotations.pyx":57
+ * 
+ * 
+ * def elevation_at(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+  __pyx_tuple__21 = PyTuple_Pack(8, __pyx_n_s_location_lat_rad, __pyx_n_s_location_lon_rad, __pyx_n_s_location_ecef, __pyx_n_s_satellite_ecef, __pyx_n_s_rho, __pyx_n_s_range_2, __pyx_n_s_el, __pyx_n_s_el_deg); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__21);
+  __Pyx_GIVEREF(__pyx_tuple__21);
+  __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(4, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__rotations_pyx, __pyx_n_s_elevation_at, 57, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 57, __pyx_L1_error)
+
+  /* "astrodynamics/_rotations.pyx":76
  * 
  * 
  * def razel(             # <<<<<<<<<<<<<<
  *     double location_lat_rad,
  *     double location_lon_rad,
  */
-  __pyx_tuple__21 = PyTuple_Pack(19, __pyx_n_s_location_lat_rad, __pyx_n_s_location_lon_rad, __pyx_n_s_location_ecef, __pyx_n_s_satellite_ecef, __pyx_n_s_rx, __pyx_n_s_ry, __pyx_n_s_rz, __pyx_n_s_sin_location_lat, __pyx_n_s_cos_location_lat, __pyx_n_s_sin_location_lon, __pyx_n_s_cos_location_lon, __pyx_n_s_top_s, __pyx_n_s_top_e, __pyx_n_s_top_z, __pyx_n_s_range_2, __pyx_n_s_el, __pyx_n_s_az, __pyx_n_s_el_deg, __pyx_n_s_az_deg); if (unlikely(!__pyx_tuple__21)) __PYX_ERR(0, 30, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__21);
-  __Pyx_GIVEREF(__pyx_tuple__21);
-  __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(4, 0, 19, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__rotations_pyx, __pyx_n_s_razel, 30, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_tuple__23 = PyTuple_Pack(10, __pyx_n_s_location_lat_rad, __pyx_n_s_location_lon_rad, __pyx_n_s_location_ecef, __pyx_n_s_satellite_ecef, __pyx_n_s_rho, __pyx_n_s_range_2, __pyx_n_s_el, __pyx_n_s_az, __pyx_n_s_el_deg, __pyx_n_s_az_deg); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 76, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__23);
+  __Pyx_GIVEREF(__pyx_tuple__23);
+  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(4, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__rotations_pyx, __pyx_n_s_razel, 76, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 76, __pyx_L1_error)
 
-  /* "astrodynamics/_rotations.pyx":69
+  /* "astrodynamics/_rotations.pyx":97
  * 
  * 
  * def ecef_to_llh(double[:] recef):             # <<<<<<<<<<<<<<
  *     """
  *     Convert ECEF coordinates to latitude, longitude, and altitude
  */
-  __pyx_tuple__23 = PyTuple_Pack(12, __pyx_n_s_recef, __pyx_n_s_recef, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_p, __pyx_n_s_thet, __pyx_n_s_esq, __pyx_n_s_epsq, __pyx_n_s_lat, __pyx_n_s_lon, __pyx_n_s_h, __pyx_n_s_n); if (unlikely(!__pyx_tuple__23)) __PYX_ERR(0, 69, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__23);
-  __Pyx_GIVEREF(__pyx_tuple__23);
-  __pyx_codeobj__24 = (PyObject*)__Pyx_PyCode_New(1, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__23, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__rotations_pyx, __pyx_n_s_ecef_to_llh, 69, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__24)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_tuple__25 = PyTuple_Pack(12, __pyx_n_s_recef, __pyx_n_s_recef, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_p, __pyx_n_s_thet, __pyx_n_s_esq, __pyx_n_s_epsq, __pyx_n_s_lat, __pyx_n_s_lon, __pyx_n_s_h, __pyx_n_s_n); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(0, 97, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__25);
+  __Pyx_GIVEREF(__pyx_tuple__25);
+  __pyx_codeobj__26 = (PyObject*)__Pyx_PyCode_New(1, 0, 12, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__25, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__rotations_pyx, __pyx_n_s_ecef_to_llh, 97, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__26)) __PYX_ERR(0, 97, __pyx_L1_error)
 
   /* "View.MemoryView":286
  *         return self.name
@@ -18844,9 +19057,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_tuple__25 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__25)) __PYX_ERR(2, 286, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__25);
-  __Pyx_GIVEREF(__pyx_tuple__25);
+  __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct_or_indirect); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__27);
+  __Pyx_GIVEREF(__pyx_tuple__27);
 
   /* "View.MemoryView":287
  * 
@@ -18855,9 +19068,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_tuple__26 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(2, 287, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__26);
-  __Pyx_GIVEREF(__pyx_tuple__26);
+  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_strided_and_direct); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(2, 287, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__28);
+  __Pyx_GIVEREF(__pyx_tuple__28);
 
   /* "View.MemoryView":288
  * cdef generic = Enum("<strided and direct or indirect>")
@@ -18866,9 +19079,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__27 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__27)) __PYX_ERR(2, 288, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__27);
-  __Pyx_GIVEREF(__pyx_tuple__27);
+  __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_strided_and_indirect); if (unlikely(!__pyx_tuple__29)) __PYX_ERR(2, 288, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__29);
+  __Pyx_GIVEREF(__pyx_tuple__29);
 
   /* "View.MemoryView":291
  * 
@@ -18877,9 +19090,9 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_tuple__28 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(2, 291, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__28);
-  __Pyx_GIVEREF(__pyx_tuple__28);
+  __pyx_tuple__30 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_direct); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(2, 291, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__30);
+  __Pyx_GIVEREF(__pyx_tuple__30);
 
   /* "View.MemoryView":292
  * 
@@ -18888,19 +19101,19 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * 
  */
-  __pyx_tuple__29 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__29)) __PYX_ERR(2, 292, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__29);
-  __Pyx_GIVEREF(__pyx_tuple__29);
+  __pyx_tuple__31 = PyTuple_Pack(1, __pyx_kp_s_contiguous_and_indirect); if (unlikely(!__pyx_tuple__31)) __PYX_ERR(2, 292, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__31);
+  __Pyx_GIVEREF(__pyx_tuple__31);
 
   /* "(tree fragment)":1
  * def __pyx_unpickle_Enum(__pyx_type, long __pyx_checksum, __pyx_state):             # <<<<<<<<<<<<<<
  *     cdef object __pyx_PickleError
  *     cdef object __pyx_result
  */
-  __pyx_tuple__30 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(2, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__30);
-  __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __pyx_tuple__32 = PyTuple_Pack(5, __pyx_n_s_pyx_type, __pyx_n_s_pyx_checksum, __pyx_n_s_pyx_state, __pyx_n_s_pyx_PickleError, __pyx_n_s_pyx_result); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(2, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__32);
+  __Pyx_GIVEREF(__pyx_tuple__32);
+  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(3, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_stringsource, __pyx_n_s_pyx_unpickle_Enum, 1, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(2, 1, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -19310,28 +19523,40 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "astrodynamics/_rotations.pyx":30
+  /* "astrodynamics/_rotations.pyx":57
+ * 
+ * 
+ * def elevation_at(             # <<<<<<<<<<<<<<
+ *     double location_lat_rad,
+ *     double location_lon_rad,
+ */
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_10_rotations_1elevation_at, NULL, __pyx_n_s_astrodynamics__rotations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_elevation_at, __pyx_t_1) < 0) __PYX_ERR(0, 57, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "astrodynamics/_rotations.pyx":76
  * 
  * 
  * def razel(             # <<<<<<<<<<<<<<
  *     double location_lat_rad,
  *     double location_lon_rad,
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_10_rotations_1razel, NULL, __pyx_n_s_astrodynamics__rotations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_10_rotations_3razel, NULL, __pyx_n_s_astrodynamics__rotations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_razel, __pyx_t_1) < 0) __PYX_ERR(0, 30, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_razel, __pyx_t_1) < 0) __PYX_ERR(0, 76, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "astrodynamics/_rotations.pyx":69
+  /* "astrodynamics/_rotations.pyx":97
  * 
  * 
  * def ecef_to_llh(double[:] recef):             # <<<<<<<<<<<<<<
  *     """
  *     Convert ECEF coordinates to latitude, longitude, and altitude
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_10_rotations_3ecef_to_llh, NULL, __pyx_n_s_astrodynamics__rotations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 69, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_10_rotations_5ecef_to_llh, NULL, __pyx_n_s_astrodynamics__rotations); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ecef_to_llh, __pyx_t_1) < 0) __PYX_ERR(0, 69, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_ecef_to_llh, __pyx_t_1) < 0) __PYX_ERR(0, 97, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "astrodynamics/_rotations.pyx":1
@@ -19364,7 +19589,7 @@ if (!__Pyx_RefNanny) {
  * cdef strided = Enum("<strided and direct>") # default
  * cdef indirect = Enum("<strided and indirect>")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__25, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 286, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 286, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(generic);
   __Pyx_DECREF_SET(generic, __pyx_t_1);
@@ -19378,7 +19603,7 @@ if (!__Pyx_RefNanny) {
  * cdef indirect = Enum("<strided and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__26, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 287, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 287, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(strided);
   __Pyx_DECREF_SET(strided, __pyx_t_1);
@@ -19392,7 +19617,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__27, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 288, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 288, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(indirect);
   __Pyx_DECREF_SET(indirect, __pyx_t_1);
@@ -19406,7 +19631,7 @@ if (!__Pyx_RefNanny) {
  * cdef indirect_contiguous = Enum("<contiguous and indirect>")
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__28, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 291, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__30, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 291, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(contiguous);
   __Pyx_DECREF_SET(contiguous, __pyx_t_1);
@@ -19420,7 +19645,7 @@ if (!__Pyx_RefNanny) {
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__29, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 292, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_MemviewEnum_type), __pyx_tuple__31, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(2, 292, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_XGOTREF(indirect_contiguous);
   __Pyx_DECREF_SET(indirect_contiguous, __pyx_t_1);
@@ -22517,17 +22742,17 @@ no_fail:
 }
 
 /* ObjectToMemviewSlice */
-  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *obj, int writable_flag) {
+  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_double(PyObject *obj, int writable_flag) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
+    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_CONTIG) };
     int retcode;
     if (obj == Py_None) {
         result.memview = (struct __pyx_memoryview_obj *) Py_None;
         return result;
     }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
-                                                 PyBUF_RECORDS_RO | writable_flag, 1,
+    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, __Pyx_IS_C_CONTIG,
+                                                 (PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) | writable_flag, 1,
                                                  &__Pyx_TypeInfo_double, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))
@@ -22540,17 +22765,17 @@ __pyx_fail:
 }
 
 /* ObjectToMemviewSlice */
-  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_double(PyObject *obj, int writable_flag) {
+  static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *obj, int writable_flag) {
     __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
     __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_CONTIG) };
+    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
     int retcode;
     if (obj == Py_None) {
         result.memview = (struct __pyx_memoryview_obj *) Py_None;
         return result;
     }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, __Pyx_IS_C_CONTIG,
-                                                 (PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) | writable_flag, 1,
+    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
+                                                 PyBUF_RECORDS_RO | writable_flag, 1,
                                                  &__Pyx_TypeInfo_double, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))

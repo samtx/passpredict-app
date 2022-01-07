@@ -23,24 +23,7 @@
         "name": "astrodynamics._time",
         "sources": [
             "astrodynamics/_time.pyx",
-            "astrodynamics/sofa/eqeq94.c",
-            "astrodynamics/sofa/numat.c",
-            "astrodynamics/sofa/rz.c",
-            "astrodynamics/sofa/anp.c",
-            "astrodynamics/sofa/cal2jd.c",
-            "astrodynamics/sofa/ir.c",
-            "astrodynamics/sofa/ry.c",
-            "astrodynamics/sofa/obl80.c",
-            "astrodynamics/sofa/rx.c",
-            "astrodynamics/sofa/anpm.c",
-            "astrodynamics/sofa/nut80.c",
-            "astrodynamics/sofa/gmst82.c",
-            "astrodynamics/sofa/dat.c",
-            "astrodynamics/sofa/jd2cal.c",
-            "astrodynamics/sgp4/SGP4.cpp",
-            "astrodynamics/ast2body/astMath.cpp",
-            "astrodynamics/ast2body/ast2Body.cpp",
-            "astrodynamics/ast2body/astTime.cpp"
+            "astrodynamics/sgp4/SGP4.cpp"
         ]
     },
     "module_name": "astrodynamics._time"
@@ -1308,9 +1291,9 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("epoch_to_jd", 0);
 
-  /* "astrodynamics/_time.pyx":24
- *     cdef int year, mon, day, hr, minute
- *     cdef double sec, jd, jdfr
+  /* "astrodynamics/_time.pyx":25
+ *     cdef double sec
+ *     cdef double jd, jdfr
  *     if epoch_year < 57:             # <<<<<<<<<<<<<<
  *         year = epoch_year + 2000
  *     else:
@@ -1318,8 +1301,8 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
   __pyx_t_1 = ((__pyx_v_epoch_year < 57) != 0);
   if (__pyx_t_1) {
 
-    /* "astrodynamics/_time.pyx":25
- *     cdef double sec, jd, jdfr
+    /* "astrodynamics/_time.pyx":26
+ *     cdef double jd, jdfr
  *     if epoch_year < 57:
  *         year = epoch_year + 2000             # <<<<<<<<<<<<<<
  *     else:
@@ -1327,9 +1310,9 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
  */
     __pyx_v_year = (__pyx_v_epoch_year + 0x7D0);
 
-    /* "astrodynamics/_time.pyx":24
- *     cdef int year, mon, day, hr, minute
- *     cdef double sec, jd, jdfr
+    /* "astrodynamics/_time.pyx":25
+ *     cdef double sec
+ *     cdef double jd, jdfr
  *     if epoch_year < 57:             # <<<<<<<<<<<<<<
  *         year = epoch_year + 2000
  *     else:
@@ -1337,7 +1320,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
     goto __pyx_L3;
   }
 
-  /* "astrodynamics/_time.pyx":27
+  /* "astrodynamics/_time.pyx":28
  *         year = epoch_year + 2000
  *     else:
  *         year = epoch_year + 1900             # <<<<<<<<<<<<<<
@@ -1349,7 +1332,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
   }
   __pyx_L3:;
 
-  /* "astrodynamics/_time.pyx":28
+  /* "astrodynamics/_time.pyx":29
  *     else:
  *         year = epoch_year + 1900
  *     days2mdhms_SGP4(year, epoch_days, mon, day, hr, minute, sec)             # <<<<<<<<<<<<<<
@@ -1358,7 +1341,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
  */
   SGP4Funcs::days2mdhms_SGP4(__pyx_v_year, __pyx_v_epoch_days, __pyx_v_mon, __pyx_v_day, __pyx_v_hr, __pyx_v_minute, __pyx_v_sec);
 
-  /* "astrodynamics/_time.pyx":29
+  /* "astrodynamics/_time.pyx":30
  *         year = epoch_year + 1900
  *     days2mdhms_SGP4(year, epoch_days, mon, day, hr, minute, sec)
  *     jday_SGP4(year, mon, day, hr, minute, sec, jd, jdfr)             # <<<<<<<<<<<<<<
@@ -1367,7 +1350,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
  */
   SGP4Funcs::jday_SGP4(__pyx_v_year, __pyx_v_mon, __pyx_v_day, __pyx_v_hr, __pyx_v_minute, __pyx_v_sec, __pyx_v_jd, __pyx_v_jdfr);
 
-  /* "astrodynamics/_time.pyx":30
+  /* "astrodynamics/_time.pyx":31
  *     days2mdhms_SGP4(year, epoch_days, mon, day, hr, minute, sec)
  *     jday_SGP4(year, mon, day, hr, minute, sec, jd, jdfr)
  *     return (jd, jdfr)             # <<<<<<<<<<<<<<
@@ -1375,11 +1358,11 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_jd); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_jd); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_jdfr); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_jdfr); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
@@ -1412,7 +1395,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_epoch_to_jd(CYTHON_UNUSED PyObj
   return __pyx_r;
 }
 
-/* "astrodynamics/_time.pyx":33
+/* "astrodynamics/_time.pyx":34
  * 
  * 
  * def julian_date(int year, int mon, int day, int hr, int minute, double sec):             # <<<<<<<<<<<<<<
@@ -1468,35 +1451,35 @@ static PyObject *__pyx_pw_13astrodynamics_5_time_3julian_date(PyObject *__pyx_se
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_mon)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 1); __PYX_ERR(0, 33, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 1); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_day)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 2); __PYX_ERR(0, 33, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 2); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_hr)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 3); __PYX_ERR(0, 33, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 3); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_minute)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 4); __PYX_ERR(0, 33, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 4); __PYX_ERR(0, 34, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_sec)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 5); __PYX_ERR(0, 33, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, 5); __PYX_ERR(0, 34, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "julian_date") < 0)) __PYX_ERR(0, 33, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "julian_date") < 0)) __PYX_ERR(0, 34, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -1508,16 +1491,16 @@ static PyObject *__pyx_pw_13astrodynamics_5_time_3julian_date(PyObject *__pyx_se
       values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
       values[5] = PyTuple_GET_ITEM(__pyx_args, 5);
     }
-    __pyx_v_year = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_year == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_mon = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_mon == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_day = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_day == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_hr = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_hr == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_minute = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_minute == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
-    __pyx_v_sec = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_sec == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 33, __pyx_L3_error)
+    __pyx_v_year = __Pyx_PyInt_As_int(values[0]); if (unlikely((__pyx_v_year == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_mon = __Pyx_PyInt_As_int(values[1]); if (unlikely((__pyx_v_mon == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_day = __Pyx_PyInt_As_int(values[2]); if (unlikely((__pyx_v_day == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_hr = __Pyx_PyInt_As_int(values[3]); if (unlikely((__pyx_v_hr == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_minute = __Pyx_PyInt_As_int(values[4]); if (unlikely((__pyx_v_minute == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
+    __pyx_v_sec = __pyx_PyFloat_AsDouble(values[5]); if (unlikely((__pyx_v_sec == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 34, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 33, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("julian_date", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 34, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("astrodynamics._time.julian_date", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -1543,7 +1526,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_2julian_date(CYTHON_UNUSED PyOb
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("julian_date", 0);
 
-  /* "astrodynamics/_time.pyx":39
+  /* "astrodynamics/_time.pyx":40
  *     cdef double jd
  *     cdef double jdfr
  *     jday_SGP4(year, mon, day, hr, minute, sec, jd, jdfr)             # <<<<<<<<<<<<<<
@@ -1552,7 +1535,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_2julian_date(CYTHON_UNUSED PyOb
  */
   SGP4Funcs::jday_SGP4(__pyx_v_year, __pyx_v_mon, __pyx_v_day, __pyx_v_hr, __pyx_v_minute, __pyx_v_sec, __pyx_v_jd, __pyx_v_jdfr);
 
-  /* "astrodynamics/_time.pyx":40
+  /* "astrodynamics/_time.pyx":41
  *     cdef double jdfr
  *     jday_SGP4(year, mon, day, hr, minute, sec, jd, jdfr)
  *     return (jd, jdfr)             # <<<<<<<<<<<<<<
@@ -1560,11 +1543,11 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_2julian_date(CYTHON_UNUSED PyOb
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_jd); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_jd); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_jdfr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_2 = PyFloat_FromDouble(__pyx_v_jdfr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 40, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -1576,7 +1559,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_2julian_date(CYTHON_UNUSED PyOb
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "astrodynamics/_time.pyx":33
+  /* "astrodynamics/_time.pyx":34
  * 
  * 
  * def julian_date(int year, int mon, int day, int hr, int minute, double sec):             # <<<<<<<<<<<<<<
@@ -1597,7 +1580,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_2julian_date(CYTHON_UNUSED PyOb
   return __pyx_r;
 }
 
-/* "astrodynamics/_time.pyx":43
+/* "astrodynamics/_time.pyx":44
  * 
  * 
  * def jday2datetime(double jd):             # <<<<<<<<<<<<<<
@@ -1618,7 +1601,7 @@ static PyObject *__pyx_pw_13astrodynamics_5_time_5jday2datetime(PyObject *__pyx_
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("jday2datetime (wrapper)", 0);
   assert(__pyx_arg_jd); {
-    __pyx_v_jd = __pyx_PyFloat_AsDouble(__pyx_arg_jd); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 43, __pyx_L3_error)
+    __pyx_v_jd = __pyx_PyFloat_AsDouble(__pyx_arg_jd); if (unlikely((__pyx_v_jd == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 44, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -1658,7 +1641,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("jday2datetime", 0);
 
-  /* "astrodynamics/_time.pyx":49
+  /* "astrodynamics/_time.pyx":50
  *     cdef int year, mon, day, hr, minute, i_sec
  *     cdef double jdFrac, d_sec
  *     invjday_SGP4(jd, jdFrac, year, mon, day, hr, minute, d_sec)             # <<<<<<<<<<<<<<
@@ -1667,7 +1650,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
  */
   SGP4Funcs::invjday_SGP4(__pyx_v_jd, __pyx_v_jdFrac, __pyx_v_year, __pyx_v_mon, __pyx_v_day, __pyx_v_hr, __pyx_v_minute, __pyx_v_d_sec);
 
-  /* "astrodynamics/_time.pyx":50
+  /* "astrodynamics/_time.pyx":51
  *     cdef double jdFrac, d_sec
  *     invjday_SGP4(jd, jdFrac, year, mon, day, hr, minute, d_sec)
  *     i_sec = int(c_round(d_sec))             # <<<<<<<<<<<<<<
@@ -1676,7 +1659,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
  */
   __pyx_v_i_sec = ((int)round(__pyx_v_d_sec));
 
-  /* "astrodynamics/_time.pyx":51
+  /* "astrodynamics/_time.pyx":52
  *     invjday_SGP4(jd, jdFrac, year, mon, day, hr, minute, d_sec)
  *     i_sec = int(c_round(d_sec))
  *     if i_sec == 60:             # <<<<<<<<<<<<<<
@@ -1686,29 +1669,29 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
   __pyx_t_1 = ((__pyx_v_i_sec == 60) != 0);
   if (__pyx_t_1) {
 
-    /* "astrodynamics/_time.pyx":52
+    /* "astrodynamics/_time.pyx":53
  *     i_sec = int(c_round(d_sec))
  *     if i_sec == 60:
  *         return datetime.datetime(year, mon, day, hr, minute, 59, tzinfo=tz_utc) + datetime.timedelta(seconds=1)             # <<<<<<<<<<<<<<
  *     return datetime.datetime(year, mon, day, hr, minute, i_sec, tzinfo=tz_utc)
  */
     __Pyx_XDECREF(__pyx_r);
-    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_datetime); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_datetime); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_datetime); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_datetime); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_year); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_year); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_mon); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_mon); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_day); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_day); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_hr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_hr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_minute); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_minute); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = PyTuple_New(6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_8 = PyTuple_New(6); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_2);
@@ -1728,30 +1711,30 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
     __pyx_t_5 = 0;
     __pyx_t_6 = 0;
     __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_tz_utc); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_6, __pyx_n_s_tz_utc); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_tzinfo, __pyx_t_6) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_tzinfo, __pyx_t_6) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_timedelta); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_timedelta); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_seconds, __pyx_int_1) < 0) __PYX_ERR(0, 52, __pyx_L1_error)
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_empty_tuple, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
+    if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_seconds, __pyx_int_1) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_empty_tuple, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-    __pyx_t_7 = PyNumber_Add(__pyx_t_6, __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_7 = PyNumber_Add(__pyx_t_6, __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1759,7 +1742,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
     __pyx_t_7 = 0;
     goto __pyx_L0;
 
-    /* "astrodynamics/_time.pyx":51
+    /* "astrodynamics/_time.pyx":52
  *     invjday_SGP4(jd, jdFrac, year, mon, day, hr, minute, d_sec)
  *     i_sec = int(c_round(d_sec))
  *     if i_sec == 60:             # <<<<<<<<<<<<<<
@@ -1768,30 +1751,30 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
  */
   }
 
-  /* "astrodynamics/_time.pyx":53
+  /* "astrodynamics/_time.pyx":54
  *     if i_sec == 60:
  *         return datetime.datetime(year, mon, day, hr, minute, 59, tzinfo=tz_utc) + datetime.timedelta(seconds=1)
  *     return datetime.datetime(year, mon, day, hr, minute, i_sec, tzinfo=tz_utc)             # <<<<<<<<<<<<<<
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_datetime); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_year); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_year); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_mon); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_mon); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_day); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_day); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_hr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_hr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_minute); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_minute); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_i_sec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_i_sec); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = PyTuple_New(6); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_9 = PyTuple_New(6); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_7);
@@ -1811,13 +1794,13 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
   __pyx_t_5 = 0;
   __pyx_t_4 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyDict_NewPresized(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_tz_utc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_tz_utc); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_tzinfo, __pyx_t_4) < 0) __PYX_ERR(0, 53, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_tzinfo, __pyx_t_4) < 0) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 53, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_9, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 54, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
@@ -1826,7 +1809,7 @@ static PyObject *__pyx_pf_13astrodynamics_5_time_4jday2datetime(CYTHON_UNUSED Py
   __pyx_t_4 = 0;
   goto __pyx_L0;
 
-  /* "astrodynamics/_time.pyx":43
+  /* "astrodynamics/_time.pyx":44
  * 
  * 
  * def jday2datetime(double jd):             # <<<<<<<<<<<<<<
@@ -1950,29 +1933,29 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple_);
   __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(2, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__time_pyx, __pyx_n_s_epoch_to_jd, 18, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 18, __pyx_L1_error)
 
-  /* "astrodynamics/_time.pyx":33
+  /* "astrodynamics/_time.pyx":34
  * 
  * 
  * def julian_date(int year, int mon, int day, int hr, int minute, double sec):             # <<<<<<<<<<<<<<
  *     """
  *     Convert date to julian date
  */
-  __pyx_tuple__3 = PyTuple_Pack(8, __pyx_n_s_year, __pyx_n_s_mon, __pyx_n_s_day, __pyx_n_s_hr, __pyx_n_s_minute, __pyx_n_s_sec, __pyx_n_s_jd, __pyx_n_s_jdfr); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(8, __pyx_n_s_year, __pyx_n_s_mon, __pyx_n_s_day, __pyx_n_s_hr, __pyx_n_s_minute, __pyx_n_s_sec, __pyx_n_s_jd, __pyx_n_s_jdfr); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
-  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(6, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__time_pyx, __pyx_n_s_julian_date, 33, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_codeobj__4 = (PyObject*)__Pyx_PyCode_New(6, 0, 8, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__3, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__time_pyx, __pyx_n_s_julian_date, 34, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__4)) __PYX_ERR(0, 34, __pyx_L1_error)
 
-  /* "astrodynamics/_time.pyx":43
+  /* "astrodynamics/_time.pyx":44
  * 
  * 
  * def jday2datetime(double jd):             # <<<<<<<<<<<<<<
  *     """
  *     Convert julian date float to python datetime object rounded to nearest second
  */
-  __pyx_tuple__5 = PyTuple_Pack(10, __pyx_n_s_jd, __pyx_n_s_jd, __pyx_n_s_year, __pyx_n_s_mon, __pyx_n_s_day, __pyx_n_s_hr, __pyx_n_s_minute, __pyx_n_s_i_sec, __pyx_n_s_jdFrac, __pyx_n_s_d_sec); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(10, __pyx_n_s_jd, __pyx_n_s_jd, __pyx_n_s_year, __pyx_n_s_mon, __pyx_n_s_day, __pyx_n_s_hr, __pyx_n_s_minute, __pyx_n_s_i_sec, __pyx_n_s_jdFrac, __pyx_n_s_d_sec); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__time_pyx, __pyx_n_s_jday2datetime, 43, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(1, 0, 10, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__time_pyx, __pyx_n_s_jday2datetime, 44, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -2296,28 +2279,28 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_epoch_to_jd, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "astrodynamics/_time.pyx":33
+  /* "astrodynamics/_time.pyx":34
  * 
  * 
  * def julian_date(int year, int mon, int day, int hr, int minute, double sec):             # <<<<<<<<<<<<<<
  *     """
  *     Convert date to julian date
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_5_time_3julian_date, NULL, __pyx_n_s_astrodynamics__time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 33, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_5_time_3julian_date, NULL, __pyx_n_s_astrodynamics__time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_julian_date, __pyx_t_1) < 0) __PYX_ERR(0, 33, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_julian_date, __pyx_t_1) < 0) __PYX_ERR(0, 34, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "astrodynamics/_time.pyx":43
+  /* "astrodynamics/_time.pyx":44
  * 
  * 
  * def jday2datetime(double jd):             # <<<<<<<<<<<<<<
  *     """
  *     Convert julian date float to python datetime object rounded to nearest second
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_5_time_5jday2datetime, NULL, __pyx_n_s_astrodynamics__time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_5_time_5jday2datetime, NULL, __pyx_n_s_astrodynamics__time); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_jday2datetime, __pyx_t_1) < 0) __PYX_ERR(0, 43, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_jday2datetime, __pyx_t_1) < 0) __PYX_ERR(0, 44, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "astrodynamics/_time.pyx":1

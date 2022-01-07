@@ -26,21 +26,19 @@ cdef extern from "sofa.h":
     cdef void iauRxp(double r[3][3], double p[3], double rp[3])
 
 
-
-def razel(
+cdef void ecef_to_rhosez(
     double location_lat_rad,
     double location_lon_rad,
-    double[:] location_ecef,
-    double[:] satellite_ecef
+    double[::1] location_ecef,
+    double[::1] satellite_ecef,
+    double* rho_sez,
 ):
     """
-    Get range, azimuth, and elevation of satellite relative for observing location
+    Get slant vector to satellite relative for observing location
     """
     cdef double rx, ry, rz
     cdef double sin_location_lat, cos_location_lat
     cdef double sin_location_lon, cos_location_lon
-    cdef double top_s, top_e, top_z
-    cdef double range_, el, az, el_deg, az_deg
 
     rx = satellite_ecef[0] - location_ecef[0]
     ry = satellite_ecef[1] - location_ecef[1]
@@ -51,18 +49,48 @@ def razel(
     sin_location_lon = sin(location_lon_rad)
     cos_location_lon = cos(location_lon_rad)
 
-    top_s = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
-    top_e = -sin_location_lon * rx + cos_location_lon * ry
-    top_z = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
+    rho_sez[0] = (sin_location_lat * cos_location_lon * rx) + (sin_location_lat * sin_location_lon * ry) - (cos_location_lat * rz)
+    rho_sez[1] = -sin_location_lon * rx + cos_location_lon * ry
+    rho_sez[2] = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
 
-    range_ = sqrt(top_s*top_s + top_e*top_e + top_z*top_z)
-    el = asin(top_z / range_)
-    az = atan2(-top_e, top_s) + pi
 
+def elevation_at(
+    double location_lat_rad,
+    double location_lon_rad,
+    double[::1] location_ecef,
+    double[::1] satellite_ecef
+):
+    """
+    Get elevation of satellite relative for observing location
+    """
+    cdef double rho[3]
+    cdef double range_, el, el_deg
+    ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+    range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+    el = asin(rho[2] / range_)
+    # convert radians to degrees
+    el_deg = el * 180.0 / pi
+    return el_deg
+
+
+def razel(
+    double location_lat_rad,
+    double location_lon_rad,
+    double[::1] location_ecef,
+    double[::1] satellite_ecef,
+):
+    """
+    Get range, azimuth, and elevation of satellite relative for observing location
+    """
+    cdef double rho[3]
+    cdef double range_, el, az, el_deg, az_deg
+    ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
+    range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
+    el = asin(rho[2] / range_)
+    az = atan2(-rho[1], rho[0]) + pi
     # convert radians to degrees
     el_deg = el * 180.0 / pi
     az_deg = az * 180.0 / pi
-
     return (range_, az_deg, el_deg)
 
 
@@ -130,7 +158,10 @@ cpdef mod2ecef(double jd, double[::1] rmod, double[::1] recef):
 
     """
     cdef double dp80, de80, epsa, tt1, tt2, ee, gast
-    cdef double N[3][3], G[3][3], NG[3][3], NGT[3][3]
+    cdef double N[3][3]
+    cdef double G[3][3]
+    cdef double NG[3][3]
+    cdef double NGT[3][3]
     cdef double twopi = 2*pi
 
     # get terrestial time

@@ -20,12 +20,12 @@ common_kw = {
 ext = [
     Extension(
         'astrodynamics._time',
-        ['astrodynamics/_time.pyx'] + glob.glob('astrodynamics/sgp4/*.cpp'),
+        ['astrodynamics/_time.pyx'] + sorted(glob.glob('astrodynamics/sgp4/*.cpp')),
         **common_kw
     ),
     Extension(
         'astrodynamics._rotations',
-        ['astrodynamics/_rotations.pyx'] + glob.glob('astrodynamics/sofa/*.c'),
+        ['astrodynamics/_rotations.pyx'] + sorted(glob.glob('astrodynamics/sofa/*.c')),
         **common_kw
     ),
     Extension(
@@ -38,6 +38,6 @@ ext = [
 setup(
     name="astrodynamics",
     packages=['astrodynamics'],
-    ext_modules = cythonize(ext, language_level="3", gdb_debug=True, annotate=True),
+    ext_modules = cythonize(ext, language_level="3"), #, gdb_debug=True, annotate=True),
     zip_safe = False,
 )
