@@ -26,12 +26,12 @@ cdef extern from "sofa.h":
     cdef void iauRxp(double r[3][3], double p[3], double rp[3])
 
 
-cdef void ecef_to_rhosez(
+cpdef void ecef_to_rhosez(
     double location_lat_rad,
     double location_lon_rad,
     double[::1] location_ecef,
     double[::1] satellite_ecef,
-    double* rho_sez,
+    double[::1] rho_sez,
 ):
     """
     Get slant vector to satellite relative for observing location
@@ -54,6 +54,23 @@ cdef void ecef_to_rhosez(
     rho_sez[2] = (cos_location_lat * cos_location_lon * rx) + (cos_location_lat * sin_location_lon * ry) + (sin_location_lat * rz)
 
 
+def range_at(
+    double location_lat_rad,
+    double location_lon_rad,
+    double[::1] location_ecef,
+    double[::1] satellite_ecef
+):
+    """
+    Get slant range of satellite relative for observing location [km]
+    """
+    cdef double rho[3]
+    cdef double[::1] rho_v = rho
+    cdef double range_
+    ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho_v)
+    range_ = sqrt(rho_v[0]*rho_v[0] + rho_v[1]*rho_v[1] + rho_v[2]*rho_v[2])
+    return range_
+
+
 def elevation_at(
     double location_lat_rad,
     double location_lon_rad,
@@ -61,13 +78,14 @@ def elevation_at(
     double[::1] satellite_ecef
 ):
     """
-    Get elevation of satellite relative for observing location
+    Get elevation of satellite relative for observing location [deg]
     """
     cdef double rho[3]
+    cdef double[::1] rho_v = rho
     cdef double range_, el, el_deg
-    ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho)
-    range_ = sqrt(rho[0]*rho[0] + rho[1]*rho[1] + rho[2]*rho[2])
-    el = asin(rho[2] / range_)
+    ecef_to_rhosez(location_lat_rad, location_lon_rad, location_ecef, satellite_ecef, rho_v)
+    range_ = sqrt(rho_v[0]*rho_v[0] + rho_v[1]*rho_v[1] + rho_v[2]*rho_v[2])
+    el = asin(rho_v[2] / range_)
     # convert radians to degrees
     el_deg = el * 180.0 / pi
     return el_deg
@@ -100,7 +118,7 @@ def ecef_to_llh(double[:] recef):
     Uses WGS84 constants
     Based on orbit_predictor.coordinate_systems.ecef_to_llh
     """
-     # WGS-84 ellipsoid parameters */
+    # WGS-84 ellipsoid parameters */
     cdef double a = 6378.1370
     cdef double b = 6356.752314
     cdef double p, thet, esq, epsq, lat, lon, h, n

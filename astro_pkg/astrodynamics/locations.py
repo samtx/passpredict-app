@@ -10,7 +10,7 @@ from orbit_predictor import coordinate_systems
 from .utils import get_timezone_from_latlon
 from .time import julian_date_from_datetime
 from .solar import sun_pos
-from ._rotations import razel
+from ._rotations import elevation_at
 
 
 class Location(LocationBase):
@@ -51,20 +51,30 @@ class Location(LocationBase):
         delta = now.utcoffset().total_seconds() / 3600
         return delta
 
-    def is_sunlit(self, dt: datetime):
+    def sun_elevation_jd(self, jd: float) -> float:
+        """
+        Computes elevation angle of sun relative to location. Returns degrees.
+        """
+        sun_recef = sun_pos(jd)
+        el = elevation_at(self.latitude_rad, self.longitude_rad, self.recef, sun_recef)
+        return el
+
+    def sun_elevation(self, dt: datetime) -> float:
+        """
+        Computes elevation angle of sun relative to location. Returns degrees.
+        """
         jd, jdfr = julian_date_from_datetime(dt)
         jd = jd + jdfr
-        sun_recef = sun_pos(jd)
-        _, _, el = razel(self.latitude_rad, self.longitude_rad, self.recef, sun_recef)
+        el = self.sun_elevation_jd(jd)
+        return el
 
-
-        # sun_rho = self.sun.rECEF[:,idx0:idxf+1] - self.rsiteECEF
-        # sun_sez = ecef2sez(sun_rho, self.location.lat, self.location.lon)
-        # sun_rng = np.linalg.norm(sun_sez, axis=0)
-        # sun_el = np.arcsin(sun_sez[2] / sun_rng) * RAD2DEG
-        # site_in_sunset = sun_el - sunset_el < 0
-        # site_in_sunset_idx = np.nonzero(site_in_sunset)[0]
-
+    def is_sunlit(self, dt: datetime) -> bool:
+        """
+        Computes elevation angle of sun relative to location
+        Returns True if elevation > -6 degrees
+        """
+        el = self.sun_elevation(dt)
+        return el > -6
 
     def __repr__(self):
         deg = u'\N{DEGREE SIGN}'

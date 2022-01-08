@@ -1,14 +1,21 @@
 from __future__ import annotations
 import datetime
 import typing
-from math import radians, degrees, pi
-from functools import cached_property
+from math import radians, degrees, pi, log10, sin, cos, acos
+from functools import cached_property, lru_cache
 from dataclasses import dataclass
+from enum import Enum
 
 import numpy as np
+from numpy.linalg import norm
 from orbit_predictor.predictors.pass_iterators import LocationPredictor
+from scipy.interpolate import CubicSpline
 
 from . import _rotations
+from .time import julian_date_from_datetime
+from ._time import jday2datetime
+from .solar import sun_pos
+from .constants import R_EARTH
 from .exceptions import NotReachable, PropagationError
 from .locations import Location
 from .utils import get_pass_detail_datetime_metadata
@@ -32,6 +39,12 @@ class PassPoint:
     brightness: float = None    # magnitude brightness
 
 
+class PassType(str, Enum):
+    daylight = 'daylight'
+    unlit = 'unlit'
+    visible = 'visible'
+
+
 class BasicPassInfo:
     """
     Holds basic pass information:
@@ -47,12 +60,18 @@ class BasicPassInfo:
         aos_dt: datetime.datetime,
         tca_dt: datetime.datetime,
         los_dt: datetime.datetime,
-        max_elevation: float
+        max_elevation: float,
+        type_: PassType = None,
+        vis_begin_dt: datetime.datetime = None,
+        vis_end_dt: datetime.datetime = None,
     ):
         self.aos_dt = aos_dt if aos_dt is not None else None
         self.tca_dt = tca_dt
         self.los_dt = los_dt if los_dt is not None else None
         self.max_elevation = max_elevation
+        self.type = type_
+        self.vis_begin_dt = vis_begin_dt
+        self.vis_end_dt = vis_end_dt
 
     @property
     def aos(self):
@@ -91,10 +110,13 @@ class PredictedPass:
     aos: PassPoint
     tca: PassPoint
     los: PassPoint
+    type: PassType = None
     azimuth: typing.Sequence[float] = None
     elevation: typing.Sequence[float] = None
     range: typing.Sequence[float] = None
     datetime: typing.Sequence[datetime.datetime] = None
+    vis_begin: PassPoint = None
+    vis_end: PassPoint = None
 
     @cached_property
     def midpoint(self):
@@ -234,7 +256,12 @@ class Observer(LocationPredictor):
         aos = self.point(basic_pass.aos_dt)
         tca = self.point(basic_pass.tca_dt)
         los = self.point(basic_pass.los_dt)
-        return PredictedPass(self.predictor.satid, self.location, aos, tca, los)
+        vis_begin = self.point(basic_pass.vis_begin_dt)
+        vis_end = self.point(basic_pass.vis_end_dt)
+        return PredictedPass(
+            self.predictor.satid, self.location, aos, tca, los, type=basic_pass.type,
+            vis_begin=vis_begin, vis_end=vis_end,
+        )
 
     def _find_nearest_descending(self, ascending_date):
         for candidate in self._sample_points(ascending_date):
@@ -263,7 +290,7 @@ class Observer(LocationPredictor):
         mid_left = self.midpoint(start, mid)
         return [end, mid, mid_right, mid_left]
 
-    def _refine_pass(self, ascending_date, descending_date):
+    def _refine_pass(self, ascending_date, descending_date) -> BasicPassInfo:
         tca_dt = self._find_tca(ascending_date, descending_date)
         elevation = self._elevation_at(tca_dt)
         if elevation > self.max_elevation_gt:
@@ -271,10 +298,56 @@ class Observer(LocationPredictor):
             los_dt = self._find_los(tca_dt)
         else:
             aos_dt = los_dt = None
+            return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation)
         # Find visual pass details
+        # First, get endpoints of when location is not sunlit
+        # Use cubic splines to find sun elevation
+        jd0 = sum(julian_date_from_datetime(aos_dt))
+        jdf = sum(julian_date_from_datetime(los_dt))
+        jd = np.linspace(jd0, jdf, 5)  # use 5 points for spline
+        sun_el_fn = lambda j: self.location.sun_elevation_jd(j) + 6
+        el = np.array([sun_el_fn(j) for j in jd])
+        if np.min(el) > 0:
+            # entire pass in sunlit
+            return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation, type_=PassType.daylight)
 
+        tol = 1/86400  # one second
+        # part of the pass is in darkness. Find new jd0, jdf
+        sun_el = CubicSpline(jd, el, bc_type='natural')
+        for root in sun_el.roots():
+            tmp1 = sun_el(root - tol)
+            tmp2 = sun_el(root + tol)
+            if tmp1 < tmp2:
+                # sun elevation is decreasing
+                jd0 = root
+            else:
+                jdf = root
+        # Now use jd0 and jdf to find when satellite is illuminated by sun
+        jd = np.linspace(jd0, jdf, 10)  # use 10 points for spline
+        illum_fn = lambda j: self.satellite.illumination_distance_jd(j) - R_EARTH
+        illum_pts = np.array([illum_fn(j) for j in jd])
+        if np.max(illum_pts) < 0:
+            # entire pass is in shadow
+            return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation, type_=PassType.unlit)
 
-        return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation)
+        # part of the pass is visible
+        illum = CubicSpline(jd, illum_pts, bc_type='natural')
+        for root in illum.roots():
+            tmp1 = illum(root - tol)
+            tmp2 = illum(root + tol)
+            if tmp1 < tmp2:
+                # satellite is going into shadow
+                jdf = root
+            else:
+                # satellite is coming out of shadow
+                jd0 = root
+        # Set visible start and end points for Pass
+        vis_begin_dt = jday2datetime(jd0)
+        vis_end_dt = jday2datetime(jdf)
+        return BasicPassInfo(
+            aos_dt, tca_dt, los_dt, elevation, type_=PassType.visible,
+            vis_begin_dt=vis_begin_dt, vis_end_dt=vis_end_dt,
+        )
 
     def _find_tca(self, ascending_date, descending_date):
         while not self._precision_reached(ascending_date, descending_date):
@@ -345,6 +418,20 @@ class Observer(LocationPredictor):
         )
         return RangeAzEl(range_, az, el)
 
+    @lru_cache(maxsize=64)
+    def range_at_jd(self, jd: float) -> float:
+        """
+        Get slant range magnitude from location to satellite [km]
+        """
+        satellite_ecef = self.predictor.get_only_position_jd(jd)
+        range_ = _rotations.range_at(
+            self.location.latitude_rad,
+            self.location.longitude_rad,
+            self.location.recef,
+            satellite_ecef,
+        )
+        return range_
+
     def point(self, datetime: datetime.datetime) -> PassPoint:
         """
         Get PassPoint with range, azimuth, and elevation data for datetime
@@ -352,3 +439,29 @@ class Observer(LocationPredictor):
         rnazel = self.razel(datetime)
         pt = PassPoint(datetime, rnazel.range, rnazel.az, rnazel.el)
         return pt
+
+    @lru_cache(maxsize=64)
+    def rho_jd(self, jd: float) -> np.ndarray:
+        """
+        Get topocentric ECEF vector from location to satellite
+        """
+        rho = np.empty(3, dtype=np.double)
+        sat_recef = self.predictor.get_only_position_jd(jd)
+        _rotations.ecef_to_rhosez(self.location.latitude_rad, self.location.longitude_rad, self.location.recef, sat_recef, rho)
+        return rho
+
+    def brightness(self, jd: float) -> float:
+        beta = pi - self.sat_location_sun_angle(jd)
+        range_ = norm(self.rho_jd(jd))
+        mag = self.satellite.intrinsic_mag - 15 + 5*log10(range_) - 2.5*log10(sin(beta) + (pi-beta)*cos(beta))
+        return mag
+
+    def sat_location_sun_angle(self, jd: float) -> float:
+        """
+        Get phase angle between location -- satellite -- sun
+        Return value in radians
+        """
+        sun_rho = sun_pos(jd) - self.location.recef
+        sat_rho = self.rho_jd(jd)
+        phase_angle = acos(np.dot(sat_rho, sun_rho) / (norm(sat_rho) * norm(sun_rho)))
+        return phase_angle

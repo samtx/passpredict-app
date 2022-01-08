@@ -2,22 +2,26 @@
 from zoneinfo import ZoneInfo
 
 import numpy as np
-from numpy.testing import assert_allclose
 import pytest
+from pytest import approx
 
 from astrodynamics import Location
 
+@pytest.mark.parametrize(
+    'lat, lon, h, ecef_expected, tol',
+    (
+        pytest.param(42.38, -71.13, 24, [1526.122, -4465.064, 4276.894], 1e-3, id="Vallado, Eg. 11-6, p.912"),
+        pytest.param(39.007, -104.883, 2187, [-1275.1219, -4797.9890, 3994.2975], 1e-4, id="Vallado, Eg. 7-1, p.431"),
+    )
+)
+def test_location_instance_ecef_position(lat, lon, h, ecef_expected, tol):
+    """
+    Test Location object to create ecef position vector
+    """
+    location = Location("", latitude_deg=lat, longitude_deg=lon, elevation_m=h)
+    ecef = location.recef
+    assert ecef == approx(ecef_expected, abs=tol)
 
-def test_location_instance_ecef_position():
-    """
-    Vallado, Eg. 11-6, p.912
-    """
-    phi = 42.38  # latitude, deg
-    lmda = -71.13  # longitude, deg
-    h = 24  # height, m
-    location = Location("", latitude_deg=phi, longitude_deg=lmda, elevation_m=h)
-    location_ecef = np.array([1526.122, -4465.064, 4276.894])
-    assert_allclose(location.position_ecef, location_ecef, atol=1e-3)
 
 @pytest.mark.parametrize(
     'name, lat, lon, zoneinfo_str, offset_tuple',

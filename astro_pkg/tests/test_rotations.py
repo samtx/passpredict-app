@@ -1,5 +1,5 @@
 # test rotations.py
-from math import radians, degrees
+from math import radians
 import numpy as np
 from numpy.linalg import norm
 from numpy.testing import assert_allclose
@@ -37,6 +37,11 @@ class TestECEFtoRazelRotations:
         lat, lon, location_ecef, satellite_ecef = self._setup(lat, lon, location_ecef, satellite_ecef)
         el = _rotations.elevation_at(lat, lon, location_ecef, satellite_ecef)
         assert el == approx(razel_expected.el, abs=1e-3)
+
+    def test_range_at(self, lat, lon, location_ecef, satellite_ecef, razel_expected):
+        lat, lon, location_ecef, satellite_ecef = self._setup(lat, lon, location_ecef, satellite_ecef)
+        range_ = _rotations.range_at(lat, lon, location_ecef, satellite_ecef)
+        assert range_ == approx(razel_expected.range, abs=1e-4)
 
 
 @pytest.mark.parametrize(

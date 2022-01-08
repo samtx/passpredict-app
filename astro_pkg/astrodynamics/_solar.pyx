@@ -63,7 +63,7 @@ cpdef sun_pos(double jd):
     return recef
 
 
-cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):
+cpdef double sun_sat_angle(double[::1] rsat, double[::1] rsun):
     """Compute the sun-satellite angle
     Args:
         rsat : satellite position vector in ECI coordinates
@@ -73,7 +73,7 @@ cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):
     References:
         Vallado, p. 912, Alg. 74
     """
-    cdef double[:] cprod
+    cdef double[::1] cprod
     cdef double numer, denom, sinzeta, zeta
 
     # cross product
@@ -90,7 +90,7 @@ cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):
     return zeta
 
 
-cpdef double sun_sat_orthogonal_distance(double[:] rsat, double zeta):
+cpdef double sun_sat_orthogonal_distance(double[::1] rsat, double zeta):
     """
     Args:
         rsat : satellite position vector in ECI coordinates
@@ -101,14 +101,19 @@ cpdef double sun_sat_orthogonal_distance(double[:] rsat, double zeta):
     return norm(rsat) * cos(zeta - pi*0.5)
 
 
-def is_sat_illuminated(rsat, rsun):
+cpdef double sat_illumination_distance(double[::1] rsat, double[::1] rsun):
     cdef double zeta, dist
     zeta = sun_sat_angle(rsat, rsun)
     dist = sun_sat_orthogonal_distance(rsat, zeta)
+    return dist
+
+
+def is_sat_illuminated(double[::1] rsat, double[::1] rsun):
+    dist = sat_illumination_distance(rsat, rsun)
     return dist > R_EARTH
 
 
-cdef double* cross(double[:] a, double[:] b):
+cdef double* cross(double[::1] a, double[::1] b):
     """
     Cross product between two vectors
     """
@@ -119,7 +124,7 @@ cdef double* cross(double[:] a, double[:] b):
     return axb
 
 
-cdef double norm(double[:] a):
+cdef double norm(double[::1] a):
     """
     L2 norm of vector
     """

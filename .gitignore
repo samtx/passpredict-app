@@ -1,3 +1,6 @@
+# IAU SOFA source code not in application
+sofa/
+!astro_pkg/astrodynamics/sofa
 
 # vscode
 *.code-workspace

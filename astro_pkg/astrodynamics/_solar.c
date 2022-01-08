@@ -1998,9 +1998,6 @@ static int __Pyx_ValidateAndInit_memviewslice(
 /* ObjectToMemviewSlice.proto */
 static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_dc_double(PyObject *, int writable_flag);
 
-/* ObjectToMemviewSlice.proto */
-static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *, int writable_flag);
-
 /* MemviewDtypeToObject.proto */
 static CYTHON_INLINE PyObject *__pyx_memview_get_double(const char *itemp);
 static CYTHON_INLINE int __pyx_memview_set_double(const char *itemp, PyObject *obj);
@@ -2207,6 +2204,7 @@ static void __pyx_f_13astrodynamics_6_solar_sun_pos_mod(double, __Pyx_memviewsli
 static PyObject *__pyx_f_13astrodynamics_6_solar_sun_pos(double, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_13astrodynamics_6_solar_sun_sat_angle(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_13astrodynamics_6_solar_sun_sat_orthogonal_distance(__Pyx_memviewslice, double, int __pyx_skip_dispatch); /*proto*/
+static double __pyx_f_13astrodynamics_6_solar_sat_illumination_distance(__Pyx_memviewslice, __Pyx_memviewslice, int __pyx_skip_dispatch); /*proto*/
 static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice); /*proto*/
 static struct __pyx_array_obj *__pyx_array_new(PyObject *, Py_ssize_t, char *, char *, char *); /*proto*/
 static void *__pyx_align_pointer(void *, size_t); /*proto*/
@@ -2476,7 +2474,8 @@ static PyObject *__pyx_pf_13astrodynamics_6_solar_sun_pos_mod(CYTHON_UNUSED PyOb
 static PyObject *__pyx_pf_13astrodynamics_6_solar_2sun_pos(CYTHON_UNUSED PyObject *__pyx_self, double __pyx_v_jd); /* proto */
 static PyObject *__pyx_pf_13astrodynamics_6_solar_4sun_sat_angle(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun); /* proto */
 static PyObject *__pyx_pf_13astrodynamics_6_solar_6sun_sat_orthogonal_distance(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, double __pyx_v_zeta); /* proto */
-static PyObject *__pyx_pf_13astrodynamics_6_solar_8is_sat_illuminated(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_rsat, PyObject *__pyx_v_rsun); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_6_solar_8sat_illumination_distance(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun); /* proto */
+static PyObject *__pyx_pf_13astrodynamics_6_solar_10is_sat_illuminated(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -3213,7 +3212,7 @@ static PyObject *__pyx_pf_13astrodynamics_6_solar_2sun_pos(CYTHON_UNUSED PyObjec
 /* "astrodynamics/_solar.pyx":66
  * 
  * 
- * cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):             # <<<<<<<<<<<<<<
+ * cpdef double sun_sat_angle(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
  *     """Compute the sun-satellite angle
  *     Args:
  */
@@ -3307,7 +3306,7 @@ static double __pyx_f_13astrodynamics_6_solar_sun_sat_angle(__Pyx_memviewslice _
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 83, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_to_MemoryviewSlice_dc_double(__pyx_t_1, PyBUF_WRITABLE); if (unlikely(!__pyx_t_8.memview)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_cprod = __pyx_t_8;
   __pyx_t_8.memview = NULL;
@@ -3402,7 +3401,7 @@ static double __pyx_f_13astrodynamics_6_solar_sun_sat_angle(__Pyx_memviewslice _
   /* "astrodynamics/_solar.pyx":66
  * 
  * 
- * cpdef double sun_sat_angle(double[:] rsat, double[:] rsun):             # <<<<<<<<<<<<<<
+ * cpdef double sun_sat_angle(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
  *     """Compute the sun-satellite angle
  *     Args:
  */
@@ -3471,8 +3470,8 @@ static PyObject *__pyx_pw_13astrodynamics_6_solar_5sun_sat_angle(PyObject *__pyx
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
-    __pyx_v_rsun = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsun.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
+    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
+    __pyx_v_rsun = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsun.memview)) __PYX_ERR(0, 66, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
@@ -3522,7 +3521,7 @@ static PyObject *__pyx_pf_13astrodynamics_6_solar_4sun_sat_angle(CYTHON_UNUSED P
 /* "astrodynamics/_solar.pyx":93
  * 
  * 
- * cpdef double sun_sat_orthogonal_distance(double[:] rsat, double zeta):             # <<<<<<<<<<<<<<
+ * cpdef double sun_sat_orthogonal_distance(double[::1] rsat, double zeta):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
  */
@@ -3546,7 +3545,7 @@ static double __pyx_f_13astrodynamics_6_solar_sun_sat_orthogonal_distance(__Pyx_
   /* "astrodynamics/_solar.pyx":93
  * 
  * 
- * cpdef double sun_sat_orthogonal_distance(double[:] rsat, double zeta):             # <<<<<<<<<<<<<<
+ * cpdef double sun_sat_orthogonal_distance(double[::1] rsat, double zeta):             # <<<<<<<<<<<<<<
  *     """
  *     Args:
  */
@@ -3604,7 +3603,7 @@ static PyObject *__pyx_pw_13astrodynamics_6_solar_7sun_sat_orthogonal_distance(P
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_ds_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 93, __pyx_L3_error)
+    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 93, __pyx_L3_error)
     __pyx_v_zeta = __pyx_PyFloat_AsDouble(values[1]); if (unlikely((__pyx_v_zeta == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 93, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
@@ -3653,17 +3652,169 @@ static PyObject *__pyx_pf_13astrodynamics_6_solar_6sun_sat_orthogonal_distance(C
 /* "astrodynamics/_solar.pyx":104
  * 
  * 
- * def is_sat_illuminated(rsat, rsun):             # <<<<<<<<<<<<<<
+ * cpdef double sat_illumination_distance(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
  *     cdef double zeta, dist
  *     zeta = sun_sat_angle(rsat, rsun)
  */
 
+static PyObject *__pyx_pw_13astrodynamics_6_solar_9sat_illumination_distance(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static double __pyx_f_13astrodynamics_6_solar_sat_illumination_distance(__Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun, CYTHON_UNUSED int __pyx_skip_dispatch) {
+  double __pyx_v_zeta;
+  double __pyx_v_dist;
+  double __pyx_r;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("sat_illumination_distance", 0);
+
+  /* "astrodynamics/_solar.pyx":106
+ * cpdef double sat_illumination_distance(double[::1] rsat, double[::1] rsun):
+ *     cdef double zeta, dist
+ *     zeta = sun_sat_angle(rsat, rsun)             # <<<<<<<<<<<<<<
+ *     dist = sun_sat_orthogonal_distance(rsat, zeta)
+ *     return dist
+ */
+  __pyx_v_zeta = __pyx_f_13astrodynamics_6_solar_sun_sat_angle(__pyx_v_rsat, __pyx_v_rsun, 0);
+
+  /* "astrodynamics/_solar.pyx":107
+ *     cdef double zeta, dist
+ *     zeta = sun_sat_angle(rsat, rsun)
+ *     dist = sun_sat_orthogonal_distance(rsat, zeta)             # <<<<<<<<<<<<<<
+ *     return dist
+ * 
+ */
+  __pyx_v_dist = __pyx_f_13astrodynamics_6_solar_sun_sat_orthogonal_distance(__pyx_v_rsat, __pyx_v_zeta, 0);
+
+  /* "astrodynamics/_solar.pyx":108
+ *     zeta = sun_sat_angle(rsat, rsun)
+ *     dist = sun_sat_orthogonal_distance(rsat, zeta)
+ *     return dist             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+  __pyx_r = __pyx_v_dist;
+  goto __pyx_L0;
+
+  /* "astrodynamics/_solar.pyx":104
+ * 
+ * 
+ * cpdef double sat_illumination_distance(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
+ *     cdef double zeta, dist
+ *     zeta = sun_sat_angle(rsat, rsun)
+ */
+
+  /* function exit code */
+  __pyx_L0:;
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
 /* Python wrapper */
-static PyObject *__pyx_pw_13astrodynamics_6_solar_9is_sat_illuminated(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_13astrodynamics_6_solar_9is_sat_illuminated = {"is_sat_illuminated", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_6_solar_9is_sat_illuminated, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_13astrodynamics_6_solar_9is_sat_illuminated(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
-  PyObject *__pyx_v_rsat = 0;
-  PyObject *__pyx_v_rsun = 0;
+static PyObject *__pyx_pw_13astrodynamics_6_solar_9sat_illumination_distance(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyObject *__pyx_pw_13astrodynamics_6_solar_9sat_illumination_distance(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_rsat = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_rsun = { 0, 0, { 0 }, { 0 }, { 0 } };
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  PyObject *__pyx_r = 0;
+  __Pyx_RefNannyDeclarations
+  __Pyx_RefNannySetupContext("sat_illumination_distance (wrapper)", 0);
+  {
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_rsat,&__pyx_n_s_rsun,0};
+    PyObject* values[2] = {0,0};
+    if (unlikely(__pyx_kwds)) {
+      Py_ssize_t kw_args;
+      const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
+      switch (pos_args) {
+        case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        CYTHON_FALLTHROUGH;
+        case  1: values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        CYTHON_FALLTHROUGH;
+        case  0: break;
+        default: goto __pyx_L5_argtuple_error;
+      }
+      kw_args = PyDict_Size(__pyx_kwds);
+      switch (pos_args) {
+        case  0:
+        if (likely((values[0] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rsat)) != 0)) kw_args--;
+        else goto __pyx_L5_argtuple_error;
+        CYTHON_FALLTHROUGH;
+        case  1:
+        if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rsun)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("sat_illumination_distance", 1, 2, 2, 1); __PYX_ERR(0, 104, __pyx_L3_error)
+        }
+      }
+      if (unlikely(kw_args > 0)) {
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "sat_illumination_distance") < 0)) __PYX_ERR(0, 104, __pyx_L3_error)
+      }
+    } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
+      goto __pyx_L5_argtuple_error;
+    } else {
+      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+    }
+    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 104, __pyx_L3_error)
+    __pyx_v_rsun = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsun.memview)) __PYX_ERR(0, 104, __pyx_L3_error)
+  }
+  goto __pyx_L4_argument_unpacking_done;
+  __pyx_L5_argtuple_error:;
+  __Pyx_RaiseArgtupleInvalid("sat_illumination_distance", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 104, __pyx_L3_error)
+  __pyx_L3_error:;
+  __Pyx_AddTraceback("astrodynamics._solar.sat_illumination_distance", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_RefNannyFinishContext();
+  return NULL;
+  __pyx_L4_argument_unpacking_done:;
+  __pyx_r = __pyx_pf_13astrodynamics_6_solar_8sat_illumination_distance(__pyx_self, __pyx_v_rsat, __pyx_v_rsun);
+
+  /* function exit code */
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+static PyObject *__pyx_pf_13astrodynamics_6_solar_8sat_illumination_distance(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun) {
+  PyObject *__pyx_r = NULL;
+  __Pyx_RefNannyDeclarations
+  PyObject *__pyx_t_1 = NULL;
+  int __pyx_lineno = 0;
+  const char *__pyx_filename = NULL;
+  int __pyx_clineno = 0;
+  __Pyx_RefNannySetupContext("sat_illumination_distance", 0);
+  __Pyx_XDECREF(__pyx_r);
+  if (unlikely(!__pyx_v_rsat.memview)) { __Pyx_RaiseUnboundLocalError("rsat"); __PYX_ERR(0, 104, __pyx_L1_error) }
+  if (unlikely(!__pyx_v_rsun.memview)) { __Pyx_RaiseUnboundLocalError("rsun"); __PYX_ERR(0, 104, __pyx_L1_error) }
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_f_13astrodynamics_6_solar_sat_illumination_distance(__pyx_v_rsat, __pyx_v_rsun, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __pyx_r = __pyx_t_1;
+  __pyx_t_1 = 0;
+  goto __pyx_L0;
+
+  /* function exit code */
+  __pyx_L1_error:;
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_AddTraceback("astrodynamics._solar.sat_illumination_distance", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __pyx_r = NULL;
+  __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_rsat, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_rsun, 1);
+  __Pyx_XGIVEREF(__pyx_r);
+  __Pyx_RefNannyFinishContext();
+  return __pyx_r;
+}
+
+/* "astrodynamics/_solar.pyx":111
+ * 
+ * 
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
+ *     dist = sat_illumination_distance(rsat, rsun)
+ *     return dist > R_EARTH
+ */
+
+/* Python wrapper */
+static PyObject *__pyx_pw_13astrodynamics_6_solar_11is_sat_illuminated(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_13astrodynamics_6_solar_11is_sat_illuminated = {"is_sat_illuminated", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_6_solar_11is_sat_illuminated, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_13astrodynamics_6_solar_11is_sat_illuminated(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+  __Pyx_memviewslice __pyx_v_rsat = { 0, 0, { 0 }, { 0 }, { 0 } };
+  __Pyx_memviewslice __pyx_v_rsun = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3693,11 +3844,11 @@ static PyObject *__pyx_pw_13astrodynamics_6_solar_9is_sat_illuminated(PyObject *
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_rsun)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("is_sat_illuminated", 1, 2, 2, 1); __PYX_ERR(0, 104, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("is_sat_illuminated", 1, 2, 2, 1); __PYX_ERR(0, 111, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "is_sat_illuminated") < 0)) __PYX_ERR(0, 104, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "is_sat_illuminated") < 0)) __PYX_ERR(0, 111, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -3705,115 +3856,91 @@ static PyObject *__pyx_pw_13astrodynamics_6_solar_9is_sat_illuminated(PyObject *
       values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
       values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
     }
-    __pyx_v_rsat = values[0];
-    __pyx_v_rsun = values[1];
+    __pyx_v_rsat = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[0], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsat.memview)) __PYX_ERR(0, 111, __pyx_L3_error)
+    __pyx_v_rsun = __Pyx_PyObject_to_MemoryviewSlice_dc_double(values[1], PyBUF_WRITABLE); if (unlikely(!__pyx_v_rsun.memview)) __PYX_ERR(0, 111, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("is_sat_illuminated", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 104, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("is_sat_illuminated", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 111, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("astrodynamics._solar.is_sat_illuminated", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_13astrodynamics_6_solar_8is_sat_illuminated(__pyx_self, __pyx_v_rsat, __pyx_v_rsun);
+  __pyx_r = __pyx_pf_13astrodynamics_6_solar_10is_sat_illuminated(__pyx_self, __pyx_v_rsat, __pyx_v_rsun);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_13astrodynamics_6_solar_8is_sat_illuminated(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_rsat, PyObject *__pyx_v_rsun) {
-  double __pyx_v_zeta;
+static PyObject *__pyx_pf_13astrodynamics_6_solar_10is_sat_illuminated(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_rsat, __Pyx_memviewslice __pyx_v_rsun) {
   double __pyx_v_dist;
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
-  __Pyx_memviewslice __pyx_t_1 = { 0, 0, { 0 }, { 0 }, { 0 } };
-  __Pyx_memviewslice __pyx_t_2 = { 0, 0, { 0 }, { 0 }, { 0 } };
+  PyObject *__pyx_t_1 = NULL;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
-  PyObject *__pyx_t_4 = NULL;
-  PyObject *__pyx_t_5 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("is_sat_illuminated", 0);
 
-  /* "astrodynamics/_solar.pyx":106
- * def is_sat_illuminated(rsat, rsun):
- *     cdef double zeta, dist
- *     zeta = sun_sat_angle(rsat, rsun)             # <<<<<<<<<<<<<<
- *     dist = sun_sat_orthogonal_distance(rsat, zeta)
- *     return dist > R_EARTH
- */
-  __pyx_t_1 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_rsat, PyBUF_WRITABLE); if (unlikely(!__pyx_t_1.memview)) __PYX_ERR(0, 106, __pyx_L1_error)
-  __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_rsun, PyBUF_WRITABLE); if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 106, __pyx_L1_error)
-  __pyx_v_zeta = __pyx_f_13astrodynamics_6_solar_sun_sat_angle(__pyx_t_1, __pyx_t_2, 0);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
-  __pyx_t_1.memview = NULL;
-  __pyx_t_1.data = NULL;
-  __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
-  __pyx_t_2.memview = NULL;
-  __pyx_t_2.data = NULL;
-
-  /* "astrodynamics/_solar.pyx":107
- *     cdef double zeta, dist
- *     zeta = sun_sat_angle(rsat, rsun)
- *     dist = sun_sat_orthogonal_distance(rsat, zeta)             # <<<<<<<<<<<<<<
+  /* "astrodynamics/_solar.pyx":112
+ * 
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):
+ *     dist = sat_illumination_distance(rsat, rsun)             # <<<<<<<<<<<<<<
  *     return dist > R_EARTH
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_to_MemoryviewSlice_ds_double(__pyx_v_rsat, PyBUF_WRITABLE); if (unlikely(!__pyx_t_2.memview)) __PYX_ERR(0, 107, __pyx_L1_error)
-  __pyx_v_dist = __pyx_f_13astrodynamics_6_solar_sun_sat_orthogonal_distance(__pyx_t_2, __pyx_v_zeta, 0);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
-  __pyx_t_2.memview = NULL;
-  __pyx_t_2.data = NULL;
+  __pyx_v_dist = __pyx_f_13astrodynamics_6_solar_sat_illumination_distance(__pyx_v_rsat, __pyx_v_rsun, 0);
 
-  /* "astrodynamics/_solar.pyx":108
- *     zeta = sun_sat_angle(rsat, rsun)
- *     dist = sun_sat_orthogonal_distance(rsat, zeta)
+  /* "astrodynamics/_solar.pyx":113
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):
+ *     dist = sat_illumination_distance(rsat, rsun)
  *     return dist > R_EARTH             # <<<<<<<<<<<<<<
  * 
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_dist); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  __Pyx_GetModuleGlobalName(__pyx_t_4, __pyx_n_s_R_EARTH); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyObject_RichCompare(__pyx_t_3, __pyx_t_4, Py_GT); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_r = __pyx_t_5;
-  __pyx_t_5 = 0;
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_dist); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  __Pyx_GetModuleGlobalName(__pyx_t_2, __pyx_n_s_R_EARTH); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_3 = PyObject_RichCompare(__pyx_t_1, __pyx_t_2, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 113, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_r = __pyx_t_3;
+  __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "astrodynamics/_solar.pyx":104
+  /* "astrodynamics/_solar.pyx":111
  * 
  * 
- * def is_sat_illuminated(rsat, rsun):             # <<<<<<<<<<<<<<
- *     cdef double zeta, dist
- *     zeta = sun_sat_angle(rsat, rsun)
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
+ *     dist = sat_illumination_distance(rsat, rsun)
+ *     return dist > R_EARTH
  */
 
   /* function exit code */
   __pyx_L1_error:;
-  __PYX_XDEC_MEMVIEW(&__pyx_t_1, 1);
-  __PYX_XDEC_MEMVIEW(&__pyx_t_2, 1);
+  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
-  __Pyx_XDECREF(__pyx_t_4);
-  __Pyx_XDECREF(__pyx_t_5);
   __Pyx_AddTraceback("astrodynamics._solar.is_sat_illuminated", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
+  __PYX_XDEC_MEMVIEW(&__pyx_v_rsat, 1);
+  __PYX_XDEC_MEMVIEW(&__pyx_v_rsun, 1);
   __Pyx_XGIVEREF(__pyx_r);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "astrodynamics/_solar.pyx":111
+/* "astrodynamics/_solar.pyx":116
  * 
  * 
- * cdef double* cross(double[:] a, double[:] b):             # <<<<<<<<<<<<<<
+ * cdef double* cross(double[::1] a, double[::1] b):             # <<<<<<<<<<<<<<
  *     """
  *     Cross product between two vectors
  */
@@ -3832,7 +3959,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("cross", 0);
 
-  /* "astrodynamics/_solar.pyx":116
+  /* "astrodynamics/_solar.pyx":121
  *     """
  *     cdef double[3] axb
  *     axb[0] = a[1]*b[2] - a[2]*b[1]             # <<<<<<<<<<<<<<
@@ -3847,7 +3974,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_1 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 116, __pyx_L1_error)
+    __PYX_ERR(0, 121, __pyx_L1_error)
   }
   __pyx_t_3 = 2;
   __pyx_t_2 = -1;
@@ -3857,7 +3984,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_3 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 116, __pyx_L1_error)
+    __PYX_ERR(0, 121, __pyx_L1_error)
   }
   __pyx_t_4 = 2;
   __pyx_t_2 = -1;
@@ -3867,7 +3994,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_4 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 116, __pyx_L1_error)
+    __PYX_ERR(0, 121, __pyx_L1_error)
   }
   __pyx_t_5 = 1;
   __pyx_t_2 = -1;
@@ -3877,11 +4004,11 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_5 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 116, __pyx_L1_error)
+    __PYX_ERR(0, 121, __pyx_L1_error)
   }
-  (__pyx_v_axb[0]) = (((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_1 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_3 * __pyx_v_b.strides[0]) )))) - ((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_4 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_5 * __pyx_v_b.strides[0]) )))));
+  (__pyx_v_axb[0]) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_1)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_3)) )))) - ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_4)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_5)) )))));
 
-  /* "astrodynamics/_solar.pyx":117
+  /* "astrodynamics/_solar.pyx":122
  *     cdef double[3] axb
  *     axb[0] = a[1]*b[2] - a[2]*b[1]
  *     axb[1] = a[2]*b[0] - a[0]*b[2]             # <<<<<<<<<<<<<<
@@ -3896,7 +4023,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_5 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 117, __pyx_L1_error)
+    __PYX_ERR(0, 122, __pyx_L1_error)
   }
   __pyx_t_4 = 0;
   __pyx_t_2 = -1;
@@ -3906,7 +4033,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_4 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 117, __pyx_L1_error)
+    __PYX_ERR(0, 122, __pyx_L1_error)
   }
   __pyx_t_3 = 0;
   __pyx_t_2 = -1;
@@ -3916,7 +4043,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_3 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 117, __pyx_L1_error)
+    __PYX_ERR(0, 122, __pyx_L1_error)
   }
   __pyx_t_1 = 2;
   __pyx_t_2 = -1;
@@ -3926,11 +4053,11 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_1 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 117, __pyx_L1_error)
+    __PYX_ERR(0, 122, __pyx_L1_error)
   }
-  (__pyx_v_axb[1]) = (((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_5 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_4 * __pyx_v_b.strides[0]) )))) - ((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_3 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_1 * __pyx_v_b.strides[0]) )))));
+  (__pyx_v_axb[1]) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_5)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_4)) )))) - ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_3)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_1)) )))));
 
-  /* "astrodynamics/_solar.pyx":118
+  /* "astrodynamics/_solar.pyx":123
  *     axb[0] = a[1]*b[2] - a[2]*b[1]
  *     axb[1] = a[2]*b[0] - a[0]*b[2]
  *     axb[2] = a[0]*b[1] - a[1]*b[0]             # <<<<<<<<<<<<<<
@@ -3945,7 +4072,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_1 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 118, __pyx_L1_error)
+    __PYX_ERR(0, 123, __pyx_L1_error)
   }
   __pyx_t_3 = 1;
   __pyx_t_2 = -1;
@@ -3955,7 +4082,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_3 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 118, __pyx_L1_error)
+    __PYX_ERR(0, 123, __pyx_L1_error)
   }
   __pyx_t_4 = 1;
   __pyx_t_2 = -1;
@@ -3965,7 +4092,7 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_4 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 118, __pyx_L1_error)
+    __PYX_ERR(0, 123, __pyx_L1_error)
   }
   __pyx_t_5 = 0;
   __pyx_t_2 = -1;
@@ -3975,11 +4102,11 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   } else if (unlikely(__pyx_t_5 >= __pyx_v_b.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 118, __pyx_L1_error)
+    __PYX_ERR(0, 123, __pyx_L1_error)
   }
-  (__pyx_v_axb[2]) = (((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_1 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_3 * __pyx_v_b.strides[0]) )))) - ((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_4 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_b.data + __pyx_t_5 * __pyx_v_b.strides[0]) )))));
+  (__pyx_v_axb[2]) = (((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_1)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_3)) )))) - ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_4)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_b.data) + __pyx_t_5)) )))));
 
-  /* "astrodynamics/_solar.pyx":119
+  /* "astrodynamics/_solar.pyx":124
  *     axb[1] = a[2]*b[0] - a[0]*b[2]
  *     axb[2] = a[0]*b[1] - a[1]*b[0]
  *     return axb             # <<<<<<<<<<<<<<
@@ -3989,10 +4116,10 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   __pyx_r = __pyx_v_axb;
   goto __pyx_L0;
 
-  /* "astrodynamics/_solar.pyx":111
+  /* "astrodynamics/_solar.pyx":116
  * 
  * 
- * cdef double* cross(double[:] a, double[:] b):             # <<<<<<<<<<<<<<
+ * cdef double* cross(double[::1] a, double[::1] b):             # <<<<<<<<<<<<<<
  *     """
  *     Cross product between two vectors
  */
@@ -4006,10 +4133,10 @@ static double *__pyx_f_13astrodynamics_6_solar_cross(__Pyx_memviewslice __pyx_v_
   return __pyx_r;
 }
 
-/* "astrodynamics/_solar.pyx":122
+/* "astrodynamics/_solar.pyx":127
  * 
  * 
- * cdef double norm(double[:] a):             # <<<<<<<<<<<<<<
+ * cdef double norm(double[::1] a):             # <<<<<<<<<<<<<<
  *     """
  *     L2 norm of vector
  */
@@ -4030,7 +4157,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("norm", 0);
 
-  /* "astrodynamics/_solar.pyx":127
+  /* "astrodynamics/_solar.pyx":132
  *     """
  *     cdef double n
  *     n = sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])             # <<<<<<<<<<<<<<
@@ -4044,7 +4171,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_1 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_t_3 = 0;
   __pyx_t_2 = -1;
@@ -4054,7 +4181,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_3 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_t_4 = 1;
   __pyx_t_2 = -1;
@@ -4064,7 +4191,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_4 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_t_5 = 1;
   __pyx_t_2 = -1;
@@ -4074,7 +4201,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_5 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_t_6 = 2;
   __pyx_t_2 = -1;
@@ -4084,7 +4211,7 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_6 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
   __pyx_t_7 = 2;
   __pyx_t_2 = -1;
@@ -4094,11 +4221,11 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   } else if (unlikely(__pyx_t_7 >= __pyx_v_a.shape[0])) __pyx_t_2 = 0;
   if (unlikely(__pyx_t_2 != -1)) {
     __Pyx_RaiseBufferIndexError(__pyx_t_2);
-    __PYX_ERR(0, 127, __pyx_L1_error)
+    __PYX_ERR(0, 132, __pyx_L1_error)
   }
-  __pyx_v_n = sqrt(((((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_1 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_3 * __pyx_v_a.strides[0]) )))) + ((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_4 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_5 * __pyx_v_a.strides[0]) ))))) + ((*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_6 * __pyx_v_a.strides[0]) ))) * (*((double *) ( /* dim=0 */ (__pyx_v_a.data + __pyx_t_7 * __pyx_v_a.strides[0]) ))))));
+  __pyx_v_n = sqrt(((((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_1)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_3)) )))) + ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_4)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_5)) ))))) + ((*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_6)) ))) * (*((double *) ( /* dim=0 */ ((char *) (((double *) __pyx_v_a.data) + __pyx_t_7)) ))))));
 
-  /* "astrodynamics/_solar.pyx":128
+  /* "astrodynamics/_solar.pyx":133
  *     cdef double n
  *     n = sqrt(a[0]*a[0] + a[1]*a[1] + a[2]*a[2])
  *     return n             # <<<<<<<<<<<<<<
@@ -4106,10 +4233,10 @@ static double __pyx_f_13astrodynamics_6_solar_norm(__Pyx_memviewslice __pyx_v_a)
   __pyx_r = __pyx_v_n;
   goto __pyx_L0;
 
-  /* "astrodynamics/_solar.pyx":122
+  /* "astrodynamics/_solar.pyx":127
  * 
  * 
- * cdef double norm(double[:] a):             # <<<<<<<<<<<<<<
+ * cdef double norm(double[::1] a):             # <<<<<<<<<<<<<<
  *     """
  *     L2 norm of vector
  */
@@ -18878,6 +19005,7 @@ static PyMethodDef __pyx_methods[] = {
   {"sun_pos", (PyCFunction)__pyx_pw_13astrodynamics_6_solar_3sun_pos, METH_O, __pyx_doc_13astrodynamics_6_solar_2sun_pos},
   {"sun_sat_angle", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_6_solar_5sun_sat_angle, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_6_solar_4sun_sat_angle},
   {"sun_sat_orthogonal_distance", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_6_solar_7sun_sat_orthogonal_distance, METH_VARARGS|METH_KEYWORDS, __pyx_doc_13astrodynamics_6_solar_6sun_sat_orthogonal_distance},
+  {"sat_illumination_distance", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_13astrodynamics_6_solar_9sat_illumination_distance, METH_VARARGS|METH_KEYWORDS, 0},
   {0, 0, 0, 0}
 };
 
@@ -19278,17 +19406,17 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
-  /* "astrodynamics/_solar.pyx":104
+  /* "astrodynamics/_solar.pyx":111
  * 
  * 
- * def is_sat_illuminated(rsat, rsun):             # <<<<<<<<<<<<<<
- *     cdef double zeta, dist
- *     zeta = sun_sat_angle(rsat, rsun)
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
+ *     dist = sat_illumination_distance(rsat, rsun)
+ *     return dist > R_EARTH
  */
-  __pyx_tuple__22 = PyTuple_Pack(4, __pyx_n_s_rsat, __pyx_n_s_rsun, __pyx_n_s_zeta, __pyx_n_s_dist); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(3, __pyx_n_s_rsat, __pyx_n_s_rsun, __pyx_n_s_dist); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__solar_pyx, __pyx_n_s_is_sat_illuminated, 104, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(2, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_astrodynamics__solar_pyx, __pyx_n_s_is_sat_illuminated, 111, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 111, __pyx_L1_error)
 
   /* "View.MemoryView":286
  *         return self.name
@@ -19809,16 +19937,16 @@ if (!__Pyx_RefNanny) {
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "astrodynamics/_solar.pyx":104
+  /* "astrodynamics/_solar.pyx":111
  * 
  * 
- * def is_sat_illuminated(rsat, rsun):             # <<<<<<<<<<<<<<
- *     cdef double zeta, dist
- *     zeta = sun_sat_angle(rsat, rsun)
+ * def is_sat_illuminated(double[::1] rsat, double[::1] rsun):             # <<<<<<<<<<<<<<
+ *     dist = sat_illumination_distance(rsat, rsun)
+ *     return dist > R_EARTH
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_6_solar_9is_sat_illuminated, NULL, __pyx_n_s_astrodynamics__solar); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 104, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_13astrodynamics_6_solar_11is_sat_illuminated, NULL, __pyx_n_s_astrodynamics__solar); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_is_sat_illuminated, __pyx_t_1) < 0) __PYX_ERR(0, 104, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_is_sat_illuminated, __pyx_t_1) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "astrodynamics/_solar.pyx":1
@@ -23241,29 +23369,6 @@ no_fail:
     }
     retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, __Pyx_IS_C_CONTIG,
                                                  (PyBUF_C_CONTIGUOUS | PyBUF_FORMAT) | writable_flag, 1,
-                                                 &__Pyx_TypeInfo_double, stack,
-                                                 &result, obj);
-    if (unlikely(retcode == -1))
-        goto __pyx_fail;
-    return result;
-__pyx_fail:
-    result.memview = NULL;
-    result.data = NULL;
-    return result;
-}
-
-/* ObjectToMemviewSlice */
-    static CYTHON_INLINE __Pyx_memviewslice __Pyx_PyObject_to_MemoryviewSlice_ds_double(PyObject *obj, int writable_flag) {
-    __Pyx_memviewslice result = { 0, 0, { 0 }, { 0 }, { 0 } };
-    __Pyx_BufFmt_StackElem stack[1];
-    int axes_specs[] = { (__Pyx_MEMVIEW_DIRECT | __Pyx_MEMVIEW_STRIDED) };
-    int retcode;
-    if (obj == Py_None) {
-        result.memview = (struct __pyx_memoryview_obj *) Py_None;
-        return result;
-    }
-    retcode = __Pyx_ValidateAndInit_memviewslice(axes_specs, 0,
-                                                 PyBUF_RECORDS_RO | writable_flag, 1,
                                                  &__Pyx_TypeInfo_double, stack,
                                                  &result, obj);
     if (unlikely(retcode == -1))

@@ -1,5 +1,6 @@
 sgp4>=2.12
 Cython
 numpy>=1.20
+scipy>=1.7.3
 orbit-predictor
 timezonefinder

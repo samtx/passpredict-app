@@ -96,8 +96,22 @@ def test_sun_location_elevation_datetime_from_orbitpredictor(hr_dt, el_expected)
     """
     location = Location("", 0, 0, 0)
     d = datetime.datetime(2016, 9, 8) + datetime.timedelta(hours=hr_dt)
-    jd, jdfr = julian_date_from_datetime(d)
-    jd = jd + jdfr
-    sun_recef = _solar.sun_pos(jd)
-    el = _rotations.elevation_at(location.latitude_rad, location.longitude_rad, location.recef, sun_recef)
+    el = location.sun_elevation(d)
     assert el == approx(el_expected, abs=0.25)
+
+
+@pytest.mark.parametrize(
+    'hr_dt, is_sunlit_expected',
+    [
+        (16, True),
+        (19, False),
+    ]
+)
+def test_location_is_sunlit(hr_dt, is_sunlit_expected):
+    """
+    Use test case from orbit predictor
+    """
+    location = Location("", 0, 0, 0)
+    d = datetime.datetime(2016, 9, 8) + datetime.timedelta(hours=hr_dt)
+    is_sunlit = location.is_sunlit(d)
+    assert is_sunlit == approx(is_sunlit_expected)
