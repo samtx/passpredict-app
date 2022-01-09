@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections import defaultdict
 import datetime
 import typing
 from math import radians, degrees, pi, log10, sin, cos, acos
@@ -117,6 +118,7 @@ class PredictedPass:
     datetime: typing.Sequence[datetime.datetime] = None
     vis_begin: PassPoint = None
     vis_end: PassPoint = None
+    brightness: float = None
 
     @cached_property
     def midpoint(self):
@@ -253,15 +255,20 @@ class Observer(LocationPredictor):
 
     def _build_predicted_pass(self, basic_pass: BasicPassInfo):
         """Returns a classic predicted pass"""
-        aos = self.point(basic_pass.aos_dt)
-        tca = self.point(basic_pass.tca_dt)
-        los = self.point(basic_pass.los_dt)
-        vis_begin = self.point(basic_pass.vis_begin_dt)
-        vis_end = self.point(basic_pass.vis_end_dt)
-        return PredictedPass(
-            self.predictor.satid, self.location, aos, tca, los, type=basic_pass.type,
-            vis_begin=vis_begin, vis_end=vis_end,
-        )
+        data = defaultdict()
+        data.update({
+            'satid': self.predictor.satid,
+            'location': self.location,
+            'type': basic_pass.type,
+            'aos': self.point(basic_pass.aos_dt),
+            'tca': self.point(basic_pass.tca_dt),
+            'los': self.point(basic_pass.los_dt),
+        })
+        if basic_pass.vis_begin_dt:
+            data['vis_begin'] = self.point(basic_pass.vis_begin_dt)
+        if basic_pass.vis_end_dt:
+            data['vis_end'] = self.point(basic_pass.vis_end_dt)
+        return PredictedPass(**data)
 
     def _find_nearest_descending(self, ascending_date):
         for candidate in self._sample_points(ascending_date):
@@ -314,7 +321,7 @@ class Observer(LocationPredictor):
         tol = 1/86400  # one second
         # part of the pass is in darkness. Find new jd0, jdf
         sun_el = CubicSpline(jd, el, bc_type='natural')
-        for root in sun_el.roots():
+        for root in sun_el.roots(extrapolate=False):
             tmp1 = sun_el(root - tol)
             tmp2 = sun_el(root + tol)
             if tmp1 < tmp2:
@@ -332,7 +339,7 @@ class Observer(LocationPredictor):
 
         # part of the pass is visible
         illum = CubicSpline(jd, illum_pts, bc_type='natural')
-        for root in illum.roots():
+        for root in illum.roots(extrapolate=False):
             tmp1 = illum(root - tol)
             tmp2 = illum(root + tol)
             if tmp1 < tmp2:
