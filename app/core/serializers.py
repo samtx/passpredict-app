@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import List, Union
 from zoneinfo import ZoneInfo
+from collections import defaultdict
 
 from astrodynamics import PredictedPass
 
@@ -69,18 +70,26 @@ def overpass_serializer(
     """ Serialize individual overpass data """
     overpasses = []
     for pass_ in pass_list:
+        data = defaultdict()
         aos = passpoint_serializer(pass_.aos, tz)
         tca = passpoint_serializer(pass_.tca, tz)
         los = passpoint_serializer(pass_.los, tz)
         max_elevation = max((aos.el, tca.el, los.el))
-        overpass = Overpass(
-            aos=aos,
-            tca=tca,
-            los=los,
-            duration=round(pass_.duration, 1),
-            satid=pass_.satid,
-            max_elevation=max_elevation
-        )
+        data.update({
+            'aos': aos,
+            'tca': tca,
+            'los': los,
+            'max_elevation': max_elevation,
+            'duration': round(pass_.duration, 1),
+            'satid': pass_.satid,
+        })
+        if pass_.vis_begin:
+            data['vis_begin'] = passpoint_serializer(pass_.vis_begin, tz)
+        if pass_.vis_end:
+            data['vis_end'] = passpoint_serializer(pass_.vis_end, tz)
+        if pass_.brightness:
+            data['brightness'] = round(pass_.brightness, 2)
+        overpass = Overpass(**data)
         if pass_.elevation is not None:
             # serialize OverpassDetail
             overpass = OverpassDetail(

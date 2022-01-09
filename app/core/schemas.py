@@ -130,6 +130,8 @@ class Overpass(BaseModel):
     satid: int = Field(None, description='Satellite NORAD ID')
     type: PassType = None
     brightness: float = None
+    vis_begin: Point = Field(None, description='Satellite visibility begins')
+    vis_end: Point = Field(None, description='Satellite visibility ends')
 
 
 class OverpassDetail(Overpass):
