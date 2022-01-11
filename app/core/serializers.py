@@ -17,6 +17,7 @@ from .schemas import (
     PassDetailResult,
     SatelliteLatLng,
 )
+from app.utils import round_datetime_to_nearest_second
 
 
 def single_satellite_overpass_result_serializer(
@@ -82,6 +83,7 @@ def overpass_serializer(
             'max_elevation': max_elevation,
             'duration': round(pass_.duration, 1),
             'satid': pass_.satid,
+            'type': pass_.type,
         })
         if pass_.vis_begin:
             data['vis_begin'] = passpoint_serializer(pass_.vis_begin, tz)
@@ -105,10 +107,11 @@ def overpass_serializer(
 
 def passpoint_serializer(passpoint, tz: ZoneInfo):
     """ Serialize overpass point """
-    dt_local = passpoint.dt.astimezone(tz)
+    dt = round_datetime_to_nearest_second(passpoint.dt)
+    dt_local = dt.astimezone(tz)
     timestamp = dt_local.timestamp()
     az = round(passpoint.azimuth, 2)
-    az_ord = OrdinalDirection.from_az(az).name
+    az_ord = OrdinalDirection.from_az(az)
     el = round(passpoint.elevation, 2)
     range_ = round(passpoint.range, 3)
     return Point(

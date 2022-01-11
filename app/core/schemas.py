@@ -6,23 +6,28 @@ from typing import List
 from pydantic import BaseModel, Field, validator, conlist
 
 
-class OrdinalDirection(int, Enum):
-    N = 0
-    NNE = 1
-    NE = 2
-    ENE = 3
-    E = 4
-    ESE = 5
-    SE = 6
-    SSE = 7
-    S = 8
-    SSW = 9
-    SW = 10
-    WSW = 11
-    W = 12
-    WNW = 13
-    NW = 14
-    NNW = 15
+class OrdinalDirection(str, Enum):
+    N = 'N'
+    NNE = 'NNE'
+    NE = 'NE'
+    ENE = 'ENE'
+    E = 'E'
+    ESE = 'ESE'
+    SE = 'SE'
+    SSE = 'SSE'
+    S = 'S'
+    SSW = 'SSW'
+    SW = 'SW'
+    WSW = 'WSW'
+    W = 'W'
+    WNW = 'WNW'
+    NW = 'NW'
+    NNW = 'NNW'
+
+    @staticmethod
+    def _from_direction_index(n: int) -> str:
+        directions = ('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW')
+        return directions[n]
 
     @classmethod
     def from_az(cls, az_deg: float):
@@ -33,7 +38,8 @@ class OrdinalDirection(int, Enum):
         n = floor((azm-start)/mod)
         if n == 16:
             n = 0
-        return cls(n)
+        ord_str = cls._from_direction_index(n)
+        return cls(ord_str)
 
 
 class Satellite(BaseModel):
@@ -75,7 +81,7 @@ class Point(BaseModel):
     datetime: datetime.datetime
     timestamp: float = Field(..., description='Unix timestamp in seconds since Jan 1 1970 UTC')
     az: float = Field(..., title='Azimuth', description='azimuth [deg]')
-    az_ord: str = Field(..., description='Ordinal direction, eg. NE, NNW, WSW')
+    az_ord: OrdinalDirection = Field(..., description='Ordinal direction, eg. NE, NNW, WSW')
     el: float = Field(..., description='elevation [deg]')
     range: float = Field(..., description='range [km]')
     dec: float = Field(None, description='declination [deg]')

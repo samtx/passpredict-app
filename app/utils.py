@@ -119,3 +119,9 @@ def get_satellite_norad_ids():
     ]
     return satellites
 
+
+def round_datetime_to_nearest_second(d: datetime.datetime) -> datetime.datetime:
+    """  Round datetime to nearest whole second  """
+    if d.microsecond >= 500_000:
+        d += datetime.timedelta(seconds=1)
+    return d.replace(microsecond=0)
