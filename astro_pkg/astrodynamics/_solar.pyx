@@ -73,15 +73,16 @@ cpdef double sun_sat_angle(double[::1] rsat, double[::1] rsun):
     References:
         Vallado, p. 912, Alg. 74
     """
-    cdef double[::1] cprod
+    cdef double sun_cross_sat[3]
+    cdef double[::1] sun_cross_sat_v = sun_cross_sat
     cdef double numer, denom, sinzeta, zeta
 
     # cross product
     # cprod[0] = a[1]*b[2] - a[2]*b[1]
     # cprod[1] = a[2]*b[0] - a[0]*b[2]
     # cprod[2] = a[0]*b[1] - a[1]*b[0]
-    cprod = np.cross(rsun, rsat)
-    numer = norm(cprod)
+    cross(rsun, rsat, sun_cross_sat_v)
+    numer = norm(sun_cross_sat_v)
     denom = norm(rsun) * norm(rsat)
     sinzeta = numer / denom
     if (sinzeta > 1) and (1.0000003 > sinzeta):
@@ -113,11 +114,10 @@ def is_sat_illuminated(double[::1] rsat, double[::1] rsun):
     return dist > R_EARTH
 
 
-cdef double* cross(double[::1] a, double[::1] b):
+cdef cross(double[::1] a, double[::1] b, double[::1] axb):
     """
     Cross product between two vectors
     """
-    cdef double[3] axb
     axb[0] = a[1]*b[2] - a[2]*b[1]
     axb[1] = a[2]*b[0] - a[0]*b[2]
     axb[2] = a[0]*b[1] - a[1]*b[0]

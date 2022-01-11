@@ -305,7 +305,7 @@ class Observer(LocationPredictor):
             los_dt = self._find_los(tca_dt)
         else:
             aos_dt = los_dt = None
-            return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation)
+        return BasicPassInfo(aos_dt, tca_dt, los_dt, elevation)
         # Find visual pass details
         # First, get endpoints of when location is not sunlit
         # Use cubic splines to find sun elevation
@@ -330,7 +330,7 @@ class Observer(LocationPredictor):
             else:
                 jdf = root
         # Now use jd0 and jdf to find when satellite is illuminated by sun
-        jd = np.linspace(jd0, jdf, 10)  # use 10 points for spline
+        jd = np.linspace(jd0, jdf, 5)  # use 10 points for spline
         illum_fn = lambda j: self.satellite.illumination_distance_jd(j) - R_EARTH
         illum_pts = np.array([illum_fn(j) for j in jd])
         if np.max(illum_pts) < 0:
@@ -373,6 +373,7 @@ class Observer(LocationPredictor):
         """Returns the midpoint between two dates"""
         return start + (end - start) / 2
 
+    @lru_cache(maxsize=128)
     def _elevation_at(self, when_utc):
         position = self.predictor.get_only_position(when_utc)
         return self.location.elevation_for(position)
@@ -425,7 +426,7 @@ class Observer(LocationPredictor):
         )
         return RangeAzEl(range_, az, el)
 
-    @lru_cache(maxsize=64)
+    @lru_cache(maxsize=128)
     def range_at_jd(self, jd: float) -> float:
         """
         Get slant range magnitude from location to satellite [km]
@@ -447,7 +448,7 @@ class Observer(LocationPredictor):
         pt = PassPoint(datetime, rnazel.range, rnazel.az, rnazel.el)
         return pt
 
-    @lru_cache(maxsize=64)
+    @lru_cache(maxsize=128)
     def rho_jd(self, jd: float) -> np.ndarray:
         """
         Get topocentric ECEF vector from location to satellite

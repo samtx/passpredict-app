@@ -3653,7 +3653,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_8ecef_to_llh(CYTHON_UNUSE
 
   /* "astrodynamics/_rotations.pyx":122
  *     """
- *      # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
+ *     # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
  *     cdef double a = 6378.1370             # <<<<<<<<<<<<<<
  *     cdef double b = 6356.752314
  *     cdef double p, thet, esq, epsq, lat, lon, h, n
@@ -3661,7 +3661,7 @@ static PyObject *__pyx_pf_13astrodynamics_10_rotations_8ecef_to_llh(CYTHON_UNUSE
   __pyx_v_a = 6378.1370;
 
   /* "astrodynamics/_rotations.pyx":123
- *      # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
+ *     # WGS-84 ellipsoid parameters *[inserted by cython to avoid comment closer]/
  *     cdef double a = 6378.1370
  *     cdef double b = 6356.752314             # <<<<<<<<<<<<<<
  *     cdef double p, thet, esq, epsq, lat, lon, h, n
