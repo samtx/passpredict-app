@@ -6,39 +6,43 @@ from app import settings
 from app.templating import Jinja2Templates
 
 
-if not settings.REDIS_URL:
-    if not settings.REDIS_PASSWORD:
-        redis_uri = "redis://{host}:{port}/{db}".format(
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            db=settings.REDIS_DB,
-        )
+def get_redis_uri(config):
+    if not config.REDIS_URL:
+        if not config.REDIS_PASSWORD:
+            redis_uri = "redis://{host}:{port}/{db}".format(
+                host=config.REDIS_HOST,
+                port=config.REDIS_PORT,
+                db=config.REDIS_DB,
+            )
+        else:
+            redis_uri = "redis://{user}:{password}@{host}:{port}/{db}".format(
+                user=config.REDIS_USER,
+                password=config.REDIS_PASSWORD,
+                host=config.REDIS_HOST,
+                port=config.REDIS_PORT,
+                db=config.REDIS_DB,
+            )
     else:
-        redis_uri = "redis://{user}:{password}@{host}:{port}/{db}".format(
-            user=settings.REDIS_USER,
-            password=settings.REDIS_PASSWORD,
-            host=settings.REDIS_HOST,
-            port=settings.REDIS_PORT,
-            db=settings.REDIS_DB,
+        redis_uri = config.REDIS_URL
+    return redis_uri
+
+
+def get_postgres_uri(config):
+    if config.POSTGRES_URI:
+        postgres_uri = config.POSTGRES_URI
+    else:
+        postgres_uri = "postgresql://{user}:{password}@{host}:{port}/{database}".format(
+            host=config.POSTGRES_HOST,
+            port=config.POSTGRES_PORT,
+            user=config.POSTGRES_USER,
+            password=config.POSTGRES_PASSWORD,
+            database=config.POSTGRES_NAME
         )
-else:
-    redis_uri = settings.REDIS_URL
+    return postgres_uri
 
-cache = Redis.from_url(redis_uri)
+cache = Redis.from_url(get_redis_uri(settings))
 
-
-if settings.POSTGRES_URI:
-    postgres_uri = settings.POSTGRES_URI
-else:
-    postgres_uri = "postgresql://{user}:{password}@{host}:{port}/{database}".format(
-        host=settings.POSTGRES_HOST,
-        port=settings.POSTGRES_PORT,
-        user=settings.POSTGRES_USER,
-        password=settings.POSTGRES_PASSWORD,
-        database=settings.POSTGRES_NAME
-    )
-
-db = Database(postgres_uri)
+db = Database(get_postgres_uri(settings))
 
 if settings.DEBUG:
     mapbox_client_token = settings.MAPBOX_DEFAULT_TOKEN

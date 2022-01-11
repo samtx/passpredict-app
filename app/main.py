@@ -1,6 +1,7 @@
 # main.py
 import logging
 from urllib.parse import urlencode
+from pathlib import Path
 from functools import cache as functools_cache
 
 from starlette.applications import Starlette
@@ -8,12 +9,13 @@ from starlette.responses import RedirectResponse
 from starlette.requests import Request
 from starlette.routing import Route, Mount
 from starlette.status import HTTP_302_FOUND
+import markdown
 
 from app.utils import get_satellite_norad_ids
 from app.resources import cache, db, templates, static_app
 from app import settings
 from app import passes
-from . import api
+from .api import create_app as create_api_app
 
 
 logging.basicConfig(
@@ -72,6 +74,39 @@ async def help(request: Request):
     return templates.TemplateResponse('help.html', {'request': request})
 
 
+async def api_home(request: Request):
+    """
+    Render API homepage with explanation on how to use the API
+    """
+    # Get markdown content
+    key = "markdown:api-home.md"
+    cache = request.app.state.cache
+    res = await cache.get(key)
+    if not res:
+        # html is not in cache, re-render it
+        fpath = Path(templates.directory) / 'api-home.md'
+        config = {
+            'toc': {
+                'permalink': True,
+                'baselevel': 2,
+            }
+        }
+        with open(fpath, 'r') as f:
+            content = markdown.markdown(
+                f.read(),
+                extensions=['fenced_code', 'toc'],
+                extension_configs=config,
+            )
+        await cache.set(key, content.encode('utf-8'), ex=86400)  # cache for one day
+    else:
+        content = res.decode('utf-8')
+    context = {
+        'request': request,
+        'content': content,
+    }
+    return templates.TemplateResponse('api-home.html', context)
+
+
 async def connect_to_db_and_cache():
     try:
         ping = await app.state.cache.ping()
@@ -90,26 +125,26 @@ async def disconnect_from_db_and_cache():
     await app.state.db.disconnect()
 
 
-routes = [
-    Route('/', home, name='home', methods=['GET', 'POST']),
-    Route('/about', about, name='about'),
-    Route('/help', help, name='help'),
-    Mount('/passes', routes=passes.routes, name='passes'),
-    Mount('/api', app=api.app, name='api'),
-    Mount('/static', app=static_app, name='static'),
-]
+def create_app(db=db, cache=cache):
+    api_app = create_api_app(db, cache)
+    routes = [
+        Route('/', home, name='home', methods=['GET', 'POST']),
+        Route('/about', about, name='about'),
+        Route('/help', help, name='help'),
+        Route('/api', api_home, name='api_home'),
+        Mount('/api', app=api_app, name='api'),
+        Mount('/passes', routes=passes.routes, name='passes'),
+        Mount('/static', app=static_app, name='static'),
+    ]
+    app = Starlette(
+        debug=settings.DEBUG,
+        routes=routes,
+        on_startup=[connect_to_db_and_cache],
+        on_shutdown=[disconnect_from_db_and_cache],
+    )
+    # attach database and cache connections onto application state
+    app.state.db = db
+    app.state.cache = cache
+    return app
 
-
-app = Starlette(
-    debug=settings.DEBUG,
-    routes=routes,
-    on_startup=[connect_to_db_and_cache],
-    on_shutdown=[disconnect_from_db_and_cache],
-)
-
-
-# attach database and cache connections onto application state
-app.state.db = db
-app.state.cache = cache
-api.app.state.db = db
-api.app.state.cache = cache
+app = create_app()

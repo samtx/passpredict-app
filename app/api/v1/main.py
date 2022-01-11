@@ -49,6 +49,3 @@ app.include_router(
     passes.router,
     prefix='/passes',
 )
-
-app.state.db = db
-app.state.cache = cache

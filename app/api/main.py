@@ -1,11 +1,8 @@
-from pathlib import Path
-
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import markdown
 
 from app import settings
-from app.resources import templates, db, cache
+from .middlewares import CacheControlMiddleware
 from . import passes
 from . import satellites
 from . import locations
@@ -23,78 +20,42 @@ Please note: This website and API are in active development and the endpoints ar
 origins = ["*"] if settings.DEBUG else ['passpredict.com', 'www.passpredict.com']
 
 
-app = FastAPI(
-    title="Pass Predict API",
-    description=description,
-    version="0.1.0",
-    debug=settings.DEBUG
-)
+def create_app(db, cache):
+    app = FastAPI(
+        title="Pass Predict API",
+        description=description,
+        version="0.1.0",
+        debug=settings.DEBUG
+    )
+    app.state.db = db
+    app.state.cache = cache
+    v1.app.state.db = db
+    v1.app.state.cache = cache
 
-# Add Public API Version 1 application
-app.mount("/v1", v1.app)
+    # Add middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_headers=['*'],
+        expose_headers=['Cache-Control'],
+    )
+    app.add_middleware(CacheControlMiddleware)
 
-# Add middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_headers=['*'],
-    expose_headers=['Cache-Control'],
-)
+    # Add Public API Version 1 application
+    app.mount("/v1", v1.app)
 
-@app.middleware("http")
-async def set_cache_control_header(request: Request, call_next):
-    """
-    Set Cache-Control header for API responses
-    """
-    response = await call_next(request)
-    response.headers['Cache-Control'] = "private, max-age=900"  # cache for 15 minutes
-    return response
+    # Add routes
+    app.include_router(
+        passes.router,
+        prefix='/passes',
+    )
+    app.include_router(
+        satellites.router,
+        prefix='/satellites',
+    )
+    app.include_router(
+        locations.router,
+        prefix='/locations',
+    )
 
-
-# Add routes
-app.include_router(
-    passes.router,
-    prefix='/passes',
-)
-app.include_router(
-    satellites.router,
-    prefix='/satellites',
-)
-app.include_router(
-    locations.router,
-    prefix='/locations',
-)
-
-
-@app.get('/', include_in_schema=False)
-async def home(request: Request):
-    """
-    Render API homepage with explanation on how to use the API
-    """
-    # Get markdown content
-    key = "markdown:api-home.md"
-    cache = request.app.state.cache
-    res = await cache.get(key)
-    if not res:
-        # html is not in cache, re-render it
-        fpath = Path(templates.directory) / 'api-home.md'
-        config = {
-            'toc': {
-                'permalink': True,
-                'baselevel': 2,
-            }
-        }
-        with open(fpath, 'r') as f:
-            content = markdown.markdown(
-                f.read(),
-                extensions=['fenced_code', 'toc'],
-                extension_configs=config,
-            )
-        await cache.set(key, content.encode('utf-8'), ex=86400)  # cache for one day
-    else:
-        content = res.decode('utf-8')
-    context = {
-        'request': request,
-        'content': content,
-    }
-    return templates.TemplateResponse('api-home.html', context)
+    return app

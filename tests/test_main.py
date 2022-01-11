@@ -1,25 +1,22 @@
-from starlette.testclient import TestClient
-
-from app.main import app
-
-client = TestClient(app)
+import pytest
 
 
-def test_homepage_status():
-    response = client.get("/")
+@pytest.mark.asyncio
+async def test_homepage_status(client):
+    response = await client.get("/")
     assert response.status_code == 200
 
-
-def test_about_status():
-    response = client.get("/about")
+@pytest.mark.asyncio
+async def test_about_status(client):
+    response = await client.get("/about")
     assert response.status_code == 200
 
-
-def test_api_home_status():
-    response = client.get("/api")
+@pytest.mark.asyncio
+async def test_api_home_status(client):
+    response = await client.get("/api")
     assert response.status_code == 200
 
-
-def test_help_status():
-    response = client.get("/help")
+@pytest.mark.asyncio
+async def test_help_status(client):
+    response = await client.get("/help")
     assert response.status_code == 200
