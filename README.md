@@ -12,7 +12,7 @@ The satellite predictions are made with the [`passpredict`](https://pypi.org/pro
 ## Passes public API endpoint
 
 This web app exposes a public REST API for generating pass predictions.
-Details on how to use the API can be [found here](app/templates/api-home.md).
+Details on how to use the API can be [found here](app/api/v1/README.md).
 
 
 ## Tech Stack
