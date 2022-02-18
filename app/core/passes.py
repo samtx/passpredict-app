@@ -6,7 +6,7 @@ from databases import Database
 from aioredis import Redis
 from starlette.concurrency import run_in_threadpool
 
-from astrodynamics import (
+from app.astrodynamics import (
     predict_single_satellite_overpasses,
     predict_next_overpass,
     get_next_pass_detail,

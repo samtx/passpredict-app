@@ -2,20 +2,14 @@
 import datetime
 from typing import NamedTuple, Tuple
 
-from astrodynamics import AsyncPasspredictTLESource, SatellitePredictor
+from app.astrodynamics import AsyncPasspredictTLESource, SGP4Predictor
+from app.astrodynamics import TLE
 from sqlalchemy import select
 from starlette.exceptions import HTTPException
 from databases import Database
 from aioredis import Redis
 
 from app.dbmodels import tle as tledb
-
-
-# from orbit_predictor.sources
-class TLE(NamedTuple):
-    sate_id: int        # NORAD satellite ID
-    lines: Tuple[str]   # tuple of tle strings (tle1, tle2)
-    date: datetime.datetime   # datetime in UTC
 
 
 class PasspredictTLESource(AsyncPasspredictTLESource):
@@ -102,8 +96,5 @@ class PasspredictTLESource(AsyncPasspredictTLESource):
         Create Predictor instance with TLE data
         """
         tle = await self.get_tle_or_404(satid, date)
-        predictor = SatellitePredictor(satid)
-        predictor._source = self
-        predictor.tle = tle
-        predictor.set_propagator()
-        return predictor
+        satellite = SGP4Predictor.from_tle(tle)
+        return satellite

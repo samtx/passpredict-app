@@ -11,5 +11,5 @@ async def test_api_passes_cache_control_header_set(client):
         'lon': -97.7437,
         'h': 0,
     }
-    response = await client.get("/api/passes", params=params)
+    response = await client.get("/api/passes", params=params, follow_redirects=True)
     assert response.status_code == 200

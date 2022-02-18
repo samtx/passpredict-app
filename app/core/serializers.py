@@ -3,7 +3,7 @@ from typing import List, Union
 from zoneinfo import ZoneInfo
 from collections import defaultdict
 
-from astrodynamics import PredictedPass
+from app.astrodynamics import PredictedPass
 
 from .schemas import (
     Location,

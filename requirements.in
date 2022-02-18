@@ -16,3 +16,4 @@ asyncpg
 timezonefinder
 Markdown
 python-dateutil
+passpredict~=0.4.0  # passpredict

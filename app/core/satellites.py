@@ -4,7 +4,7 @@ from databases import Database
 from aioredis import Redis
 from starlette.concurrency import run_in_threadpool
 
-from astrodynamics import (
+from app.astrodynamics import (
     get_satellite_llh,
 )
 from app.utils import get_satellite_norad_ids

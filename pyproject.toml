@@ -1,6 +1,6 @@
 [metadata]
 name = "app"
-version = "0.1.0"
+version = "0.2.0"
 description = "Website for passpredict.com"
 
 [build-system]
@@ -12,4 +12,4 @@ testpaths = ["tests"]
 filterwarnings = ["ignore: 'contextfunction' is renamed to 'pass_context':DeprecationWarning"]
 
 [tool.coverage.run]
-omit = ["app/tests/*", "astro_pkg/tests"]
+omit = ["app/tests/*"]

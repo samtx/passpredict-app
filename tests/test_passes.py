@@ -15,19 +15,19 @@ def pass_params():
 
 @pytest.mark.asyncio
 async def test_api_passes_Austin_ISS(client, pass_params):
-    response = await client.get("/api/passes", params=pass_params)
+    response = await client.get("/api/passes", params=pass_params, follow_redirects=True)
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
 async def test_api_passes_cache_control_header_set(client, pass_params):
-    response = await client.get("/api/passes", params=pass_params)
+    response = await client.get("/api/passes", params=pass_params, follow_redirects=True)
     assert 'cache-control' in response.headers
 
 
 @pytest.mark.asyncio
 async def test_api_passes_json_response(client, pass_params):
-    response = await client.get("/api/passes", params=pass_params)
+    response = await client.get("/api/passes", params=pass_params, follow_redirects=True)
     data = response.json()
     assert 'location' in data
     assert 'satellite' in data
