@@ -13,7 +13,10 @@ import click
 
 from app.utils import grouper, epoch_from_tle, satid_from_tle
 from app.dbmodels import satellite, tle as tledb
-from app.resources import postgres_uri
+from app.resources import get_postgres_uri
+from app import settings
+
+postgres_uri = get_postgres_uri(settings)
 
 
 logging.basicConfig(
@@ -52,18 +55,16 @@ def download_tle_data():
     Download common tle data from celestrak
     """
     logger.info('Download TLEs from Celestrak')
-    base_url = 'https://www.celestrak.com/NORAD/elements/'
+    base_url = 'https://www.celestrak.com/NORAD/elements/gp.php'
     endpoints = [
-        'stations.txt',
-        'active.txt',
-        'visual.txt',
-        'amateur.txt',
-        'starlink.txt',
-        'tle-new.txt',
-        'noaa.txt',
-        'goes.txt',
-        'supplemental/starlink.txt',
-        'supplemental/planet.txt',
+        'stations',
+        'active',
+        'visual',
+        'amateur',
+        'starlink',
+        'last-30-days',
+        'noaa',
+        'goes',
     ]
     tasks = [fetch(u, base_url) for u in endpoints]
     loop = asyncio.get_event_loop()
@@ -71,13 +72,17 @@ def download_tle_data():
     return responses
 
 
-async def fetch(url, base_url=''):
+async def fetch(group, base_url=''):
     """
     Async fetch url from celestrak
     """
     headers = {'user-agent': 'passpredict.com'}
+    params = {
+        'GROUP': group,
+        'FORMAT': 'TLE',
+    }
     async with httpx.AsyncClient(base_url=base_url, headers=headers) as client:
-        res = await client.get(url)
+        res = await client.get('', params=params)
     if not res:
         logger.error(f'Error downloading URL: {res.url}')
     return res
@@ -167,18 +172,16 @@ def main(debug):
     """
     if debug:
         logger.setLevel(logging.DEBUG)
-    base_url = 'https://www.celestrak.com/NORAD/elements/'
+    base_url = 'https://www.celestrak.com/NORAD/elements/gp.php'
     endpoints = [
-        'stations.txt',
-        'active.txt',
-        'visual.txt',
-        'amateur.txt',
-        'starlink.txt',
-        'tle-new.txt',
-        'noaa.txt',
-        'goes.txt',
-        'supplemental/starlink.txt',
-        'supplemental/planet.txt',
+        'stations',
+        'active',
+        'visual',
+        'amateur',
+        'starlink',
+        'last-30-days',
+        'noaa',
+        'goes',
     ]
     tasks = [fetch(u, base_url) for u in endpoints]
     loop = asyncio.get_event_loop()
