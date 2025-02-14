@@ -6,10 +6,6 @@ from dataclasses import dataclass, asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncConnection
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy import (
-    Connection,
-    cte,
-)
 
 from api import db
 from .domain import Satellite, SatelliteDimensions, Orbit
@@ -225,11 +221,11 @@ class SatelliteService:
     # ) -> None:
     #     ...
 
-    # async def query_orbits(
-    #     self,
-    #     params,
-    # ) -> list[Orbit]:
-    #     ...
+    async def query_orbits(
+        self,
+        params,
+    ) -> list[Orbit]:
+        ...
 
     # async def get_orbit(
     #     self,

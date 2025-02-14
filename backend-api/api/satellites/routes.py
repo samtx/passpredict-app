@@ -5,7 +5,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field, ConfigDict
+from sqlalchemy.ext.asyncio import AsyncConnection
 
+from api.db.engine import read_conn, write_conn
 from .services import SatelliteService
 
 
@@ -37,11 +39,19 @@ class Satellite(BaseModel):
     dimensions: SatelliteDimensions | None = None
 
 
+async def get_read_conn() -> AsyncConnection:
+    return read_conn
 
 
+async def get_write_conn() -> AsyncConnection:
+    return write_conn
 
-def get_satellite_service(db_conn) -> SatelliteService:
-    service = SatelliteService(db_conn=db_conn)
+
+async def get_satellite_service(
+    read_conn: Annotated[AsyncConnection, Depends(get_read_conn)],
+    write_conn: Annotated[AsyncConnection, Depends(get_write_conn)],
+) -> SatelliteService:
+    service = SatelliteService(read_conn=read_conn, write_conn=write_conn)
     return service
 
 
@@ -152,12 +162,12 @@ class OrbitQueryResponse(BaseModel):
 
 
 @router.get(
-    "/orbit",
+    "/orbits",
     response_model=OrbitQueryResponse,
 )
 async def query_orbit(
     params: Annotated[OrbitQueryRequest, Query()],
     service: Annotated[SatelliteService, Depends(get_satellite_service)],
 ):
-    result = await service.query_satellites(params)
+    result = await service.query_orbits(params)
     return result
