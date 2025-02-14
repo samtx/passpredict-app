@@ -2,7 +2,7 @@ from datetime import datetime, date
 from uuid import UUID
 from typing import Protocol, Literal, Any
 from collections.abc import Iterator
-from dataclasses import asdict
+from dataclasses import dataclass, asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncConnection
 from sqlalchemy.dialects.sqlite import insert
@@ -75,6 +75,14 @@ class OrbitProtocol(Protocol):
     mean_motion_ddot: float | None
 
 
+@dataclass
+class OrbitInsertResult:
+    id: UUID
+    norad_id: int
+    epoch: datetime
+    originator: str
+
+
 class SatelliteQueryParamProtocol(Protocol):
     norad_ids: list[int]
     intl_designators: list[str]
@@ -87,16 +95,23 @@ class SatelliteService:
 
     def __init__(
         self,
-        Session: async_sessionmaker,
+        read_conn: AsyncConnection,
+        write_conn: AsyncConnection,
     ):
-        self.Session = Session
+        self.read_conn = read_conn
+        self.write_conn = write_conn
+
+    @staticmethod
+    def session_factory(bind) -> AsyncSession:
+        return AsyncSession(bind)
 
     async def insert_satellite(
         self,
         satellite: SatelliteProtocol,
     ) -> Satellite:
         sat_model = self._build_satellite_db_model(satellite)
-        async with self.Session.begin() as session:
+        Session = self.session_factory(self.write_conn)
+        async with Session.begin() as session:
             session.add(sat_model)
             await session.flush()
             await session.refresh(sat_model)
@@ -110,7 +125,8 @@ class SatelliteService:
             self._build_satellite_db_model(satellite)
             for satellite in satellites
         ]
-        async with self.Session.begin() as session:
+        Session = self.session_factory(self.write_conn)
+        async with Session.begin() as session:
             session.add(sat_models)
             await session.flush()
             await session.refresh(sat_models)
@@ -124,12 +140,21 @@ class SatelliteService:
         self,
         norad_id: int,
     ) -> Satellite:
-        ...
+        Session = self.session_factory(self.read_conn)
+        async with Session as session:
+            sat_model = await session.get(db.Satellite, norad_id)
+        satellite = self._build_satellite_domain_model(sat_model)
+        return satellite
 
     async def query_satellites(
         self,
         params: SatelliteQueryParamProtocol,
     ) -> list[Satellite]:
+        # Session = self.session_factory(self.read_conn)
+        # async with Session() as session:
+        #     sat_model = await session.get(db.Satellite, norad_id)
+        # satellite = self._build_satellite_domain_model(sat_model)
+        # return satellite
         ...
 
     async def update_satellite(
@@ -150,67 +175,67 @@ class SatelliteService:
     ) -> Orbit:
         ...
 
-    # async def batch_insert_orbits(
-    #     self,
-    #     orbits: list[OrbitProtocol],
-    # ) -> list[Orbit]:
-
-
     async def batch_insert_orbits(
         self,
         orbits: list[OrbitProtocol],
-    ) -> list[Orbit]:
+    ) -> list[OrbitInsertResult]:
         """
         Use two statements:
             1. Create satellite records which don't exist yet for the orbits
             2. Upsert orbit rows from values
         """
-        norad_ids = {
+        unique_norad_ids = {
             orbit.norad_id
             for orbit in orbits
         }
-
         orbit_value_gen = (
             self._build_orbit_db_model_data(orbit)
             for orbit in orbits
         )
-
-        async with self.Session.begin() as session:
+        async with self.write_conn.begin() as conn:
             create_sats_stmt = (insert(db.Satellite)
-                .values({"id": norad_id for norad_id in norad_ids})
+                .values({"id": norad_id for norad_id in unique_norad_ids})
                 .on_conflict_do_nothing(index_elements=["id"])
             )
             insert_orbits_stmt = (insert(db.Orbit)
                 .values(list(orbit_value_gen))
-                .on_conflict_do_nothing(index_elements=["id", "epoch", "originator"])
+                .on_conflict_do_nothing(index_elements=["satellite_id", "epoch", "originator"])
+                .returning(
+                    db.Orbit.id,
+                    db.Orbit.satellite_id,
+                    db.Orbit.epoch,
+                    db.Orbit.originator,
+                )
             )
-            await session.execute(create_sats_stmt)
-            await session.execute(insert_orbits_stmt)
-            await session.commit()
+            await conn.execute(create_sats_stmt)
+            inserted_orbits = await conn.scalars(insert_orbits_stmt).all()
+            await conn.commit()
+        return [OrbitInsertResult(*orbit) for orbit in inserted_orbits]
 
-    async def update_orbit(
-        self,
-        orbit: OrbitProtocol,
-    ) -> Orbit:
-        ...
 
-    async def delete_orbit(
-        self,
-        orbit_id: UUID,
-    ) -> None:
-        ...
+    # async def update_orbit(
+    #     self,
+    #     orbit: OrbitProtocol,
+    # ) -> Orbit:
+    #     ...
 
-    async def query_orbits(
-        self,
-        params,
-    ) -> list[Orbit]:
-        ...
+    # async def delete_orbit(
+    #     self,
+    #     orbit_id: UUID,
+    # ) -> None:
+    #     ...
 
-    async def get_orbit(
-        self,
-        orbit_id: UUID,
-    ) -> Orbit:
-        ...
+    # async def query_orbits(
+    #     self,
+    #     params,
+    # ) -> list[Orbit]:
+    #     ...
+
+    # async def get_orbit(
+    #     self,
+    #     orbit_id: UUID,
+    # ) -> Orbit:
+    #     ...
 
 
 
