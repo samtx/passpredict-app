@@ -12,18 +12,6 @@ class SatelliteDimensions:
     span: float | None = None
 
 
-@dataclass
-class Satellite:
-    norad_id: int
-    intl_designator: str
-    name: str
-    description: str | None = None
-    tags: list[str] = field(default_factory=list)
-    decayed_date: date | None = None
-    launch_date: date | None = None
-    dimensions: SatelliteDimensions | None = None
-
-
 @dataclass(frozen=True)
 class Orbit:
     norad_id: int
@@ -53,7 +41,21 @@ class Orbit:
     element_set_no: int | None = None
     ephemeris_type: Literal[0, "SGP", "SGP4", "SDP4", "SGP8", "SDP8"] | None = None
     tle: str | None = None
+    satellite: "Satellite" | None = None
 
     @staticmethod
     def new_id() -> UUID:
         return uuid4()
+
+
+@dataclass
+class Satellite:
+    norad_id: int
+    intl_designator: str
+    name: str
+    description: str | None = None
+    tags: list[str] = field(default_factory=list)
+    decay_date: date | None = None
+    launch_date: date | None = None
+    dimensions: SatelliteDimensions | None = None
+    orbits: list[Orbit] = field(default_factory=list)

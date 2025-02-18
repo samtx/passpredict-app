@@ -1,11 +1,12 @@
 from datetime import datetime, date
 from uuid import UUID
 from typing import Protocol, Literal, Any
-from collections.abc import Iterator
 from dataclasses import dataclass, asdict
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncConnection
+from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy import select, func
 
 from api import db
 from .domain import Satellite, SatelliteDimensions, Orbit
@@ -91,26 +92,18 @@ class SatelliteService:
 
     def __init__(
         self,
-        read_conn: AsyncConnection,
-        write_conn: AsyncConnection,
+        session: AsyncSession,
     ):
-        self.read_conn = read_conn
-        self.write_conn = write_conn
-
-    @staticmethod
-    def session_factory(bind) -> AsyncSession:
-        return AsyncSession(bind)
+        self.session = session
 
     async def insert_satellite(
         self,
         satellite: SatelliteProtocol,
     ) -> Satellite:
         sat_model = self._build_satellite_db_model(satellite)
-        Session = self.session_factory(self.write_conn)
-        async with Session.begin() as session:
-            session.add(sat_model)
-            await session.flush()
-            await session.refresh(sat_model)
+        self.session.add(sat_model)
+        await self.session.commit()
+        await self.session.refresh(sat_model)
         return self._build_satellite_domain_model(sat_model)
 
     async def batch_insert_satellites(
@@ -121,11 +114,9 @@ class SatelliteService:
             self._build_satellite_db_model(satellite)
             for satellite in satellites
         ]
-        Session = self.session_factory(self.write_conn)
-        async with Session.begin() as session:
-            session.add(sat_models)
-            await session.flush()
-            await session.refresh(sat_models)
+        self.session.add(sat_models)
+        await self.session.commit()
+        await self.session.refresh(sat_models)
         satellites = [
             self._build_satellite_domain_model(sat_model)
             for sat_model in sat_models
@@ -135,23 +126,43 @@ class SatelliteService:
     async def get_satellite(
         self,
         norad_id: int,
+        include_latest_orbit: bool = False,
     ) -> Satellite:
-        Session = self.session_factory(self.read_conn)
-        async with Session as session:
-            sat_model = await session.get(db.Satellite, norad_id)
-        satellite = self._build_satellite_domain_model(sat_model)
+        if include_latest_orbit:
+            subq = (select(db.Orbit.id.label("orbit_id"), func.max(db.Orbit.epoch))
+                .where(db.Orbit.satellite_id == norad_id)
+                .group_by(db.Orbit.satellite_id)
+                .subquery()
+            )
+            stmt = (select(db.Satellite, db.Orbit)
+                .where(db.Satellite.id == norad_id)
+                .join(db.Orbit.id == subq.c.orbit_id)
+            )
+            sat_model, orbit_model = (await self.session.scalars(stmt)).first()
+            satellite = self._build_satellite_domain_model(sat_model)
+            orbit = self._build_orbit_domain_model(orbit_model)
+            satellite.latest_orbit = orbit
+        else:
+            sat_model = await self.session.get(db.Satellite, norad_id)
+            satellite = self._build_satellite_domain_model(sat_model)
         return satellite
 
     async def query_satellites(
         self,
-        params: SatelliteQueryParamProtocol,
+        norad_ids: list[int] | None = None,
+        intl_designators: list[str] | None = None,
+        page_size: int | None = None,
+        cursor: str | None = None,
+        q: str | None = None,
     ) -> list[Satellite]:
-        # Session = self.session_factory(self.read_conn)
-        # async with Session() as session:
-        #     sat_model = await session.get(db.Satellite, norad_id)
-        # satellite = self._build_satellite_domain_model(sat_model)
-        # return satellite
-        ...
+        if norad_ids:
+            # Only use norad_ids for query
+            stmt = (select(db.Satellite)
+                .where(db.Satellite.id.in_(norad_ids))
+
+            )
+        else:
+            stmt = select()
 
     async def update_satellite(
         self,
@@ -165,11 +176,11 @@ class SatelliteService:
     ) -> None:
         ...
 
-    async def insert_orbit(
-        self,
-        orbit: OrbitProtocol,
-    ) -> Orbit:
-        ...
+    # async def insert_orbit(
+    #     self,
+    #     orbit: OrbitProtocol,
+    # ) -> Orbit:
+    #     ...
 
     async def batch_insert_orbits(
         self,
@@ -188,24 +199,23 @@ class SatelliteService:
             self._build_orbit_db_model_data(orbit)
             for orbit in orbits
         )
-        async with self.write_conn.begin() as conn:
-            create_sats_stmt = (insert(db.Satellite)
-                .values({"id": norad_id for norad_id in unique_norad_ids})
-                .on_conflict_do_nothing(index_elements=["id"])
+        create_sats_stmt = (insert(db.Satellite)
+            .values({"id": norad_id for norad_id in unique_norad_ids})
+            .on_conflict_do_nothing(index_elements=["id"])
+        )
+        insert_orbits_stmt = (insert(db.Orbit)
+            .values(list(orbit_value_gen))
+            .on_conflict_do_nothing(index_elements=["satellite_id", "epoch", "originator"])
+            .returning(
+                db.Orbit.id,
+                db.Orbit.satellite_id,
+                db.Orbit.epoch,
+                db.Orbit.originator,
             )
-            insert_orbits_stmt = (insert(db.Orbit)
-                .values(list(orbit_value_gen))
-                .on_conflict_do_nothing(index_elements=["satellite_id", "epoch", "originator"])
-                .returning(
-                    db.Orbit.id,
-                    db.Orbit.satellite_id,
-                    db.Orbit.epoch,
-                    db.Orbit.originator,
-                )
-            )
-            await conn.execute(create_sats_stmt)
-            inserted_orbits = await conn.scalars(insert_orbits_stmt).all()
-            await conn.commit()
+        )
+        await self.session.execute(create_sats_stmt)
+        inserted_orbits = await self.session.scalars(insert_orbits_stmt).all()
+        await self.session.commit()
         return [OrbitInsertResult(*orbit) for orbit in inserted_orbits]
 
 
@@ -221,11 +231,47 @@ class SatelliteService:
     # ) -> None:
     #     ...
 
-    async def query_orbits(
+    async def query_satellite_orbit_time_range(
         self,
-        params,
-    ) -> list[Orbit]:
-        ...
+        norad_ids: list[int],
+        start: datetime,
+        end: datetime,
+        originators: list[str] | None = None,
+    ) -> list[Satellite]:
+        """Query satellites and embed orbits with epochs within time range"""
+        satellite_stmt = select(db.Satellite).where(db.Satellite.id.in_(norad_ids))
+        orbit_stmt = select(db.Orbit).where(db.Orbit.satellite_id.in_(norad_ids))
+        if originators:
+            orbit_stmt = orbit_stmt.where(db.Orbit.originator.in_(originators))
+        orbit_stmt = (orbit_stmt
+            .where(db.Orbit.epoch >= start)
+            .where(db.Orbit.epoch <= end)
+            .order_by(db.Orbit.epoch.desc())
+        )
+        async with self.session.begin():
+            satellite_models = (await self.session.scalars(satellite_stmt)).all()
+            orbits = (await self.session.scalars(orbit_stmt)).all()
+        satellite_map = {
+            satellite_model.id: self._build_satellite_domain_model(satellite_model)
+            for satellite_model in sorted(satellite_models, key=lambda x: x.id)
+        }
+        for orbit in orbits:
+            satellite_map[orbit.satellite_id].orbits.append(orbit)
+        return list(satellite_map.values())
+
+    # async def query_orbits(
+    #     self,
+    #     norad_ids: list[int],
+    #     latest_only: bool = False,
+    #     embed_satellite: bool = False,
+    #     page_size: int | None = None,
+    #     cursor: UUID | None = None,
+    # ) -> list[Orbit]:
+    #     """ Query orbit models """
+    #     stmt = select(db.Orbit).where(db.Orbit.satellite_id.in_(norad_ids))
+    #     if latest_only
+    #     if embed_satellite:
+    #         stmt = stmt.options(selectinload(db.Orbit.satellite))
 
     # async def get_orbit(
     #     self,

@@ -69,7 +69,7 @@ async def insert_satellite(
     return result
 
 
-class SatelliteQueryRequest(BaseModel):
+class SatelliteQuery(BaseModel):
     norad_ids: list[int] = Field(alias="norad_id", default_factory=list)
     intl_designators: list[str] = Field(alias="intl_designator", default_factory=list)
     names:list[str] = Field(alias="name", default_factory=list)
@@ -96,7 +96,7 @@ class SatelliteQueryResponse(BaseModel):
     response_model_exclude_unset=True,
 )
 async def query_satellites(
-    params: Annotated[SatelliteQueryRequest, Query()],
+    params: Annotated[SatelliteQuery, Query()],
     service: Annotated[SatelliteService, Depends(get_satellite_service)],
 ):
     result = await service.query_satellites(params)
