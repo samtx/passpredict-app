@@ -1,11 +1,9 @@
-import logging
+from logging import getLogger
 
 from hatchet_sdk import Hatchet, ClientConfig
 
 
-root_logger = logging.getLogger()
-
-
+root_logger = getLogger()
 
 hatchet = Hatchet(
     config=ClientConfig(

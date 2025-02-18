@@ -1,5 +1,6 @@
+from api.db import WriteSession
 from .client import hatchet
-from .update_orbits import FetchCelestrakOrbits
+from .workflows import FetchCelestrakOrbits, InsertOrbitBatch
 
 
 def start():
@@ -7,4 +8,5 @@ def start():
         name="passpredict-api-worker",
     )
     worker.register_workflow(FetchCelestrakOrbits())
+    worker.register_workflow(InsertOrbitBatch(WriteSession))
     worker.start()
