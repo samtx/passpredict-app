@@ -41,7 +41,7 @@ class Orbit:
     element_set_no: int | None = None
     ephemeris_type: Literal[0, "SGP", "SGP4", "SDP4", "SGP8", "SDP8"] | None = None
     tle: str | None = None
-    satellite: "Satellite" | None = None
+    satellite: 'Satellite' = None
 
     @staticmethod
     def new_id() -> UUID:
