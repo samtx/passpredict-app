@@ -8,7 +8,6 @@ from enum import Enum
 from math import floor
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request, Query, HTTPException
-from databases import Database
 from redis.asyncio import Redis
 from pydantic import BaseModel, Field, conlist, AfterValidator, conset
 
@@ -149,7 +148,7 @@ def round_float(n: int) -> Callable[[float], float]:
 class OverpassQuery(BaseModel):
     norad_ids: Annotated[
         set[int],
-        Field(min_length=1, max_length=config.passes.max_satellites, alias="norad_id", description="NORAD IDs of satellites to predict passes"),
+        Field(min_length=1, max_length=config.predict.max_satellites, alias="norad_id", description="NORAD IDs of satellites to predict passes"),
     ]
     latitude: Annotated[
         float,
@@ -234,28 +233,28 @@ async def get_passes(
     return result
 
 
-@router.get(
-    '/detail/',
-    response_model=PassDetailResult,
-    response_model_exclude_unset=True,
-)
-async def get_pass_detail(
-    background_tasks: BackgroundTasks,
-    satid: int,
-    aosdt: datetime.datetime,
-    lat: float,
-    lon: float,
-    h: float = 0.0,
-    db: Database = Depends(get_db),
-    cache: Redis = Depends(get_cache),
-):
-    logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
-    # Check cache for data
-    key = f"passdetail:{satid}:aosdt{aosdt}:lat{lat}:lon{lon}:h{h}"
-    res = await cache.get(key)
-    if res:
-        data = pickle.loads(res)
-    else:
-        data = await _get_pass_detail(satid, aosdt, lat, lon, h, db, cache)
-        background_tasks.add_task(set_cache_with_pickle, cache, key, data, ttl=900)  # cache for 15 minutes
-    return data
+# @router.get(
+#     '/detail/',
+#     response_model=PassDetailResult,
+#     response_model_exclude_unset=True,
+# )
+# async def get_pass_detail(
+#     background_tasks: BackgroundTasks,
+#     satid: int,
+#     aosdt: datetime.datetime,
+#     lat: float,
+#     lon: float,
+#     h: float = 0.0,
+#     db: Database = Depends(get_db),
+#     cache: Redis = Depends(get_cache),
+# ):
+#     logger.info(f'route api/passes/detail/, satid={satid},lat={lat},lon={lon},h={h},aosdt={aosdt}')
+#     # Check cache for data
+#     key = f"passdetail:{satid}:aosdt{aosdt}:lat{lat}:lon{lon}:h{h}"
+#     res = await cache.get(key)
+#     if res:
+#         data = pickle.loads(res)
+#     else:
+#         data = await _get_pass_detail(satid, aosdt, lat, lon, h, db, cache)
+#         background_tasks.add_task(set_cache_with_pickle, cache, key, data, ttl=900)  # cache for 15 minutes
+#     return data

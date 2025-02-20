@@ -1,5 +1,5 @@
-from datetime import datetime, UTC
-from dataclasses import dataclass, field, asdict
+from datetime import datetime
+from dataclasses import dataclass
 from enum import Enum
 
 
@@ -10,18 +10,11 @@ class PassType(str, Enum):
 
 
 @dataclass(frozen=True)
-class Timezone:
-    name: str
-    utc_offset: float
-
-
-@dataclass(frozen=True)
 class Location:
     latitude: float
     longitude: float
     height: float = 0
     name: str | None = None
-    timezone: Timezone | None = None
 
 
 @dataclass
