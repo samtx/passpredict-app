@@ -21,20 +21,23 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_CELESTRAK_BASE_URL = "https://www.celestrak.com/NORAD/elements/gp.php"
+DEFAULT_CELESTRAK_BASE_URL = "https://celestrak.com/NORAD/elements/gp.php"
 DEFAULT_CELESTRAK_GROUPS = (
     'stations',
-    'active',
-    'visual',
-    'amateur',
-    'starlink',
-    'last-30-days',
-    'noaa',
-    'goes',
+    # 'active',
+    # 'visual',
+    # 'amateur',
+    # 'starlink',
+    # 'last-30-days',
+    # 'noaa',
+    # 'goes',
 )
 
 
-@hatchet.workflow(on_crons=["17 */8 * * *"])
+@hatchet.workflow(
+    on_events=["fetch-orbits:celestrak"],
+    on_crons=["17 2,10,18 * * *"],
+)
 class FetchCelestrakOrbits:
 
     def __init__(
@@ -52,47 +55,50 @@ class FetchCelestrakOrbits:
     async def download_orbit_data(self, context: Context):
         """Async fetch orbit data from celestrak"""
         headers = {'user-agent': 'passpredict.com'}
+        groups = context.workflow_input().get("groups", self.celestrak_groups)
         param_list = [
             {
                 'GROUP': group,
                 'FORMAT': 'JSON',
             }
-            for group in self.celestrak_groups
+            for group in groups
         ]
-        tasks = cast(list[Awaitable[httpx.Response]], [])
         queried_at = datetime.now(UTC)
-        async with httpx.AsyncClient(base_url=self.celestrak_base_url, headers=headers) as client:
-            for params in param_list:
-                task = asyncio.create_task(client.get("", params=params))
-                tasks.append(task)
-                await asyncio.sleep(0.1)  # throttle a bit
-            responses = await asyncio.gather(*tasks, return_exceptions=True)
         orbit_data = []
-        for i, response in enumerate(responses):
-            if isinstance(response, Exception):
-                # Log exception and continue
-                context.log(
-                    "Error downloading orbits from celestrak, "
-                    f"group '{self.celestrak_groups[i]}', {str(response)}"
-                )
-                continue
-            if response.status_code >= 400:
-                # Log response error and continue
-                context.log(
-                    "Bad HTTP response downloading orbits from celestrak, "
-                    f"group '{self.celestrak_groups[i]}', {response.text}"
-                )
-                continue
-            try:
-                data = response.json()
-                orbit_data.append(data)
-            except Exception as exc:
-                # Log exception and continue
-                context.log(
-                    "Error parsing orbit response from celestrak, "
-                    f"group '{self.celestrak_groups[i]}', {str(exc)}"
-                )
-                continue
+        async with httpx.AsyncClient(
+            base_url=self.celestrak_base_url,
+            headers=headers,
+            follow_redirects=True,
+            timeout=30,
+        ) as client:
+            for params in param_list:
+                # Call synchronously to not overwhelm celestrak
+                response = await client.get("", params=params)
+                if isinstance(response, Exception):
+                    # Log exception and continue
+                    context.log(
+                        "Error downloading orbits from celestrak, "
+                        f"group '{params["GROUP"]}', {repr(response)}"
+                    )
+                    continue
+                if response.status_code >= 400:
+                    # Log response error and continue
+                    context.log(
+                        "Bad HTTP response downloading orbits from celestrak, "
+                        f"group '{params["GROUP"]}', {response.text}"
+                    )
+                    continue
+                try:
+                    data = response.json()
+                    orbit_data.append(data)
+                except Exception as exc:
+                    # Log exception and continue
+                    context.log(
+                        "Error parsing orbit response from celestrak, "
+                        f"group '{params["GROUP"]}', {str(exc)}, "
+                        f"text: {response.text}"
+                    )
+                    continue
         return {
             "orbit_data": orbit_data,
             "queried_at": queried_at.isoformat(),

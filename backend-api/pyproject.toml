@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "passpredict-api"
+version = "2.0.0"
+description = "Backend API for passpredict.com"
+requires-python = ">=3.12"
+readme = "README.md"
+dependencies = [
+    "fastapi",
+    "pydantic>=2",
+    "pydantic-settings",
+    "numpy",
+    "hatchet-sdk",
+    "httpx",
+    "sqlalchemy>=2",
+    "aiosqlite",
+    "redis",
+    "uvicorn",
+    "uvloop",
+]
+
+[tool.setuptools]
+packages = ["api"]
+
+[project.scripts]
+hatchet = "api.workflows.worker:start"

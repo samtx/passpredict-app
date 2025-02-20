@@ -2,12 +2,17 @@ from logging import getLogger
 
 from hatchet_sdk import Hatchet, ClientConfig
 
+from api.settings import config
+
 
 root_logger = getLogger()
 
 hatchet = Hatchet(
+    debug=config.debug,
     config=ClientConfig(
         logger=root_logger,
+        token=config.hatchet.token,
+        tls_config=config.hatchet.tls,
     )
 )
 
