@@ -25,8 +25,7 @@ class Orbit:
     mean_motion: float
     mean_motion_dot: float
     mean_motion_ddot: float
-    id: UUID = field(default_factory=uuid4)
-    gm: float | None =  None
+    id: UUID | None = None
     rev_at_epoch: int | None = None
     originator: str | None = None
     originator_created_at: datetime | None = None
@@ -53,6 +52,7 @@ class Satellite:
     norad_id: int
     intl_designator: str
     name: str
+    id: int | None = None
     description: str | None = None
     tags: list[str] = field(default_factory=list)
     decay_date: date | None = None
