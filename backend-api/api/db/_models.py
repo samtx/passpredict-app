@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, UTC
 from uuid import uuid4, UUID
 
 from sqlalchemy import (
@@ -12,15 +12,16 @@ from sqlalchemy import (
     Uuid,
     UniqueConstraint,
     Index,
+    text,
 )
 from sqlalchemy.orm import (
     mapped_column,
     Mapped,
     relationship,
 )
-from sqlalchemy.schema import ExecutableDDLElement
-from sqlalchemy.event import listen
-from sqlalchemy.ext.compiler import compiles
+# from sqlalchemy.schema import ExecutableDDLElement
+# from sqlalchemy.event import listen
+# from sqlalchemy.ext.compiler import compiles
 
 
 from ._base import Base
@@ -28,32 +29,34 @@ from ._base import Base
 
 class Satellite(Base):
     __tablename__ = "satellite"
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)  # NORAD ID
-    cospar_id: Mapped[str] = mapped_column(String(30), unique=True, index=True)  # Intl. designator, COSPAR ID
-    name: Mapped[str] = mapped_column(String(100))
-    description: Mapped[str] = mapped_column(Text)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default='CURRENT_TIMESTAMP')
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_onupdate='CURRENT_TIMESTAMP')
-    decayed_date: Mapped[date] = mapped_column(Date)
-    launch_date: Mapped[date] = mapped_column(Date)
-    launch_year: Mapped[int] = mapped_column(Integer)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    norad_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=True)
+    intl_designator: Mapped[str] = mapped_column(String(30), unique=True, index=True, nullable=True)  # Intl. designator, COSPAR ID
+    name: Mapped[str] = mapped_column(String(100), nullable=True)
+    description: Mapped[str] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=lambda: datetime.now(UTC))
+    decay_date: Mapped[date] = mapped_column(Date, nullable=True)
+    launch_date: Mapped[date] = mapped_column(Date, nullable=True)
+    launch_year: Mapped[int] = mapped_column(Integer, nullable=True)
     # Column('constellation', Integer, ForeignKey('constellation.id')),
-    mass: Mapped[float] = mapped_column(Float)
-    length: Mapped[float] = mapped_column(Float)
-    diameter: Mapped[float] = mapped_column(Float)
-    span: Mapped[float] = mapped_column(Float)
+    mass: Mapped[float] = mapped_column(Float, nullable=True)
+    length: Mapped[float] = mapped_column(Float, nullable=True)
+    diameter: Mapped[float] = mapped_column(Float, nullable=True)
+    span: Mapped[float] = mapped_column(Float, nullable=True)
     # Column('shape', Integer, ForeignKey('shape.id')),
 
 
-class CreateFTS5Table(ExecutableDDLElement):
+# class CreateFTS5Table(ExecutableDDLElement):
 
-    def __init__(
-        self,
-        table,
-        columns,
-    ):
-        self.table = table
-        self.columns = columns
+#     def __init__(
+#         self,
+#         table,
+#         columns,
+#     ):
+#         self.table = table
+#         self.columns = columns
+
 
 # @compiles(CreateFTS5Table)
 # def create_fts5_table(element: CreateFTS5Table, compiler, **kwargs):
@@ -69,51 +72,37 @@ class CreateFTS5Table(ExecutableDDLElement):
 #     return stmt
 
 
-
 # listen(Satellite, "after_create", CreateFTS5Table() )
-
-
-class Tle(Base):
-    __tablename__ = "tle"
-    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=False), primary_key=True, default=uuid4())
-    tle1: Mapped[str] = mapped_column(String(70))
-    tle2: Mapped[str] = mapped_column(String(70))
-    epoch: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    satellite_id = mapped_column(ForeignKey("satellite.id"), index=True)
-    satellite: Mapped[Satellite] = relationship()
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default='CURRENT_TIMESTAMP')
 
 
 class Orbit(Base):
     __tablename__ = "orbit"
-    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=False), primary_key=True, default=uuid4())
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
     epoch: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     satellite_id = mapped_column(ForeignKey("satellite.id"), index=True, nullable=False)
     satellite: Mapped[Satellite] = relationship()
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default='CURRENT_TIMESTAMP')
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_onupdate='CURRENT_TIMESTAMP')
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
     originator: Mapped[str] = mapped_column(String)
     originator_created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    downloaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    ref_frame: Mapped[str] = mapped_column(String)
-    time_system: Mapped[str] = mapped_column(String)
-    mean_element_theory: Mapped[str] = mapped_column(String)
+    downloaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
+    ref_frame: Mapped[str] = mapped_column(String, nullable=True)
+    time_system: Mapped[str] = mapped_column(String, nullable=True)
+    mean_element_theory: Mapped[str] = mapped_column(String, nullable=True)
     eccentricity:Mapped[float] = mapped_column(Float, nullable=False)
     ra_of_asc_node: Mapped[float] = mapped_column(Float, nullable=False)
     arg_of_pericenter: Mapped[float] = mapped_column(Float, nullable=False)
     mean_anomaly: Mapped[float] = mapped_column(Float, nullable=False)
-    gm: Mapped[float] = mapped_column(Float)
-    ephemeris_type: Mapped[String] = mapped_column(String)
-    element_set_no: Mapped[int] = mapped_column(Integer)
-    rev_at_epoch: Mapped[int] = mapped_column(Integer)
+    ephemeris_type: Mapped[String] = mapped_column(String, nullable=True)
+    element_set_no: Mapped[int] = mapped_column(Integer, nullable=True)
+    rev_at_epoch: Mapped[int] = mapped_column(Integer, nullable=True)
     bstar: Mapped[float] = mapped_column(Float, server_default='0.0', nullable=False)
     mean_motion: Mapped[float] = mapped_column(Float, nullable=False)
     mean_motion_dot: Mapped[float] = mapped_column(Float, nullable=False)
     mean_motion_ddot: Mapped[float] = mapped_column(Float, server_default='0.0', nullable=False)
-    perigee: Mapped[float] = mapped_column(Float)
-    apogee: Mapped[float] = mapped_column(Float)
+    perigee: Mapped[float] = mapped_column(Float, nullable=True)
+    apogee: Mapped[float] = mapped_column(Float, nullable=True)
     inclination:Mapped[float] = mapped_column(Float, nullable=False)
-    tle: Mapped[str] = mapped_column(String(141))
+    tle: Mapped[str] = mapped_column(String(141), nullable=True)
     # Column('orbit_type', Integer, ForeignKey('orbit_type.id')),
 
     __table_args__ = (
@@ -149,6 +138,13 @@ JSR_status_decayed = {
 #     'constellation', metadata,
 #     Column('id', Integer, primary_key=True),
 #     Column('name', String(30), unique=True),      # eg. Starlink-1, NOAA
+# )
+
+# constellation_group = Table(
+#     'constellation_group', metadata,
+#     Column('id', Integer, primary_key=True),
+#     Column('name', String(30), unique=True),      # eg. Starlink-1, NOAA
+#     Column('constellation_id', Integer, ForeignKey('constellation.id'))
 # )
 
 # sat_type = Table(
