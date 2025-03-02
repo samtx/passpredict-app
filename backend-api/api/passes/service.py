@@ -6,59 +6,31 @@ import math
 from typing import Protocol
 from dataclasses import dataclass
 
-from databases import Database
-from aioredis import Redis
-from starlette.concurrency import run_in_threadpool
+from passpredict import (
+    predict_single_satellite_overpasses,
+)
 
-from app.astrodynamics import (
+from api.astrodynamics import (
     predict_single_satellite_overpasses,
     predict_next_overpass,
     get_next_pass_detail,
     R_EARTH,
 )
-from app.utils import get_satellite_norad_ids
-from .schemas import Satellite, SatelliteDetail, OverpassDetail
-from api.satellites.services import SatelliteService
-from api.satellites.domain import Orbit
-from .domain import Overpass, Location
-from .serializers import (
-    satellite_pass_detail_serializer,
-    single_satellite_overpass_result_serializer,
-)
-from .tle import PasspredictTLESource
+from api.domain import Overpass, Location, Orbit
 
 
-SATELLITE_DB = {s.id: s for s in get_satellite_norad_ids()}
-
-Coordinate = namedtuple('Coordinate', 'lat lon h', defaults=(0.0,))
-
-
-@dataclass
-class Location:
-    latitude: float
-    longitude: float
-    height: float = 0
-
-
-
-class ComputePassService:
-
-    def get_passes(
-        self,
-        orbits: Iterable[Orbit],
-        latitude: float,
-        longitude: float,
-        height: float,
-        start: datetime,
-        end: datetime,
-    ) -> list[Overpass]:
-        """Compute overpasses for satellites over location"""
-        overpasses = []
-        for orbit in orbits:
-
-
-    def __str__(self) -> str:
-        return "ComputePassService()"
+def get_passes(
+    orbits: Iterable[Orbit],
+    latitude: float,
+    longitude: float,
+    height: float,
+    start: datetime,
+    end: datetime,
+) -> list[Overpass]:
+    """Compute overpasses for satellites over location"""
+    overpasses = []
+    for orbit in orbits:
+        ...
 
 
 
@@ -134,17 +106,17 @@ async def _get_pass_detail(
     return data
 
 
-def get_visibility_radius(
-    location: Location,
-    aos_pt: Coordinate,
-) -> float:
-    """
-    Compute direct radius from location to AOS coordinate.
-    Assumes the Earth is a sphere.
-    """
-    theta1 = math.radians(90 - location.lat)
-    theta2 = math.radians(90 - aos_pt.lat)
-    phi1 = math.radians(location.lon)
-    phi2 = math.radians(aos_pt.lon)
-    d = R_EARTH * math.sqrt(2 - 2*(math.sin(theta1)*math.sin(theta2)*math.cos(phi1 - phi2) + math.cos(theta1)*math.cos(theta2)));
-    return d
+# def get_visibility_radius(
+#     location: Location,
+#     aos_pt: Coordinate,
+# ) -> float:
+#     """
+#     Compute direct radius from location to AOS coordinate.
+#     Assumes the Earth is a sphere.
+#     """
+#     theta1 = math.radians(90 - location.lat)
+#     theta2 = math.radians(90 - aos_pt.lat)
+#     phi1 = math.radians(location.lon)
+#     phi2 = math.radians(aos_pt.lon)
+#     d = R_EARTH * math.sqrt(2 - 2*(math.sin(theta1)*math.sin(theta2)*math.cos(phi1 - phi2) + math.cos(theta1)*math.cos(theta2)));
+#     return d

@@ -1,20 +1,20 @@
 import asyncio
 from datetime import datetime, UTC, timedelta
-import pickle
 import logging
 from typing import Annotated, cast
-from collections.abc import Callable
+from collections.abc import Callable, AsyncIterator
 from enum import Enum
 from math import floor
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request, Query, HTTPException
+from fastapi import APIRouter, Depends, Request, Query, HTTPException
 from redis.asyncio import Redis
 from pydantic import BaseModel, Field, conlist, AfterValidator, conset
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from api.settings import config
-from api.satellites.routes import Satellite, get_satellite_service
-from api.satellites.services import SatelliteService
-from .services import ComputePassService
+from api.satellites.routes import Satellite
+from api.satellites import service as satellite_service
+from . import service
 
 
 logger = logging.getLogger(__name__)
@@ -167,15 +167,14 @@ class OverpassQuery(BaseModel):
     ] = 0
     days: Annotated[
         float,
-        Field(le=config.passes.max_days, description="Number of days to predict overpasses"),
-    ] = config.passes.max_days
+        Field(le=config.predict.max_days, description="Number of days to predict overpasses"),
+    ] = config.predict.max_days
 
 
-
-async def get_compute_pass_service(
-    satellite_service: Annotated[SatelliteService, Depends(get_satellite_service)],
-) -> ComputePassService:
-    return ComputePassService(satellite_service=satellite_service)
+async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
+    ReadSession: async_sessionmaker[AsyncSession] = request.state.ReadSession
+    async with ReadSession() as session:
+        yield session
 
 
 @router.get(
@@ -185,13 +184,13 @@ async def get_compute_pass_service(
 )
 async def get_passes(
     params: Annotated[OverpassQuery, Depends()],
-    service: Annotated[ComputePassService, Depends(get_compute_pass_service)],
-    satellite_service: Annotated[SatelliteService, Depends(get_satellite_service)],
+    db_session: Annotated[AsyncSession, Depends(get_read_session)],
 ):
     start = datetime.now(UTC)
     end = start + timedelta(days=params.days)
     # Get satellite and orbit objects
-    satellites = await satellite_service.query_satellite_orbit_time_range(
+    satellites: list[Satellite] = await satellite_service.query_satellite_orbit_time_range(
+        db_session=db_session,
         norad_ids=params.norad_ids,
         start=start,
         end=end,

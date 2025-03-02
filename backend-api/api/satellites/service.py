@@ -8,7 +8,7 @@ from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy import select, func
 
 from api import db
-from . import domain
+from api import domain
 
 
 class SatelliteServiceError(Exception):
