@@ -13,7 +13,7 @@ dependencies = [
     "pydantic>=2",
     "pydantic-settings",
     "numpy",
-    "hatchet-sdk",
+    "hatchet-sdk>=0.47.0",
     "httpx",
     "sqlalchemy>=2",
     "aiosqlite",
