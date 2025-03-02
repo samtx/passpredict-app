@@ -11,7 +11,7 @@ hatchet = Hatchet(
     debug=config.debug,
     config=ClientConfig(
         logger=root_logger,
-        token=config.hatchet.token,
+        token=config.hatchet.token.get_secret_value(),
         tls_config=config.hatchet.tls,
     )
 )

@@ -6,17 +6,17 @@ from .client import hatchet
 from .workflows import (
     FetchCelestrakOrbits,
     CelestrakOrbitRequest,
-    SpaceTrackTLERequest,
+    FetchSpacetrackOrbits,
     InsertOrbitBatch,
 )
 
 
 def start():
-    hatchet.admin.put_rate_limit("spacetrack-tle-request", 1, duration=RateLimitDuration.HOUR)
+    hatchet.admin.put_rate_limit("spacetrack-tle-request", 30, duration=RateLimitDuration.HOUR)
     worker = hatchet.worker(name="passpredict-api-worker")
     worker.register_workflow(FetchCelestrakOrbits())
     worker.register_workflow(CelestrakOrbitRequest())
-    worker.register_workflow(SpaceTrackTLERequest(
+    worker.register_workflow(FetchSpacetrackOrbits(
         username=config.spacetrack.username,
         password=config.spacetrack.password.get_secret_value(),
     ))
