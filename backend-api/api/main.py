@@ -1,11 +1,15 @@
+import asyncio
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 from logging import getLogger, Formatter, StreamHandler
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 from queue import SimpleQueue
-from contextlib import asynccontextmanager
+from typing import TypedDict
 # from importlib.metadata import version
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession
 
 from api.settings import config
 from api import satellites
@@ -24,10 +28,24 @@ logger.addHandler(queue_handler)
 logger.setLevel(config.logging.level)
 
 
+class State(TypedDict):
+    ReadSession: async_sessionmaker[AsyncSession]
+    WriteSession: async_sessionmaker
+
+
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[State]:
+    from api.db.session import ReadSession, WriteSession
+
     queue_listener.start()
-    yield
+    state = {
+        "ReadSession": ReadSession,
+        "WriteSession": WriteSession,
+    }
+    yield state
+    read_engine: AsyncEngine = ReadSession.kw["bind"]
+    write_engine: AsyncEngine = WriteSession.kw["bind"]
+    await asyncio.gather(read_engine.dispose(), write_engine.dispose())
 
 
 app = FastAPI(

@@ -2,13 +2,13 @@ from datetime import date, datetime
 import logging
 from typing import Annotated, Literal
 from uuid import UUID
+from collections.abc import AsyncIterator
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from pydantic import BaseModel, Field, ConfigDict
-from sqlalchemy.ext.asyncio import AsyncConnection
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from api.db.engine import read_conn, write_conn
-from .services import SatelliteService
+from . import service
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,18 @@ logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix="/satellites",
 )
+
+
+async def get_write_session(request: Request) -> AsyncIterator[AsyncSession]:
+    WriteSession: async_sessionmaker[AsyncSession] = request.state.WriteSession
+    async with WriteSession.begin() as session:
+        yield session
+
+
+async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
+    ReadSession: async_sessionmaker[AsyncSession] = request.state.ReadSession
+    async with ReadSession() as session:
+        yield session
 
 
 class SatelliteDimensions(BaseModel):
@@ -39,22 +51,6 @@ class Satellite(BaseModel):
     dimensions: SatelliteDimensions | None = None
 
 
-async def get_read_conn() -> AsyncConnection:
-    return read_conn
-
-
-async def get_write_conn() -> AsyncConnection:
-    return write_conn
-
-
-async def get_satellite_service(
-    read_conn: Annotated[AsyncConnection, Depends(get_read_conn)],
-    write_conn: Annotated[AsyncConnection, Depends(get_write_conn)],
-) -> SatelliteService:
-    service = SatelliteService(read_conn=read_conn, write_conn=write_conn)
-    return service
-
-
 @router.post(
     '',
     response_model=Satellite,
@@ -62,10 +58,10 @@ async def get_satellite_service(
 )
 async def insert_satellite(
     satellite: Satellite,
-    service: Annotated[SatelliteService, Depends(get_satellite_service)],
+    db_session: Annotated[AsyncSession, Depends(get_write_session)],
 ):
     """Insert new satellite"""
-    result = await service.insert_satellite(satellite)
+    result = await service.insert_satellite(db_session, satellite)
     return result
 
 
@@ -97,27 +93,28 @@ class SatelliteQueryResponse(BaseModel):
 )
 async def query_satellites(
     params: Annotated[SatelliteQuery, Query()],
-    service: Annotated[SatelliteService, Depends(get_satellite_service)],
+    db_session: Annotated[AsyncSession, Depends(get_read_session)]
 ):
-    result = await service.query_satellites(params)
+    result = await service.query_satellites(db_session, params)
     return result
 
 
 @router.get(
-    '/{norad_id}',
+    '/norad_id/{norad_id}',
     response_model=Satellite,
     response_model_exclude_unset=True,
 )
 async def get_satellite(
     norad_id: int,
-    service: Annotated[SatelliteService, Depends(get_satellite_service)],
+    db_session: Annotated[AsyncSession, Depends(get_read_session)],
 ):
-    satellite = await service.get_satellite(norad_id)
+    satellite_id = await service.get_satellite_id_from_norad_id(db_session, norad_id)
+    satellite = await service.get_satellite(db_session, satellite_id)
     return satellite
 
 
 class OrbitQueryRequest(BaseModel):
-    ids: list[UUID] = Field(alias="id", default_factory=list)
+    orbit_ids: list[UUID] = Field(alias="orbit_id", default_factory=list)
     norad_ids: list[int] = Field(alias="norad_id", default_factory=list)
     epoch_after: datetime | None = Field(default=None)
     epoch_before: datetime | None = Field(default=None)
@@ -130,8 +127,9 @@ class OrbitQueryRequest(BaseModel):
 
 class SatelliteOrbit(BaseModel):
     id: UUID
-    norad_id: int
     epoch: datetime
+    satellite_id: int
+    norad_id: int | None = None
     tle: str | None = Field(None, description="Two line element set")
     creation_date: datetime | None = None
     originator: str | None = None
@@ -143,7 +141,6 @@ class SatelliteOrbit(BaseModel):
     ra_of_asc_node: float | None = None
     arg_of_pericenter: float | None = None
     mean_anomaly: float | None = None
-    gm: float | None = None
     ephemeris_type: Literal[0, "SGP", "SGP4", "SDP4", "SGP8", "SDP8"] | None = None
     element_set_no: int | None = None
     rev_at_epoch: int | None = None
@@ -161,13 +158,13 @@ class OrbitQueryResponse(BaseModel):
     next_cursor: str | None = None
 
 
-@router.get(
-    "/orbits",
-    response_model=OrbitQueryResponse,
-)
-async def query_orbit(
-    params: Annotated[OrbitQueryRequest, Query()],
-    service: Annotated[SatelliteService, Depends(get_satellite_service)],
-):
-    result = await service.query_orbits(params)
-    return result
+# @router.get(
+#     "/orbits",
+#     response_model=OrbitQueryResponse,
+# )
+# async def query_satellite_orbits(
+#     params: Annotated[OrbitQueryRequest, Query()],
+#     db_session: Annotated[AsyncSession, Depends(get_read_session)],
+# ):
+#     result = await service.query_orbits(db_session, params)
+#     return result
