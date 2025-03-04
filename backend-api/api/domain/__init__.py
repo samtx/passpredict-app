@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import date, datetime
 from typing import Literal
 from uuid import UUID
@@ -15,7 +16,7 @@ class SatelliteDimensions:
 
 @dataclass(frozen=True)
 class Orbit:
-    norad_id: int
+    satellite_id: int
     epoch: datetime
     inclination: float
     eccentricity: float
@@ -41,7 +42,7 @@ class Orbit:
     element_set_no: int | None = None
     ephemeris_type: Literal[0, "SGP", "SGP4", "SDP4", "SGP8", "SDP8"] | None = None
     tle: str | None = None
-    satellite: 'Satellite' = None
+    satellite: 'Satellite | None' = None
 
 
 @dataclass
@@ -76,8 +77,8 @@ class Location:
     name: str | None = None
 
 
-@dataclass
-class Point(frozen=True):
+@dataclass(frozen=True)
+class Point:
     datetime: datetime
     azimuth: float
     elevation: float
@@ -91,15 +92,24 @@ class Point(frozen=True):
         return s
 
 
-@dataclass
+@dataclass(frozen=True)
 class Overpass:
     aos: Point
     tca: Point
     los: Point
-    duration: float
-    max_elevation: float
     norad_id: int
+    dt_razel: list[Sequence[datetime, float, float, float]] = field(default_factory=list)
     type: PassType | None = None
     brightness: float | None = None
     vis_begin: Point | None = None
     vis_end: Point | None = None
+    vis_tca: Point | None = None
+
+    @property
+    def duration(self) -> float:
+        return (self.los.datetime - self.aos.datetime).total_seconds()
+
+    @property
+    def max_elevation(self) -> float:
+        return self.tca.elevation
+
