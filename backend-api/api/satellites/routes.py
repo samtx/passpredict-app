@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/satellites",
+    tags=["satellites"],
 )
 
 
