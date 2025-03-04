@@ -20,6 +20,7 @@ dependencies = [
     "redis",
     "uvicorn",
     "uvloop",
+    "passpredict>=0.5.1",
 ]
 
 [tool.setuptools]
@@ -27,3 +28,8 @@ packages = ["api"]
 
 [project.scripts]
 hatchet = "api.workflows.worker:start"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.5",
+]
