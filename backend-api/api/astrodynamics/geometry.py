@@ -4,6 +4,14 @@ from typing import NamedTuple
 from passpredict.constants import R_EARTH
 
 
+__all__ = [
+    "R_EARTH",
+    "LatLon",
+    "spherical_earth_distance",
+    "get_visibility_radius",
+]
+
+
 class LatLon(NamedTuple):
     lat: float
     lon: float
