@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime, UTC, timedelta
+from decimal import Decimal
 import logging
 from typing import Annotated, cast
 from collections.abc import Callable, AsyncIterator
@@ -8,59 +9,26 @@ from math import floor
 
 from fastapi import APIRouter, Depends, Request, Query, HTTPException
 from redis.asyncio import Redis
-from pydantic import BaseModel, Field, conlist, AfterValidator, conset
+from pydantic import BaseModel, Field, computed_field
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from api.settings import config
-from api.satellites.routes import Satellite
+from api import domain
+from api.satellites.routes import Satellite as SatelliteSchema
 from api.satellites import service as satellite_service
 from . import service
+
 
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/passes",
+    tags=["passes"],
 )
 
 
-class OrdinalDirection(str, Enum):
-    N = 'N'
-    NNE = 'NNE'
-    NE = 'NE'
-    ENE = 'ENE'
-    E = 'E'
-    ESE = 'ESE'
-    SE = 'SE'
-    SSE = 'SSE'
-    S = 'S'
-    SSW = 'SSW'
-    SW = 'SW'
-    WSW = 'WSW'
-    W = 'W'
-    WNW = 'WNW'
-    NW = 'NW'
-    NNW = 'NNW'
-
-    @staticmethod
-    def _from_direction_index(n: int) -> str:
-        directions = ('N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW')
-        return directions[n]
-
-    @classmethod
-    def from_az(cls, az_deg: float):
-        ''' Return direction from azimuth degree '''
-        azm = az_deg % 360
-        mod = 360/16. # number of degrees per coordinate heading
-        start = 0 - mod/2
-        n = floor((azm-start)/mod)
-        if n == 16:
-            n = 0
-        ord_str = cls._from_direction_index(n)
-        return cls(ord_str)
-
-
-class SatelliteDetail(Satellite):
+class SatelliteDetail(SatelliteSchema):
     datetime: list[datetime]
     latitude: list[float]
     longitude: list[float]
@@ -76,19 +44,15 @@ class SatelliteLatLng(BaseModel):
 
 class Point(BaseModel):
     datetime: datetime
-    timestamp: Annotated[float, Field(description='Unix timestamp in seconds since Jan 1 1970 UTC')]
-    az: Annotated[float, Field(title='Azimuth', description='azimuth [deg]')]
-    az_ord: Annotated[OrdinalDirection, Field(description='Ordinal direction, eg. NE, NNW, WSW')]
-    el: Annotated[float, Field(description='elevation [deg]')]
+    azimuth: Annotated[float, Field(description='azimuth [deg]')]
+    elevation: Annotated[float, Field(description='elevation [deg]')]
     range: Annotated[float, Field(description='range [km]')]
-    dec: Annotated[float | None, Field(description='declination [deg]')] = None
-    ra: Annotated[float | None, Field(description='right ascension [deg]')] = None
     brightness: Annotated[float | None, Field(description='brightness magnitude')] = None
 
     def __repr__(self):
         dtstr = self.datetime.strftime("%b %d %Y, %H:%M:%S")
         s = "{}UTC el={:.1f}d, az={:.1f}d, rng={:.1f}km".format(
-            dtstr, self.el, self.az, self.range)
+            dtstr, self.elevation, self.azimuth, self.range)
         return s
 
 
@@ -126,11 +90,15 @@ class Location(BaseModel):
 
 class OverpassResult(BaseModel):
     location: Location
-    satellites: list[Satellite]
+    satellites: list[SatelliteSchema]
     overpasses: list[Overpass]
     start: datetime
     end: datetime
-    page_size: int
+
+    @computed_field
+    @property
+    def page_size(self) -> int:
+        return len(self.overpasses)
 
 
 class PassDetailResult(BaseModel):
@@ -145,30 +113,36 @@ def round_float(n: int) -> Callable[[float], float]:
     return validator
 
 
-class OverpassQuery(BaseModel):
-    norad_ids: Annotated[
-        set[int],
-        Field(min_length=1, max_length=config.predict.max_satellites, alias="norad_id", description="NORAD IDs of satellites to predict passes"),
-    ]
-    latitude: Annotated[
-        float,
-        Field(ge=-90, le=90, description="Location latitude in decimal degrees"),
-        AfterValidator(round_float(6)),
-    ]
-    longitude: Annotated[
-        float,
-        Field(ge=-180, le=180, description="Location longitude in decimal degrees"),
-        AfterValidator(round_float(6)),
-    ]
-    height: Annotated[
-        float,
-        Field(description="Location height in meters above WGS-84 ellipsoid"),
-        AfterValidator(round_float(2)),
-    ] = 0
-    days: Annotated[
-        float,
-        Field(le=config.predict.max_days, description="Number of days to predict overpasses"),
-    ] = config.predict.max_days
+class OverpassQuery:
+
+    def __init__(
+        self,
+        norad_ids: Annotated[
+            set[int],
+            Query(min_length=1, max_length=config.predict.max_satellites, alias="norad_id", description="NORAD IDs of satellites to predict passes"),
+        ],
+        latitude: Annotated[
+            Decimal,
+            Query(ge=-90, le=90, decimal_places=6, description="Location latitude in decimal degrees"),
+        ],
+        longitude: Annotated[
+            Decimal,
+            Query(ge=-180, le=180, decimal_places=6, description="Location longitude in decimal degrees"),
+        ],
+        height: Annotated[
+            Decimal,
+            Query(decimal_places=2, description="Location height in meters above WGS-84 ellipsoid"),
+        ] = 0,
+        days: Annotated[
+            float,
+            Query(le=config.predict.max_days, description="Number of days to predict overpasses"),
+        ] = config.predict.max_days,
+    ):
+        self.norad_ids = norad_ids
+        self.latitude = float(latitude)
+        self.longitude = float(longitude)
+        self.height = float(height)
+        self.days = days
 
 
 async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
@@ -178,7 +152,7 @@ async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
 
 
 @router.get(
-    '/',
+    '',
     response_model=OverpassResult,
     response_model_exclude_unset=True,
 )
@@ -186,37 +160,29 @@ async def get_passes(
     params: Annotated[OverpassQuery, Depends()],
     db_session: Annotated[AsyncSession, Depends(get_read_session)],
 ):
-    start = datetime.now(UTC)
-    end = start + timedelta(days=params.days)
     # Get satellite and orbit objects
-    satellites: list[Satellite] = await satellite_service.query_satellite_orbit_time_range(
+    satellites = await satellite_service.query_latest_satellite_orbit(
         db_session=db_session,
         norad_ids=params.norad_ids,
+    )
+    # TODO: Emit warning if orbit epoch is greater than 7 days old
+
+    # Compute passes
+    start = datetime.now(UTC)
+    end = start + timedelta(days=params.days)
+    location = domain.Location(
+        latitude=params.latitude,
+        longitude=params.longitude,
+        height=params.height,
+    )
+    overpasses = await asyncio.to_thread(
+        service.compute_passes,
+        satellites=satellites,
+        location=location,
         start=start,
         end=end,
     )
-    # Confirm we get all satellites back
-    norad_ids_found = set(sat.norad_id for sat in satellites)
-    norad_ids_missing = params.norad_ids - norad_ids_found
-    if norad_ids_missing:
-        raise HTTPException(status_code=404, detail=f"Norad IDs {norad_ids_missing} not found")
-    # Confirm that all satellites have at least one orbit in time range
-    for satellite in satellites:
-        if not satellite.orbits:
-            raise HTTPException(status_code=404, detail=f"No orbits found for satellite {satellite.name}, Norad ID {satellite.norad_id} in time range")
-    # Compute passes
-    passes = cast(list[Overpass], [])
-    for satellite in satellites:
-        satellite_passes = await asyncio.to_thread(
-            service.get_passes,
-            orbits=satellite.orbits,
-            latitude=params.latitude,
-            longitude=params.longitude,
-            height=params.height,
-            start=start,
-            end=end,
-        )
-        passes.extend(satellite_passes)
+    overpasses.sort(key=lambda op: op.aos.datetime)
     result = {
         "location": {
             "latitude": params.latitude,
@@ -224,10 +190,9 @@ async def get_passes(
             "height": params.height,
         },
         "satellites": satellites,
-        "passes": sorted(passes, key=lambda x: x.aos.datetime),
+        "overpasses": overpasses,
         "start": start,
         "end": end,
-        "page_size": len(passes),
     }
     return result
 

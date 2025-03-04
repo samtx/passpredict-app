@@ -1,10 +1,9 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from uuid import UUID
 from typing import Protocol, Literal
-from dataclasses import dataclass
 
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.dialects.sqlite import insert
+from sqlalchemy.orm import selectinload, aliased
 from sqlalchemy import select, func
 
 from api import db
@@ -16,11 +15,21 @@ class SatelliteServiceError(Exception):
 
 
 class SatelliteNotFound(SatelliteServiceError):
-    ...
+
+    def __init__(
+        self,
+        satellite_ids: list[int],
+    ):
+        self.satellite_ids = satellite_ids
 
 
 class SatelliteOrbitNotFound(SatelliteServiceError):
-    ...
+
+    def __init__(
+        self,
+        satellite_ids: list[int],
+    ):
+        self.satellite_ids = satellite_ids
 
 
 class SatelliteDimensionsType(Protocol):
@@ -175,6 +184,54 @@ async def query_satellites(
         stmt = select()
 
 
+async def query_latest_satellite_orbit(
+    db_session: AsyncSession,
+    norad_ids: list[int],
+    originators: list[str] | None = None,
+) -> list[domain.Satellite]:
+    """Query latest orbits for satellites and embed satellite details"""
+    orbit_a = aliased(db.Orbit)
+    stmt = (
+        select(
+            orbit_a.id.label("orbit_id"),
+            func.max(orbit_a.epoch),
+        )
+        .group_by(orbit_a.satellite_id)
+        .join(orbit_a.satellite)
+        .where(db.Satellite.norad_id.in_(norad_ids))
+    )
+    if originators:
+        stmt = stmt.where(orbit_a.originator.in_(originators))
+    subq = stmt.subquery()
+    stmt = (
+        select(db.Orbit)
+        .join(subq, db.Orbit.id == subq.c.orbit_id)
+        .options(selectinload(db.Orbit.satellite))
+    )
+    results = await db_session.scalars(stmt)
+    # Remap database orbit models to satellite domain objects
+    satellites = [
+        _build_satellite_domain_model(orbit.satellite, [orbit])
+        for orbit in results
+    ]
+    # Raise error if satellites or orbits are missing
+    # # Confirm we get all satellites back
+    # norad_ids_found = set(sat.norad_id for sat in satellites)
+    # norad_ids_missing = params.norad_ids - norad_ids_found
+    # if norad_ids_missing:
+    #     raise HTTPException(status_code=404, detail=f"Norad IDs {norad_ids_missing} not found")
+    # # Confirm that all satellites have at least one orbit in time range
+    # for satellite in satellites:
+    #     if not satellite.orbits:
+    #         raise HTTPException(status_code=404, detail=f"No orbits found for satellite {satellite.name}, Norad ID {satellite.norad_id} in time range")
+
+
+    return satellites
+
+
+
+
+
 async def query_satellite_orbit_time_range(
     db_session: AsyncSession,
     satellite_ids: list[int],
@@ -185,10 +242,11 @@ async def query_satellite_orbit_time_range(
     """Query satellites and embed orbits with epochs within time range"""
     satellite_stmt = select(db.Satellite).where(db.Satellite.id.in_(satellite_ids))
     orbit_stmt = select(db.Orbit).where(db.Orbit.satellite_id.in_(satellite_ids))
+
     if originators:
         orbit_stmt = orbit_stmt.where(db.Orbit.originator.in_(originators))
     orbit_stmt = (orbit_stmt
-        .where(db.Orbit.epoch >= start)
+        .where(db.Orbit.epoch >= start - timedelta(days=3))
         .where(db.Orbit.epoch <= end)
         .order_by(db.Orbit.epoch.desc())
     )
@@ -204,11 +262,11 @@ async def query_satellite_orbit_time_range(
         satellite_map[orbit.satellite_id].orbits.append(orbit)
     requested_satellite_ids = set(satellite_ids)
     found_satellite_ids = set(satellite_map.keys())
-    if requested_satellite_ids > found_satellite_ids:
-        raise SatelliteNotFound
-    for satellite, satellite_orbits in satellite_map.items():
+    if missing_satellite_ids := (requested_satellite_ids - found_satellite_ids):
+        raise SatelliteNotFound(satellite_ids=list(missing_satellite_ids))
+    for satellite_id, satellite_orbits in satellite_map.items():
         if not satellite_orbits:
-            raise SatelliteOrbitNotFound
+            raise SatelliteOrbitNotFound(satellite_id=[satellite_id])
     return list(satellite_map.values())
 
 
@@ -224,26 +282,36 @@ def _build_satellite_db_model(satellite: SatelliteType) -> db.Satellite:
     return sat_db_model
 
 
-def _build_satellite_domain_model(sat_model: db.Satellite) -> domain.Satellite:
+def _build_satellite_domain_model(
+    sat_model: db.Satellite,
+    orbit_models: list[db.Orbit] = [],
+) -> domain.Satellite:
+    orbits = [
+        _build_orbit_domain_model(orbit_model)
+        for orbit_model in orbit_models
+    ]
     satellite = domain.Satellite(
-        norad_id=sat_model.id,
+        id=sat_model.id,
+        norad_id=sat_model.norad_id,
         intl_designator=sat_model.intl_designator,
         name=sat_model.name,
         description=sat_model.description,
         tags=[],   # TODO: Add Satellite model tags
-        decayed_date=sat_model.decay_date,
+        decay_date=sat_model.decay_date,
         launch_date=sat_model.launch_date,
         dimensions=domain.SatelliteDimensions(
             mass=sat_model.mass,
             length=sat_model.length,
             diameter=sat_model.diameter,
             span=sat_model.span,
-        )
+        ),
+        orbits=orbits,
     )
     return satellite
 
 
-def _build_orbit_domain_model(orbit_model: db.Orbit) -> domain.Orbit:
+def _build_orbit_domain_model(orbit_model: db.Orbit, satellite_model: db.Satellite = None) -> domain.Orbit:
+    satellite = _build_satellite_domain_model(satellite_model) if satellite_model else None
     orbit = domain.Orbit(
         id=orbit_model.id,
         epoch=orbit_model.epoch,
@@ -269,5 +337,6 @@ def _build_orbit_domain_model(orbit_model: db.Orbit) -> domain.Orbit:
         apogee=orbit_model.apogee,
         inclination=orbit_model.inclination,
         tle=orbit_model.tle,
+        satellite=satellite,
     )
     return orbit
