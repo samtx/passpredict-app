@@ -23,8 +23,8 @@ from . import service
 logger = logging.getLogger(__name__)
 
 
-router = APIRouter(
-    prefix="/passes",
+v1_router = APIRouter(
+    prefix="/v1/passes",
     tags=["passes"],
 )
 
@@ -127,7 +127,7 @@ async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
         yield session
 
 
-@router.get(
+@v1_router.get(
     '',
     response_model=OverpassResult,
     response_model_exclude_unset=True,

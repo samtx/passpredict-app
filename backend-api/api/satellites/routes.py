@@ -14,8 +14,8 @@ from . import service
 logger = logging.getLogger(__name__)
 
 
-router = APIRouter(
-    prefix="/satellites",
+v1_router = APIRouter(
+    prefix="/v1/satellites",
     tags=["satellites"],
 )
 
@@ -52,7 +52,7 @@ class Satellite(BaseModel):
     dimensions: SatelliteDimensions | None = None
 
 
-@router.post(
+@v1_router.post(
     '',
     response_model=Satellite,
     response_model_exclude_unset=True,
@@ -87,7 +87,7 @@ class SatelliteQueryResponse(BaseModel):
     next_cursor: str | None = None
 
 
-@router.get(
+@v1_router.get(
     '',
     response_model=SatelliteQueryResponse,
     response_model_exclude_unset=True,
@@ -100,7 +100,7 @@ async def query_satellites(
     return result
 
 
-@router.get(
+@v1_router.get(
     '/norad_id/{norad_id}',
     response_model=Satellite,
     response_model_exclude_unset=True,

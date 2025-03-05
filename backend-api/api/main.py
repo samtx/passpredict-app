@@ -5,7 +5,6 @@ from logging import getLogger, Formatter, StreamHandler
 from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
 from queue import SimpleQueue
 from typing import TypedDict
-# from importlib.metadata import version
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -62,5 +61,5 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(satellites.router)
-app.include_router(passes.router)
+app.include_router(satellites.v1_router)
+app.include_router(passes.v1_router)
