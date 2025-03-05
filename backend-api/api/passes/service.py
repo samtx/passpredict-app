@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from collections.abc import Iterable, Iterator, Sequence
+from typing import cast
 
 from api import astrodynamics as astro
 from api.domain import Overpass, Point, Satellite, Location
@@ -22,11 +23,36 @@ def compute_passes(
         elevation_m=location.height,
         name=location.name,
     )
-    overpasses = []
+    overpasses = cast(list[Overpass], [])
+    it = compute_pass_iterator(
+        satellites,
+        loc,
+        start,
+        end,
+        visible_only=visible_only,
+        aos_at_deg=aos_at_deg,
+        sunrise_deg=sunrise_deg,
+        razel_step=razel_step,
+    )
+    overpasses = list(it)
+    overpasses.sort(key=lambda op: op.aos.datetime)
+    return overpasses
+
+
+def compute_pass_iterator(
+    satellites: Iterable[Satellite],
+    location: astro.Location,
+    start: datetime,
+    end: datetime,
+    visible_only: bool,
+    aos_at_deg: float,
+    sunrise_deg: float,
+    razel_step: float,
+) -> Iterator[Overpass]:
     for satellite in satellites:
         orbit = satellite.orbits[0]
         propagator = astro.SGP4Propagator(orbit=orbit, satellite=satellite)
-        observer = astro.Observer(location=loc, satellite=propagator)
+        observer = astro.Observer(location=location, satellite=propagator)
         predicted_passes = observer.iter_passes(
             start_date=start,
             limit_date=end,
@@ -36,13 +62,11 @@ def compute_passes(
         )
         for predicted_pass in predicted_passes:
             if razel_step > 0:
-                dt_razel = list(
-                    gen_razel_steps(
-                        observer,
-                        predicted_pass.aos.datetime,
-                        predicted_pass.los.datetime,
-                        razel_step,
-                    )
+                dt_razel = compute_razel_steps(
+                    observer,
+                    predicted_pass.aos.datetime,
+                    predicted_pass.los.datetime,
+                    razel_step,
                 )
             else:
                 dt_razel = []
@@ -57,19 +81,23 @@ def compute_passes(
                 vis_end=predicted_pass.vis_end,
                 vis_tca=predicted_pass.vis_tca,
             )
-            overpasses.append(overpass)
-    return overpasses
+            yield overpass
 
 
-def gen_razel_steps(
+def compute_razel_steps(
     observer: astro.Observer,
     start: datetime,
     end: datetime,
     step: float,
-) -> Iterator[Sequence[datetime, float, float, float]]:
+) -> list[tuple[datetime, float, float, float]]:
     delta = timedelta(seconds=step)
-    dt = start.replace(microsecond=0)
-    while dt <= end:
-        razel = observer.razel(dt)
-        yield (dt, razel.range, razel.az, razel.el)
-        dt += delta
+    dt = start.replace(microsecond=0) - delta
+
+    def gen():
+        nonlocal dt
+        while dt <= end + delta:
+            razel = observer.razel(dt)
+            yield (dt, razel.range, razel.az, razel.el)
+            dt += delta
+
+    return list(gen())
