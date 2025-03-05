@@ -1,15 +1,12 @@
 import asyncio
 from datetime import datetime, UTC, timedelta
-from decimal import Decimal
 import logging
 from typing import Annotated, Literal, cast
-from collections.abc import Callable, AsyncIterator
-from enum import Enum
+from collections.abc import AsyncIterator
 from math import floor
 from functools import partial
 
-from fastapi import APIRouter, Depends, Request, Query, HTTPException
-from redis.asyncio import Redis
+from fastapi import APIRouter, Depends, Request, Query
 from pydantic import BaseModel, Field, computed_field, AfterValidator, PlainSerializer
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -29,20 +26,15 @@ v1_router = APIRouter(
 )
 
 
-# def round_float(n: int) -> Callable[[float], float]:
-#     def validate_fn(value: float) -> float:
-#         return round(value, n)
-#     return validate_fn
-
-def format_milliseconds(d: datetime) -> str:
-    return d.isoformat(timespec="milliseconds").replace("+00:00", "Z")
-
-
 Round6 = AfterValidator(partial(round, ndigits=6))
 Round2 = AfterValidator(partial(round, ndigits=2))
 FloatRound2 = Annotated[float, Round2]
 Round1 = AfterValidator(partial(round, ndigits=1))
-FormatMilliseconds = PlainSerializer(format_milliseconds, return_type=str, when_used="json-unless-none")
+FormatMilliseconds = PlainSerializer(
+    lambda d: d.isoformat(timespec="milliseconds").replace("+00:00", "Z"),
+    return_type=str,
+    when_used="json-unless-none",
+)
 
 
 class Point(BaseModel):
@@ -75,6 +67,7 @@ class Location(BaseModel):
     latitude: Annotated[float, Field(description='Location latitude, \u0b00N'), Round6]
     longitude: Annotated[float, Field(description='Location longitude, \u0b00E'), Round6]
     height: Annotated[float, Field(0.0, description='Location height above WGS84 ellipsoid [m]'), Round2]
+
 
 class OverpassResult(BaseModel):
     location: Location
