@@ -52,8 +52,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(satellites.v1_router)
-app.include_router(passes.v1_router)
+app.include_router(satellites.v1_router, prefix="/api")
+app.include_router(passes.v1_router, prefix="/api")
 app.add_api_route(
     "/",
     home.home_page,
