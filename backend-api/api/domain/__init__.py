@@ -60,9 +60,9 @@ class Satellite:
 
 
 class PassType(str, Enum):
-    daylight = 'daylight'
-    unlit = 'unlit'
-    visible = 'visible'
+    DAYLIGHT = 'DAYLIGHT'
+    UNLIT = 'UNLIT'
+    VISIBLE = 'VISIBLE'
 
 
 # class Coordinate(NamedTuple):
