@@ -61,25 +61,27 @@ def compute_pass_iterator(
             sunrise_dg=sunrise_deg,
         )
         for predicted_pass in predicted_passes:
+            aos_pt = make_point(predicted_pass.aos)
+            los_pt = make_point(predicted_pass.los)
             if razel_step > 0:
                 dt_razel = compute_razel_steps(
                     observer,
-                    predicted_pass.aos.datetime,
-                    predicted_pass.los.datetime,
+                    aos_pt.datetime,
+                    los_pt.datetime,
                     razel_step,
                 )
             else:
                 dt_razel = []
             overpass = Overpass(
-                aos=predicted_pass.aos,
-                tca=predicted_pass.tca,
-                los=predicted_pass.los,
+                aos=aos_pt,
+                tca=make_point(predicted_pass.tca),
+                los=los_pt,
                 dt_razel=dt_razel,
                 norad_id=satellite.norad_id,
-                type=predicted_pass.type,
-                vis_begin=predicted_pass.vis_begin,
-                vis_end=predicted_pass.vis_end,
-                vis_tca=predicted_pass.vis_tca,
+                type=predicted_pass.type.value.upper(),
+                vis_begin=make_point(predicted_pass.vis_begin),
+                vis_end=make_point(predicted_pass.vis_end),
+                vis_tca=make_point(predicted_pass.vis_tca),
             )
             yield overpass
 
@@ -101,3 +103,15 @@ def compute_razel_steps(
             dt += delta
 
     return list(gen())
+
+
+def make_point(pass_point: astro.PassPoint | None) -> Point | None:
+    if pass_point is None:
+        return None
+    return Point(
+        datetime=pass_point.dt,
+        azimuth=pass_point.azimuth,
+        elevation=pass_point.elevation,
+        range=pass_point.range,
+        brightness=pass_point.brightness,
+    )
