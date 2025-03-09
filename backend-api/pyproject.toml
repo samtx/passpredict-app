@@ -17,10 +17,12 @@ dependencies = [
     "httpx",
     "sqlalchemy>=2",
     "aiosqlite",
-    "redis",
     "uvicorn",
     "uvloop",
+    "httptools",
     "passpredict>=0.5.1",
+    "markdown>=3.7",
+    "jinja2>=3.1.6",
 ]
 
 [tool.setuptools]
