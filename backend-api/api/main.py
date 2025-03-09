@@ -1,30 +1,18 @@
 import asyncio
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
-from logging import getLogger, Formatter, StreamHandler
-from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler
-from queue import SimpleQueue
 from typing import TypedDict
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession
 
 from api.settings import config
 from api import satellites
 from api import passes
-
-
-logger = getLogger(__name__)
-log_queue = SimpleQueue()
-queue_handler = QueueHandler(log_queue)
-formatter = Formatter('{asctime} - {name} - {levelname} - {message}', style="{")
-queue_handler.setFormatter(formatter)
-file_handler = RotatingFileHandler(config.logging.filename)
-stream_handler = StreamHandler()
-queue_listener = QueueListener(log_queue, stream_handler, file_handler)
-logger.addHandler(queue_handler)
-logger.setLevel(config.logging.level)
+from api import home
 
 
 class State(TypedDict):
@@ -34,9 +22,11 @@ class State(TypedDict):
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[State]:
+    from api.logging import init_logging
     from api.db.session import ReadSession, WriteSession
 
-    queue_listener.start()
+    init_logging(__name__)
+
     state = {
         "ReadSession": ReadSession,
         "WriteSession": WriteSession,
@@ -53,6 +43,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.mount("/static", StaticFiles(directory=config.static_dir), name="static")
 
 app.add_middleware(
     CORSMiddleware,
@@ -63,3 +54,11 @@ app.add_middleware(
 
 app.include_router(satellites.v1_router)
 app.include_router(passes.v1_router)
+app.add_api_route(
+    "/",
+    home.home_page,
+    methods=["GET"],
+    response_class=HTMLResponse,
+    include_in_schema=False,
+)
+
