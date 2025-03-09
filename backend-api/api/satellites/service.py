@@ -4,10 +4,12 @@ from typing import Protocol, Literal
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload, aliased
-from sqlalchemy import select, func
+from sqlalchemy import select, func, text, String, bindparam, column
 
+from api.settings import config
 from api import db
 from api import domain
+from .schemas import SatelliteQueryFilter
 
 
 class SatelliteServiceError(Exception):
@@ -164,24 +166,39 @@ async def get_satellite(
 
 async def query_satellites(
     db_session: AsyncSession,
-    satellite_ids: list[int] | None = None,
-    norad_ids: list[int] | None = None,
-    intl_designators: list[str] | None = None,
-    page_size: int | None = None,
-    cursor: str | None = None,
-    q: str | None = None,
+    satellite_filter: SatelliteQueryFilter,
 ) -> list[domain.Satellite]:
-    if satellite_ids:
-        stmt = (select(db.Satellite)
-            .where(db.Satellite.id.in_(norad_ids))
-        )
-    elif norad_ids:
-        # Only use norad_ids for query
-        stmt = (select(db.Satellite)
-            .where(db.Satellite.norad_id.in_(norad_ids))
-        )
-    else:
-        stmt = select()
+    stmt = select(db.Satellite)
+    stmt = satellite_filter.filter(stmt)
+
+    # if q:
+    #     # Join with FTS table and order by bm25 values
+    #     fts_subq = (
+    #         text("""
+    #             SELECT rowid, bm25(satellite_fts5) as bm
+    #             FROM satellite_fts5
+    #             WHERE satellite_fts5 MATCH :q
+    #         """)
+    #         .columns(column("rowid"), column("bm"))
+    #         .bindparams(bindparam("q", value=q, type_=String))
+    #         .subquery()
+    #     )
+    #     stmt = (stmt
+    #         .join(fts_subq, db.Satellite.id == fts_subq.c.rowid)
+    #         .order_by(fts_subq.c.bm)
+    #     )
+    # else:
+    #     stmt = satellite_filter.sort(stmt)
+
+    stmt = satellite_filter.sort(stmt)
+    stmt = satellite_filter.paginate(stmt)
+    result = await db_session.execute(stmt)
+    sat_models = result.scalars().all()
+    satellites = [
+        _build_satellite_domain_model(sat_model)
+        for sat_model in sat_models
+    ]
+    return satellites
 
 
 async def query_latest_satellite_orbit(
@@ -227,9 +244,6 @@ async def query_latest_satellite_orbit(
 
 
     return satellites
-
-
-
 
 
 async def query_satellite_orbit_time_range(
