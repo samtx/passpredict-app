@@ -1,7 +1,6 @@
 from hatchet_sdk import RateLimitDuration
 
 from api.settings import config
-from api.db import WriteSession
 from .client import hatchet
 from .workflows import (
     FetchCelestrakOrbits,
@@ -20,5 +19,5 @@ def start():
         username=config.spacetrack.username,
         password=config.spacetrack.password.get_secret_value(),
     ))
-    worker.register_workflow(InsertOrbitBatch(WriteSession))
+    worker.register_workflow(InsertOrbitBatch(db_url=config.db.url))
     worker.start()

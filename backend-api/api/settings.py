@@ -38,14 +38,21 @@ class PredictConfig(BaseModel):
     max_satellites: int = 10
 
 
+class PaginateConfig(BaseModel):
+    max_limit: int = 100
+
+
 class Settings(BaseSettings):
     db: DbConfig = DbConfig()
     predict: PredictConfig = PredictConfig()
     logging: LoggingConfig = LoggingConfig()
     hatchet: HatchetConfig = HatchetConfig()
     spacetrack: SpacetrackConfig = SpacetrackConfig()
+    paginate: PaginateConfig = PaginateConfig()
     debug: bool = False
     orbit_insert_batch: int = 500
+    static_dir: Path = Path(__file__).parent.joinpath("static")
+    template_dir: Path = Path(__file__).parent.joinpath("templates")
 
     model_config = SettingsConfigDict(
         env_nested_delimiter="__",

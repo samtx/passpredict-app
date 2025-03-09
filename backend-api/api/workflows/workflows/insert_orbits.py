@@ -5,8 +5,8 @@ import logging
 from typing import Literal, cast, Any, Annotated
 
 from hatchet_sdk import Context
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy.orm import selectinload
+from sqlalchemy import create_engine
+from sqlalchemy.orm import selectinload, Session
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy import select, UniqueConstraint
 from pydantic import BaseModel, ConfigDict, AfterValidator, BeforeValidator
@@ -101,20 +101,24 @@ class InsertOrbitBatch:
 
     def __init__(
         self,
-        WriteSession: async_sessionmaker,
+        db_url: str,
     ):
-        self.WriteSession = WriteSession
+        self.db_url = db_url
 
     @hatchet.step()
-    async def insert_orbits(self, context: Context) -> InsertOrbitBatchOutput:
+    def insert_orbits(self, context: Context) -> InsertOrbitBatchOutput:
         input_ = cast(InsertOrbitBatchInput, context.workflow_input())
-        async with self.WriteSession.begin() as db_session:
-            new_orbits = await batch_insert_orbits(db_session, input_.orbits)
+        sync_url = self.db_url.replace("+aiosqlite", "")
+        engine = create_engine(sync_url)
+        with Session(bind=engine, expire_on_commit=False) as db_session:
+            with db_session.begin():
+                new_orbits = batch_insert_orbits(db_session, input_.orbits)
+
         return InsertOrbitBatchOutput(new_orbits=new_orbits)
 
 
-async def batch_insert_orbits(
-    db_session: AsyncSession,
+def batch_insert_orbits(
+    db_session: Session,
     orbits: list[Orbit],
 ) -> list[NewOrbit]:
     """
@@ -140,12 +144,16 @@ async def batch_insert_orbits(
     orbit_satellite_data, orbit_norad_ids = zip(*gen_satellite_data(orbits))
 
     stmt = insert(db.Satellite).on_conflict_do_nothing(index_elements=["norad_id"])
-    await db_session.execute(stmt, orbit_satellite_data)
+    db_session.execute(stmt, orbit_satellite_data)
 
-    stmt = (select(db.Satellite.norad_id, db.Satellite.id.label("satellite_id"))
+    stmt = (
+        select(
+            db.Satellite.norad_id,
+            db.Satellite.id.label("satellite_id"),
+        )
         .where(db.Satellite.norad_id.in_(orbit_norad_ids))
     )
-    res = await db_session.execute(stmt)
+    res = db_session.execute(stmt)
     rows = res.all()
     norad_id_to_satellite_id = {r[0]: r[1] for r in rows}
     # Update orbit records with corresponding satellite_id
@@ -161,9 +169,9 @@ async def batch_insert_orbits(
         .returning(db.Orbit)
         .options(selectinload(db.Orbit.satellite))
     )
-    res = await db_session.scalars(insert_orbits_stmt, orbit_data)
+    res = db_session.scalars(insert_orbits_stmt, orbit_data)
     inserted_orbits = cast(list[db.Orbit], res.all())
-    await db_session.flush()
+    db_session.flush()
     new_orbits = [
         NewOrbit(
             orbit_id=orbit.id,
