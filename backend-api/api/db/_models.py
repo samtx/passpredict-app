@@ -2,6 +2,8 @@ from datetime import datetime, date, UTC
 from uuid import uuid4, UUID
 
 from sqlalchemy import (
+    Table,
+    Column,
     Integer,
     String,
     Text,
@@ -12,6 +14,7 @@ from sqlalchemy import (
     Uuid,
     UniqueConstraint,
     Index,
+    func,
     text,
 )
 from sqlalchemy.orm import (
@@ -19,6 +22,8 @@ from sqlalchemy.orm import (
     Mapped,
     relationship,
 )
+
+from .session import read_engine
 # from sqlalchemy.schema import ExecutableDDLElement
 # from sqlalchemy.event import listen
 # from sqlalchemy.ext.compiler import compiles
@@ -31,13 +36,13 @@ class Satellite(Base):
     __tablename__ = "satellite"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     norad_id: Mapped[int] = mapped_column(Integer, unique=True, index=True, nullable=True)
-    intl_designator: Mapped[str] = mapped_column(String(30), unique=True, index=True, nullable=True)  # Intl. designator, COSPAR ID
+    intl_designator: Mapped[str] = mapped_column(String(30), nullable=True)  # Intl. designator, COSPAR ID
     name: Mapped[str] = mapped_column(String(100), nullable=True)
     description: Mapped[str] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=text('CURRENT_TIMESTAMP'))
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), onupdate=lambda: datetime.now(UTC))
-    decay_date: Mapped[date] = mapped_column(Date, nullable=True)
-    launch_date: Mapped[date] = mapped_column(Date, nullable=True)
+    decay_date: Mapped[date] = mapped_column(Date, nullable=True, index=True)
+    launch_date: Mapped[date] = mapped_column(Date, nullable=True, index=True)
     launch_year: Mapped[int] = mapped_column(Integer, nullable=True)
     # Column('constellation', Integer, ForeignKey('constellation.id')),
     mass: Mapped[float] = mapped_column(Float, nullable=True)
@@ -46,33 +51,10 @@ class Satellite(Base):
     span: Mapped[float] = mapped_column(Float, nullable=True)
     # Column('shape', Integer, ForeignKey('shape.id')),
 
-
-# class CreateFTS5Table(ExecutableDDLElement):
-
-#     def __init__(
-#         self,
-#         table,
-#         columns,
-#     ):
-#         self.table = table
-#         self.columns = columns
-
-
-# @compiles(CreateFTS5Table)
-# def create_fts5_table(element: CreateFTS5Table, compiler, **kwargs):
-#     sql_compiler = compiler.sql_compiler
-#     table_name = element.table.__tablename__
-#     fts_table_name = f"{table_name}_fts"
-#     columns = ", ".join((col for col in element.columns))
-#     row_id = sql_compiler.render_literal_value(element.table.primary_key, String())
-#     stmt = (
-#         f"CREATE VIRTUAL TABLE {fts_table_name} IF NOT EXISTS USING fts5("
-#         f"{columns}, content={table_name}, content_rowid={row_id});"
-#     )
-#     return stmt
-
-
-# listen(Satellite, "after_create", CreateFTS5Table() )
+    __table_args__ = (
+        Index("ix_satellite_name_lower", func.lower(name)),
+        Index("ix_satellite_intl_designator_lower", func.lower(intl_designator)),
+    )
 
 
 class Orbit(Base):
@@ -92,7 +74,7 @@ class Orbit(Base):
     ra_of_asc_node: Mapped[float] = mapped_column(Float, nullable=False)
     arg_of_pericenter: Mapped[float] = mapped_column(Float, nullable=False)
     mean_anomaly: Mapped[float] = mapped_column(Float, nullable=False)
-    ephemeris_type: Mapped[String] = mapped_column(String, nullable=True)
+    ephemeris_type: Mapped[str] = mapped_column(String, nullable=True)
     element_set_no: Mapped[int] = mapped_column(Integer, nullable=True)
     rev_at_epoch: Mapped[int] = mapped_column(Integer, nullable=True)
     bstar: Mapped[float] = mapped_column(Float, server_default='0.0', nullable=False)
@@ -106,7 +88,7 @@ class Orbit(Base):
     # Column('orbit_type', Integer, ForeignKey('orbit_type.id')),
 
     __table_args__ = (
-        Index("ix_epoch", epoch.desc()),
+        Index("ix_satellite_id_epoch_desc", "satellite_id", epoch.desc()),
         UniqueConstraint("satellite_id", "epoch", "originator", name="uix_satelliteid_epoch_originator"),
     )
 
