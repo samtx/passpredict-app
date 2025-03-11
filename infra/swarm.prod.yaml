@@ -1,0 +1,131 @@
+services:
+  # api:
+  #   image: passpredict/api
+  #   build:
+  #     context: ../backend-api
+  #     dockerfile: Dockerfile
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - "node.labels.sqlite"
+  #   volumes:
+  #     - ppapi-db:/app/db
+  #   ports:
+  #     - "8000:8000"
+  #   # environment:
+
+  # api-worker:
+  #   image: passpredict/api-worker
+  #   build:
+  #     context: ../backend-api
+  #     dockerfile: worker.Dockerfile
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - "node.labels.sqlite"
+  #   volumes:
+  #     - ppapi-db:/app/db
+  #   environment:
+  #     HATCHET_CLIENT_TLS_STRATEGY: "none"
+  #   secrets:
+  #     - hatchet_client_token
+  #   depends_on:
+  #     - hatchet-lite
+
+  traefik:
+    image: docker.io/traefik:v3.3
+    ports:
+      - "80:80"
+      - "443:443"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+      - traefik.constraint-label=traefik-public
+      - traefik.http.middlewares.admin-auth.basicauth.users=${USERNAME?Variable not set}:${HASHED_PASSWORD?Variable not set}
+    volumes:
+      # Add Docker as a mounted volume, so that Traefik can read the labels of other services
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # Mount the volume to store the certificates
+      - traefik-public-certificates:/certificates
+    command:
+      # Enable Docker in Traefik, so that it reads labels from Docker services
+      - --providers.docker
+      # Add a constraint to only use services with the label "traefik.constraint-label=traefik-public"
+      - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      # Do not expose all Docker services, only the ones explicitly exposed
+      - --providers.docker.exposedbydefault=false
+      # Enable Docker Swarm mode
+      - --providers.docker.swarmmode
+      # Create an entrypoint "http" listening on port 80
+      - --entrypoints.http.address=:80
+      # Create an entrypoint "https" listening on port 443
+      - --entrypoints.https.address=:443
+      # Create the certificate resolver "le" for Let's Encrypt, uses the environment variable EMAIL
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      # Store the Let's Encrypt certificates in the mounted volume
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      # Use the TLS Challenge for Let's Encrypt
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      # Enable the access log, with HTTP requests
+      - --accesslog
+      # Enable the Traefik log, for configurations and errors
+      - --log
+      # Enable the Dashboard and API
+      - --api
+
+
+
+  postgres:
+    image: postgres:15.6
+    command: postgres -c 'max_connections=200'
+    restart: always
+    environment:
+      - POSTGRES_USER=hatchet
+      - POSTGRES_PASSWORD=hatchet
+      - POSTGRES_DB=hatchet
+    volumes:
+      - hatchet_lite_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d hatchet -U hatchet"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+
+  hatchet-lite:
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
+    ports:
+      - "8888:8888"
+      - "7077:7077"
+    depends_on:
+      - postgres
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "password"
+      DATABASE_URL: "postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable"
+      SERVER_TASKQUEUE_RABBITMQ_URL: amqp://user:password@localhost:5672/
+      SERVER_AUTH_COOKIE_DOMAIN: localhost
+      SERVER_AUTH_COOKIE_INSECURE: "t"
+      SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
+      SERVER_GRPC_INSECURE: "t"
+      SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
+      SERVER_GRPC_PORT: "7077"
+      SERVER_URL: http://localhost:8888
+      SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
+      SERVER_LOGGER_LEVEL: warn
+      SERVER_LOGGER_FORMAT: console
+      DATABASE_LOGGER_LEVEL: warn
+      DATABASE_LOGGER_FORMAT: console
+    volumes:
+      - "hatchet_lite_rabbitmq_data:/var/lib/rabbitmq"
+      - "hatchet_lite_config:/config"
+
+volumes:
+  ppapi-db:
+  hatchet_lite_postgres_data:
+  hatchet_lite_rabbitmq_data:
+  hatchet_lite_config:
