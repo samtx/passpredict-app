@@ -1,19 +1,20 @@
 services:
-  migrations:
-    image: ewr.vultrcr.com/passpredict/api:2.0.2
-    deploy:
-      mode: replicated-job
-      replicas: 1
-      placement:
-        constraints:
-          - node.labels.ppapi-db==true
-    volumes:
-      - ppapi-db:/app/db
-    environment:
-      DB__PATH: /app/db/ppapi.db
+  # migrations:
+  #   image: ewr.vultrcr.com/passpredict/migrations:347036cd8450
+  #   command: ["alembic", "upgrade", "head"]
+  #   deploy:
+  #     mode: replicated-job
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.labels.ppapi-db==true
+  #   volumes:
+  #     - ppapi-db:/app/db
+  #   environment:
+  #     DB__PATH: /app/db/ppapi.db
 
   api:
-    image: ewr.vultrcr.com/passpredict/api:2.0.2
+    image: ewr.vultrcr.com/passpredict/api:2.0.3
     deploy:
       mode: replicated
       replicas: 1
