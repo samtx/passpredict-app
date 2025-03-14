@@ -31,18 +31,18 @@ async def get_read_session(request: Request) -> AsyncIterator[AsyncSession]:
 
 
 
-@v1_router.post(
-    '',
-    response_model=schemas.Satellite,
-    response_model_exclude_unset=True,
-)
-async def insert_satellite(
-    satellite: schemas.Satellite,
-    db_session: Annotated[AsyncSession, Depends(get_write_session)],
-):
-    """Insert new satellite"""
-    result = await service.insert_satellite(db_session, satellite)
-    return result
+# @v1_router.post(
+#     '',
+#     response_model=schemas.Satellite,
+#     response_model_exclude_unset=True,
+# )
+# async def insert_satellite(
+#     satellite: schemas.Satellite,
+#     db_session: Annotated[AsyncSession, Depends(get_write_session)],
+# ):
+#     """Insert new satellite"""
+#     result = await service.insert_satellite(db_session, satellite)
+#     return result
 
 
 @v1_router.get(
