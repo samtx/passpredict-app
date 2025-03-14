@@ -10,9 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession
 
 from api.settings import config
-from api import satellites
-from api import passes
-from api import home
+import api.satellites as satellites
+import api.passes as passes
+import api.home as home
 
 
 class State(TypedDict):

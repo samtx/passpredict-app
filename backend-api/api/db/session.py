@@ -12,13 +12,13 @@ __all__ = [
 
 
 read_engine = create_async_engine(
-    f"{config.db.url}?immutable=1&mode=ro",
+    config.db.sqlalchemy_conn_url(read_only=True),
     echo=config.db.echo,
 )
 
 
 write_engine = create_async_engine(
-    config.db.url,
+    config.db.sqlalchemy_conn_url(),
     echo=config.db.echo,
 )
 

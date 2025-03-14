@@ -26,7 +26,7 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-config.set_main_option("sqlalchemy.url", api_config.db.url)
+config.set_main_option("sqlalchemy.url", api_config.db.sqlalchemy_conn_url())
 
 
 def include_name(name, type_, parent_names):

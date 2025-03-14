@@ -19,5 +19,6 @@ def start():
         username=config.spacetrack.username,
         password=config.spacetrack.password.get_secret_value(),
     ))
-    worker.register_workflow(InsertOrbitBatch(db_url=config.db.url))
+    sync_db_url = config.db.sqlalchemy_conn_url(sync=True)
+    worker.register_workflow(InsertOrbitBatch(db_url=sync_db_url))
     worker.start()

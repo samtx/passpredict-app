@@ -108,8 +108,7 @@ class InsertOrbitBatch:
     @hatchet.step()
     def insert_orbits(self, context: Context) -> InsertOrbitBatchOutput:
         input_ = cast(InsertOrbitBatchInput, context.workflow_input())
-        sync_url = self.db_url.replace("+aiosqlite", "")
-        engine = create_engine(sync_url)
+        engine = create_engine(self.db_url)
         with Session(bind=engine, expire_on_commit=False) as db_session:
             with db_session.begin():
                 new_orbits = batch_insert_orbits(db_session, input_.orbits)

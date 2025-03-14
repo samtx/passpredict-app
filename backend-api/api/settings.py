@@ -2,8 +2,9 @@ import os
 from pathlib import Path
 from typing import Literal
 from collections.abc import Sequence
+import warnings
 
-from pydantic import BaseModel, SecretStr, Field
+from pydantic import BaseModel, SecretStr, Field, computed_field
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -17,8 +18,26 @@ API_ROOT_DIR = Path(__file__).parent
 
 
 class DbConfig(BaseModel):
-    url: str = "sqlite+aiosqlite:///./ppapi.db"
+    scheme: str = "sqlite+aiosqlite"
+    path: Path = API_ROOT_DIR.joinpath("ppapi.db")
     echo: bool = False
+
+    @computed_field
+    @property
+    def file_uri(self) -> str:
+        return f"file:{str(self.path.resolve())}"
+
+    def sqlalchemy_conn_url(
+        self,
+        sync: bool = False,
+        read_only: bool = False,
+    ) -> str:
+        url = f"{self.scheme}:///{self.file_uri}?uri=true"
+        if read_only:
+            url = url + "&mode=ro"
+        if sync:
+            url = url.replace("+aiosqlite", "")
+        return url
 
 
 class SpacetrackConfig(BaseModel):
@@ -85,7 +104,7 @@ class Settings(BaseSettings):
             env_settings,
             TomlConfigSettingsSource(settings_cls),
             dotenv_settings,
-            DotEnvDirSettingsSource(settings_cls, API_ROOT_DIR.parent.joinpath('.secrets')),
+            DotEnvDirSettingsSource(settings_cls, "/run/secrets"),
             file_secret_settings,
         )
 
@@ -103,7 +122,6 @@ class DotEnvDirSettingsSource(DotEnvSettingsSource):
         case_sensitive: bool | None = None,
         env_prefix: str | None = None,
         env_nested_delimiter: str | None = None,
-        env_nested_max_split: int | None = None,
         env_ignore_empty: bool | None = None,
         env_parse_none_str: str | None = None,
         env_parse_enums: bool | None = None,
@@ -112,8 +130,12 @@ class DotEnvDirSettingsSource(DotEnvSettingsSource):
         env_dir_paths = [Path(p).expanduser() for p in env_file_dirs]
         env_files = []
         for dir_path in env_dir_paths:
+            if not dir_path.exists():
+                warnings.warn(f'directory "{dir_path}" does not exist')
+                continue
             for f in dir_path.iterdir():
-                env_files.append(f)
+                if f.suffix == '.env':
+                    env_files.append(f)
 
         super().__init__(
             settings_cls,
@@ -122,7 +144,6 @@ class DotEnvDirSettingsSource(DotEnvSettingsSource):
             case_sensitive=case_sensitive,
             env_prefix=env_prefix,
             env_nested_delimiter=env_nested_delimiter,
-            env_nested_max_split=env_nested_max_split,
             env_ignore_empty=env_ignore_empty,
             env_parse_none_str=env_parse_none_str,
             env_parse_enums=env_parse_enums,

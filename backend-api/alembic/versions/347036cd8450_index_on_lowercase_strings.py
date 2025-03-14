@@ -23,7 +23,7 @@ def upgrade() -> None:
     op.drop_index('ix_satellite_intl_designator', table_name='satellite')
     op.drop_index('ix_satellite_name', table_name='satellite')
     op.create_index('ix_satellite_name_lower', 'satellite', [sa.text('lower(name)')], unique=False)
-    op.create_index('ix_satellite_intl_designator', 'satellite', [sa.text('lower(intl_designator')], unique=False)
+    op.create_index('ix_satellite_intl_designator', 'satellite', [sa.text('lower(intl_designator)')], unique=False)
     # ### end Alembic commands ###
 
 
