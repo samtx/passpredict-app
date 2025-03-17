@@ -5,10 +5,11 @@ import logging
 from typing import Literal, cast, Any, Annotated
 
 from hatchet_sdk import Context
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import selectinload, Session
 from sqlalchemy.dialects.sqlite import insert
-from sqlalchemy import select, UniqueConstraint
+
+
 from pydantic import BaseModel, ConfigDict, AfterValidator, BeforeValidator
 
 from api import db

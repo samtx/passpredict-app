@@ -1,10 +1,20 @@
 import os
 from pathlib import Path
-from typing import Literal
+from typing import Literal, Any, Annotated
 from collections.abc import Sequence
 import warnings
+from base64 import b64decode
 
-from pydantic import BaseModel, SecretStr, Field, computed_field
+from pydantic import (
+    BaseModel,
+    SecretStr,
+    Field,
+    computed_field,
+    model_validator,
+    AfterValidator,
+    BeforeValidator,
+    PlainSerializer,
+)
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -12,9 +22,41 @@ from pydantic_settings import (
     EnvSettingsSource,
     DotEnvSettingsSource,
 )
+from hatchet_sdk import RateLimitDuration
+
+
+def SetEnvVar(env_var: str):
+    def set_env_var(value: Any) -> Any:
+        os.environ[env_var] = value
+        return value
+    return AfterValidator(set_env_var)
 
 
 API_ROOT_DIR = Path(__file__).parent
+
+
+def map_string_to_enum(value: Any) -> RateLimitDuration:
+    if isinstance(value, RateLimitDuration):
+        return value
+    match str(value).capitalize():
+        case "SECOND":
+            return RateLimitDuration.SECOND
+        case "MINUTE":
+            return RateLimitDuration.MINUTE
+        case "HOUR":
+            return RateLimitDuration.HOUR
+        case "WEEK":
+            return RateLimitDuration.WEEK
+        case "MONTH":
+            return RateLimitDuration.MONTH
+        case "YEAR":
+            return RateLimitDuration.YEAR
+        case _:
+            raise ValueError(f"{value} not among possible options.")
+
+
+def serialize_enum_to_str(value: RateLimitDuration) -> str:
+    return RateLimitDuration.Name(value)
 
 
 class DbConfig(BaseModel):
@@ -40,17 +82,76 @@ class DbConfig(BaseModel):
         return url
 
 
+class FetchConfig(BaseModel):
+    key: str
+    cron: str
+    limit: int
+    duration: Literal["SECOND", "MINUTE", "HOUR", "DAY", "WEEK", "MONTH", "YEAR"]
+
+
 class SpacetrackConfig(BaseModel):
     username: str = ""
     password: SecretStr = ""
+    auth: str = ""
+    auth_file: Path | None = None
+    auth_file_encoding: str = "utf-8"
+    base_url: str = "https://www.space-track.org"
+    auth_endpoint: str = "/ajaxauth/login"
+    http_timeout: float = 30
+    gp_fetch: FetchConfig = FetchConfig(
+        key="spacetrack-gp-request",
+        cron="17 4,12,20 * * *",
+        limit=1,
+        duration="HOUR",
+    )
+    gp_epoch_days_since: float = 3
+    satcat_fetch: FetchConfig = FetchConfig(
+        key="spacetrack-satcat-request",
+        cron="44 11 * * *",
+        limit=1,
+        duration="DAY",
+    )
+
+    @model_validator(mode="after")
+    def get_credentials_from_files(self) -> 'SpacetrackConfig':
+
+        def b64_decode_auth(auth: str) -> tuple[str, SecretStr]:
+            username, password = b64decode(auth).decode().split(":")
+            return (username, SecretStr(password))
+
+        def read_from_file(attr: str) -> str:
+            file_path = getattr(self, attr)
+            encoding = getattr(self, f"{attr}_encoding", "utf-8")
+            with open(file_path, "rt", encoding=encoding) as f:
+                return f.read()
+
+        if self.auth_file is not None:
+            auth = read_from_file('auth_file')
+            self.username, self.password = b64_decode_auth(auth)
+        elif self.auth:
+            self.username, self.password = b64_decode_auth(self.auth)
+
+        return self
 
 
 class HatchetConfig(BaseModel):
     token: SecretStr = ""
-    tenant_id: str = ""
-    tls: Literal["none", "tls", "mtls"] = "none"
+    token_file: Path | None = None
+    token_file_encoding: str = "utf-8"
+    # tenant_id: str = ""
+    tls: Annotated[Literal["none", "tls", "mtls"], Field(validate_default=True), SetEnvVar("HATCHET_CLIENT_TLS_STRATEGY")] = "none"
     namespace: str = ""
     debug: bool = False
+    # grpc_host: Annotated[str, Field(validate_default=True), SetEnvVar("HATCHET_CLIENT_HOST_PORT")] = "localhost:7077"
+    # server_url: str = "localhost:8888"
+
+    @model_validator(mode="after")
+    def get_token_from_file(self) -> 'HatchetConfig':
+        if self.token_file is not None:
+            with open(self.token_file, "rt", encoding=self.token_file_encoding) as f:
+                self.token = SecretStr(f.read())
+        return self
+
 
 
 class LoggingConfig(BaseModel):

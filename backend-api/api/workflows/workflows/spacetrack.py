@@ -13,7 +13,7 @@ from pydantic import BaseModel, SecretStr, computed_field
 
 from api.settings import config
 from ..client import hatchet
-from .insert_orbits import Orbit, Satellite, InsertOrbitBatchOutput, NewOrbit
+from .insert_orbits import Orbit, Satellite, NewOrbit
 
 
 __all__ = [
@@ -22,11 +22,6 @@ __all__ = [
 
 
 logger = logging.getLogger(__name__)
-
-SPACETRACK_BASE_URL = "https://www.space-track.org"
-SPACETRACK_AUTH_ENDPOINT = "/ajaxauth/login"
-SPACETRACK_TIMEOUT = 30
-SPACETRACK_EPOCH_DAYS_SINCE = 0.5
 
 
 class SpacetrackJson(TypedDict):
@@ -73,10 +68,10 @@ class SpacetrackJson(TypedDict):
 
 
 class FetchSpacetrackOrbitOptions(BaseModel):
-    base_url: str = SPACETRACK_BASE_URL
-    auth_endpoint: str = SPACETRACK_AUTH_ENDPOINT
-    epoch_days_since: float = SPACETRACK_EPOCH_DAYS_SINCE
-    timeout: float = SPACETRACK_TIMEOUT
+    base_url: str = config.spacetrack.base_url
+    auth_endpoint: str = config.spacetrack.auth_endpoint
+    epoch_days_since: float = config.spacetrack.gp_epoch_days_since
+    timeout: float = config.spacetrack.http_timeout
     # include_unknown: bool = False
 
 
@@ -98,7 +93,7 @@ class NewOrbitOutput(BaseModel):
 
 @hatchet.workflow(
     on_events=["fetch-orbits:spacetrack"],
-    on_crons=["17 4,12,20 * * *"],
+    on_crons=[config.spacetrack.gp_fetch.cron],
     input_validator=FetchSpacetrackOrbitOptions,
 )
 class FetchSpacetrackOrbits:
@@ -115,9 +110,10 @@ class FetchSpacetrackOrbits:
             self.password = password
 
     @hatchet.step(
-        # rate_limits=[RateLimit(key="spacetrack-tle-request", units=1)],
+        rate_limits=[RateLimit(key="spacetrack-gp-request", units=1)],
         retries=3,
         backoff_factor=4,
+        timeout="2m"
     )
     async def download_orbit_data(self, context: Context) -> DownloadStepOutput:
         """Download orbit data from spacetrack"""
@@ -133,7 +129,7 @@ class FetchSpacetrackOrbits:
             # Login first to get authentication cookies
             credentials = {"identity": self.username, "password": self.password}
             try:
-                login_response = await client.post(SPACETRACK_AUTH_ENDPOINT, data=credentials)
+                login_response = await client.post(options.auth_endpoint, data=credentials)
                 context.log("Logged in to spacetrack")
                 response = await client.get(endpoint)
             except httpx.RequestError as exc:
@@ -163,7 +159,11 @@ class FetchSpacetrackOrbits:
             queried_at=queried_at,
         )
 
-    @hatchet.step(parents=["download_orbit_data"])
+    @hatchet.step(
+        parents=["download_orbit_data"],
+        retries=2,
+        timeout="10m",
+    )
     def parse_and_insert_orbits_to_database(self, context: Context) -> NewOrbitOutput:
         download_output = context.step_output("download_orbit_data")
         if isinstance(download_output, dict):

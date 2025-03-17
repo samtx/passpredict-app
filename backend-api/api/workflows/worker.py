@@ -11,7 +11,12 @@ from .workflows import (
 
 
 def start():
-    hatchet.admin.put_rate_limit("spacetrack-tle-request", 30, duration=RateLimitDuration.HOUR)
+    for fetch_config in (config.spacetrack.gp_fetch, config.spacetrack.satcat_fetch):
+        hatchet.admin.put_rate_limit(
+            fetch_config.key,
+            fetch_config.limit,
+            duration=fetch_config.duration,
+        )
     worker = hatchet.worker(name="passpredict-api-worker")
     worker.register_workflow(FetchCelestrakOrbits())
     worker.register_workflow(CelestrakOrbitRequest())
