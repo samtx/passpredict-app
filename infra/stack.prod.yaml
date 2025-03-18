@@ -1,0 +1,194 @@
+services:
+  # migrations:
+  #   image: ewr.vultrcr.com/passpredict/migrations:347036cd8450
+  #   command: ["alembic", "upgrade", "head"]
+  #   deploy:
+  #     mode: replicated-job
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.labels.ppapi-db==true
+  #   volumes:
+  #     - ppapi-db:/app/db
+  #   environment:
+  #     DB__PATH: /app/db/ppapi.db
+
+  api:
+    image: ewr.vultrcr.com/passpredict/api:2.0.3
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.ppapi-db==true
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.api-router.rule=Host(`api.passpredict.space`)
+        - traefik.http.routers.api-router.entrypoints=websecure
+        - traefik.http.routers.api-router.tls.certResolver=vultr-resolver
+        - traefik.http.routers.api-router.service=api-service
+        - traefik.http.services.api-service.loadbalancer.server.port=8000
+        # traefik.http.routers.api-router.observability.accesslogs: true
+        # traefik.http.routers.api-router.observability.metrics: true
+        # traefik.http.routers.api-router.observability.tracing: true
+    volumes:
+      - ppapi-db:/app/db
+    ports:
+      - "8000:8000"
+    environment:
+      HATCHET_CLIENT_TLS_STRATEGY: "none"
+      DB__PATH: /app/db/ppapi.db
+    networks:
+      - traefik-public
+
+  # api-worker:
+  #   image: ewr.vultrcr.com/passpredict/api:2.0.2
+  #   command: ["python", "-m", "api.workflows"]
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - "node.labels.ppapi-db==true"
+  #   volumes:
+  #     - ppapi-db:/app/db
+    # environment:
+    #   HATCHET_CLIENT_TLS_STRATEGY: "none"
+    #   DB__PATH: /app/db/ppapi.db
+  #   secrets:
+  #     - source: spacetrack-credentials
+  #       target: spacetrack-credentials.env
+  #   #   - hatchet_client_token
+
+  traefik:
+    image: docker.io/traefik:v3.3
+    ports:
+      - "80:80"
+      - "443:443"
+    deploy:
+      placement:
+        constraints:
+          - node.labels.traefik-public-certificates==true
+      update_config:
+        order: stop-first
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.passpredict.space`)
+        - traefik.http.routers.traefik-dashboard.service=api@internal
+        - traefik.http.routers.traefik-dashboard.middlewares=traefik-dashboard-auth
+        - traefik.http.routers.traefik-dashboard.tls.certResolver=vultr-resolver
+        - traefik.http.middlewares.traefik-dashboard-auth.basicauth.usersFile=/run/secrets/users
+        - traefik.http.services.traefik-dashboard-svc.loadbalancer.server.port=8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+    command:
+      # Use Docker swarm provider in Traefik, so that it reads labels from Docker services
+      - --providers.swarm
+      - --providers.swarm.endpoint=unix:///var/run/docker.sock
+      - --providers.swarm.network=traefik-public
+      # - --providers.swarm.constraints=Label(`traefik.constraint-label`, `traefik-public`)
+      - --providers.swarm.exposedbydefault=false
+      # Create entrypoints, redirect to https
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entryPoint.to=websecure
+      - --entryPoints.web.http.redirections.entryPoint.scheme=https
+      - --entryPoints.websecure.address=:443
+      # Create the certificate resolver for Let's Encrypt with Vultr DNS
+      - --certificatesresolvers.vultr-resolver.acme.email=admin@passpredict.space
+      - --certificatesresolvers.vultr-resolver.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.vultr-resolver.acme.dnschallenge.provider=vultr
+      # Enable API and observability
+      - --api
+      - --accesslog
+      - --log.level=INFO
+    networks:
+      - traefik-public
+    environment:
+      # Ref: https://go-acme.github.io/lego/dns/vultr/
+      VULTR_API_KEY_FILE: /run/secrets/vultr-api-key
+      VULTR_HTTP_TIMEOUT: 60
+      VULTR_POLLING_INTERVAL: 2
+      VULTR_PROPAGATION_TIMEOUT: 60
+      VULTR_TTL: 120
+    secrets:
+      - source: dns-api-key
+        target: vultr-api-key
+      - source: admin-users
+        target: users
+
+  # postgres:
+  #   image: docker.io/postgres:15.6
+  #   command: postgres -c 'max_connections=200'
+  #   environment:
+  #     - POSTGRES_USER=hatchet
+  #     - POSTGRES_PASSWORD=hatchet
+  #     - POSTGRES_DB=hatchet
+  #   volumes:
+  #     - hatchet_lite_postgres_data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -d hatchet -U hatchet"]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 5
+  #     start_period: 10s
+
+  # hatchet-lite:
+  #   image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
+  #   deploy:
+  #     labels:
+  #       - "traefik.enable=true"
+  #       - "traefik.swarm.network=traefik-public"
+  #       - "traefik.constraint-label=traefik-public"
+  #       - "traefik.http.middlewares.hatchet-auth.basicauth.usersFile=/run/secrets/users"
+  #       - "traefik.http.routers.hatchet-router.rule=Host(`hatchet.passpredict.space`)"
+  #       - "traefik.http.routers.hatchet-router.entrypoints=websecure"
+  #       # - "traefik.http.routers.hatchet-router.service=api-service"
+  #       - "traefik.http.services.hatchet-service.loadbalancer.server.port=8888"
+  #   ports:
+  #     - "8888:8888"
+  #     - "7077:7077"
+  #   environment:
+  #     RABBITMQ_DEFAULT_USER: "user"
+  #     RABBITMQ_DEFAULT_PASS: "password"
+  #     DATABASE_URL: "postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable"
+  #     SERVER_TASKQUEUE_RABBITMQ_URL: amqp://user:password@localhost:5672/
+  #     SERVER_AUTH_COOKIE_DOMAIN: localhost
+  #     SERVER_AUTH_COOKIE_INSECURE: "t"
+  #     SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
+  #     SERVER_GRPC_INSECURE: "t"
+  #     SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
+  #     SERVER_GRPC_PORT: "7077"
+  #     SERVER_URL: http://localhost:8888
+  #     SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
+  #     SERVER_LOGGER_LEVEL: warn
+  #     SERVER_LOGGER_FORMAT: console
+  #     DATABASE_LOGGER_LEVEL: warn
+  #     DATABASE_LOGGER_FORMAT: console
+  #   networks:
+  #     - traefik-public
+  #   volumes:
+  #     - "hatchet_lite_rabbitmq_data:/var/lib/rabbitmq"
+  #     - "hatchet_lite_config:/config"
+  #   secrets:
+  #     - source: admin-users
+  #       target: users
+
+volumes:
+  traefik-public-certificates:
+  ppapi-db:
+  hatchet_lite_postgres_data:
+  hatchet_lite_rabbitmq_data:
+  hatchet_lite_config:
+
+networks:
+  traefik-public:
+    external: true
+
+secrets:
+  admin-users:
+    external: true
+  spacetrack-credentials:
+    external: true
+  dns-api-key:
+    external: true

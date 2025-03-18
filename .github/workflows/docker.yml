@@ -1,0 +1,44 @@
+name: Build and Push API Docker Image
+
+on:
+  push:
+    branches: [ "main", "v2" ]
+
+env:
+  CR_URL: ewr.vultrcr.com
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Login to Vultr Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CR_URL }}
+          username: ${{ secrets.VULTR_CR_USERNAME }}
+          password: ${{ secrets.VULTR_CR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ${{ env.CR_URL }}/passpredict/api
+          tags: |
+            type=sha
+            type=raw,value=latest
+          labels: |
+              org.opencontainers.image.revision={{sha}}
+              org.opencontainers.image.created={{commit_date 'YYYY-MM-DDTHH:mm:ss.SSS[Z]'}}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: "{{defaultContext}}:backend-api"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.CR_URL }}/passpredict/api:latest

@@ -1,0 +1,5 @@
+[db]
+echo = "True"
+path = "db/ppapi.db"
+
+HATCHET_CLIENT_TLS_STRATEGY="none"

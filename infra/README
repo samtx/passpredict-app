@@ -1,0 +1,44 @@
+# Bootstrap Docker Swarm cluster configuration
+
+Switch to docker context named `passpredict` on VPS
+```bash
+docker context use passpredict
+```
+
+Initialize swarm mode
+```bash
+docker swarm init
+```
+
+Create docker network for Traefik proxy router
+```bash
+docker network create --driver=overlay traefik-public
+```
+
+Get Node ID for initial manager node on swarm. Save node ID to environment variable.
+```bash
+export NODE_ID=$(docker info -f '{{.Swarm.NodeID}}')
+```
+
+Create a tag in this node, so that Traefik is always deployed to the same node and uses the same volume
+```bash
+docker node update --label-add traefik-public-certificates=true --label-add ppapi-db=true $(docker info -f '{{.Swarm.NodeID}}')
+```
+
+Create admin user credentials file for basic authentication
+```bash
+./user-add.sh <USERNAME>
+```
+
+Create docker secret with hashed users file
+```bash
+docker secret create admin-users hashed-users.txt
+```
+
+Create docker secret with DNS API key file
+```bash
+docker secret create dns-api-key dns-api-key.txt
+```
+
+
+
