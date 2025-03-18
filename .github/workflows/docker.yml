@@ -5,8 +5,7 @@ on:
     branches: [ "main", "v2" ]
 
 env:
-  CR_URL: ewr.vutlrcr.com
-
+  CR_URL: ewr.vultrcr.com
 jobs:
   docker:
     runs-on: ubuntu-latest
