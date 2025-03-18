@@ -18,18 +18,29 @@ jobs:
           username: ${{ secrets.VULTR_CR_USERNAME }}
           password: ${{ secrets.VULTR_CR_PASSWORD }}
 
-      - name: Setup Just runner
-        uses: extractions/setup-just@v3
+      - name: Docker meta
+        uses: docker/metadata-action@v5
         with:
-          github-token: ${{ secrets.MY_GITHUB_TOKEN }}
+          images: |
+            passpredict/api
+          tags: |
+            type=sha
+            # type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
+          labels: |
+              org.opencontainers.image.revision={{sha}}
+              org.opencontainers.image.created={{commit_date 'YYYY-MM-DDTHH:mm:ss.SSS[Z]'}}
 
-      # - name: Build and push the Docker image
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     tags: ewrpasspredict/
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker
 
-
-      # - run: docker build . --file Dockerfile --tag my-image-name:$(date +%s)
-
-
-      # -
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: backend-api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=passpredict/api:latest
