@@ -26,7 +26,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            passpredict/api
+            ${{ env.CR_URL }}/passpredict/api
           tags: |
             type=sha
             type=raw,value=latest
@@ -41,4 +41,4 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=passpredict/api:latest
+          cache-from: type=registry,ref=${{ env.CR_URL }}/passpredict/api:latest
