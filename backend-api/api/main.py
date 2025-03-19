@@ -5,7 +5,7 @@ from typing import TypedDict
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncEngine, AsyncSession
 
@@ -41,7 +41,14 @@ app = FastAPI(
     debug=config.debug,
     version="2.0.0",
     lifespan=lifespan,
+    docs_url="/",
 )
+
+
+@app.get("/docs", include_in_schema=False)
+async def redirect_docs():
+    return RedirectResponse("/")
+
 
 app.mount("/static", StaticFiles(directory=config.static_dir), name="static")
 
@@ -54,11 +61,13 @@ app.add_middleware(
 
 app.include_router(satellites.v1_router, prefix="/api")
 app.include_router(passes.v1_router, prefix="/api")
-app.add_api_route(
-    "/",
-    home.home_page,
-    methods=["GET"],
-    response_class=HTMLResponse,
-    include_in_schema=False,
-)
+
+
+# app.add_api_route(
+#     "/",
+#     home.home_page,
+#     methods=["GET"],
+#     response_class=HTMLResponse,
+#     include_in_schema=False,
+# )
 
