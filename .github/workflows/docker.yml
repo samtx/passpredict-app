@@ -77,5 +77,15 @@ jobs:
           docker context create production --docker "host=ssh://production"
           docker context inspect production
 
+      - name: Login to Vultr Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CR_URL }}
+          username: ${{ secrets.VULTR_CR_USERNAME }}
+          password: ${{ secrets.VULTR_CR_PASSWORD }}
+
       - name: Deploy stack
-        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=true --prune --resolve-image=always
+        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=false --prune --resolve-image=always
+
+      - name: Check services
+        run: docker --context production stack ps passpredict
