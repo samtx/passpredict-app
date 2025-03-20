@@ -59,9 +59,9 @@ jobs:
           chmod 600 ~/.ssh/deploy
           cat >>~/.ssh/config <<EOF
           HOST production
-            HostName $SSH_HOST
-            Port $SSH_PORT
-            User $SSH_USER
+            HostName ${SSH_HOST}
+            Port ${SSH_PORT}
+            User ${SSH_USER}
             IdentityFile ~/.ssh/deploy
             StrictHostKeyChecking no
           EOF
