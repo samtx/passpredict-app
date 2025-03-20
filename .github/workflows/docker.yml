@@ -89,7 +89,9 @@ jobs:
 
       - name: Check services
         run: |
-          docker --context production stack ps passpredict --filter "desired-state=running" --no-trunc --format json > stack.json
+          docker --context production stack ps passpredict --filter "desired-state=running" --no-trunc --format json | \
+          jq '{Name, Image, DesiredState, CurrentState, Error} | tojson' \
+          > stack.json
           cat stack.json
           # echo "stack=$(cat stack.json)" >> "$GITHUB_OUTPUT" 
       
