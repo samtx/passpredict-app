@@ -58,7 +58,7 @@ jobs:
           echo "$SSH_KEY" > ~/.ssh/deploy
           chmod 600 ~/.ssh/deploy
           cat >>~/.ssh/config <<EOF
-          HOST production
+          HOST *
             HostName $SSH_HOST
             Port $SSH_PORT
             User $SSH_USER
