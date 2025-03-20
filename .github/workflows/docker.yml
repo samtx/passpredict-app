@@ -85,15 +85,17 @@ jobs:
           password: ${{ secrets.VULTR_CR_PASSWORD }}
 
       - name: Deploy stack
-        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=true --prune --resolve-image=always
+        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=false -q --prune --resolve-image=always
 
       - name: Display stack summary
         run: |
           echo "| Name | Image | Desired State | Current State | Error |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          docker --context production stack ps passpredict \
+          STACK=$(docker --context production stack ps passpredict \
             --filter "desired-state=running" \
             --no-trunc \
             --format "| {{.Name}} | {{.Image}} | {{.DesiredState}} | {{.CurrentState}} | {{.Error}} |" \
-            >> $GITHUB_STEP_SUMMARY
+          )
+          echo $STACK
+          echo $STACK >> $GITHUB_STEP_SUMMARY
             
