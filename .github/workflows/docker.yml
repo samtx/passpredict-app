@@ -66,18 +66,18 @@ jobs:
             StrictHostKeyChecking no
           EOF
         env:
-          SSH_USER: ${{ secrets.PRODUCTION_USER }} 
+          SSH_USER: ${{ vars.PRODUCTION_USER }} 
           SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
-          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
-          SSH_PORT: ${{ secrets.PRODUCTION_PORT }}
+          SSH_HOST: ${{ vars.PRODUCTION_HOST }}
+          SSH_PORT: ${{ vars.PRODUCTION_PORT }}
 
       - name: Configure Docker context
         run: |
           docker context create production --docker "host=ssh://${SSH_USER}@${SSH_HOST}"
           docker context inspect production
         env:
-          SSH_USER: ${{ secrets.PRODUCTION_USER }} 
-          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_USER: ${{ vars.PRODUCTION_USER }} 
+          SSH_HOST: ${{ vars.PRODUCTION_HOST }}
 
       - name: Deploy stack
         run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=true --prune --resolve-image=always
