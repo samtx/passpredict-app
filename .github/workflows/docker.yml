@@ -93,7 +93,6 @@ jobs:
           echo "| --- | --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           STACK=$(docker --context production stack ps passpredict \
             --filter "desired-state=running" \
-            --no-trunc \
             --format "| {{.Name}} | {{.Image}} | {{.DesiredState}} | {{.CurrentState}} | {{.Error}} |" \
           )
           echo $STACK
