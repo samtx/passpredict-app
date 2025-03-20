@@ -72,7 +72,9 @@ jobs:
           SSH_PORT: ${{ secrets.PRODUCTION_PORT }}
 
       - name: Configure Docker context
-        run: docker context create production --docker "host=ssh://$SSH_USER@$SSH_HOST"
+        run: |
+          docker context create production --docker "host=ssh://${SSH_USER}@${SSH_HOST}"
+          docker context inspect production
         env:
           SSH_USER: ${{ secrets.PRODUCTION_USER }} 
           SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
