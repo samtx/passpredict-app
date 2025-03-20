@@ -46,7 +46,11 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production
+    needs: [build-and-push]
     steps:
+      - name: Checkout source
+        uses: actions/checkout@4
+    
       - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
