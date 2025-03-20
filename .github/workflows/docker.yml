@@ -2,7 +2,7 @@ name: Build and Push API Docker Image
 
 on:
   push:
-    branches: [ "main", "v2" ]
+    branches: [ "main", "deploy-action" ]
 
 env:
   CR_URL: ewr.vultrcr.com
