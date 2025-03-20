@@ -7,7 +7,7 @@ on:
 env:
   CR_URL: ewr.vultrcr.com
 jobs:
-  docker:
+  build-and-push:
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -42,3 +42,35 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.CR_URL }}/passpredict/api:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_KEY" > ~/.ssh/deploy
+          chmod 600 ~/.ssh/deploy
+          cat >>~/.ssh/config <<EOF
+          HOST production
+            HostName $SSH_HOST
+            Port $SSH_PORT
+            User $SSH_USER
+            IdentityFile ~/.ssh/deploy
+            StrictHostKeyChecking no
+          EOF
+        env:
+          SSH_USER: ${{ secrets.PRODUCTION_USER }} 
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_PORT: ${{ secrets.PRODUCTION_PORT }}
+
+      - name: Configure Docker context
+        run: docker context create production --docker "host=ssh://$SSH_USER@$SSH_HOST"
+        env:
+          SSH_USER: ${{ secrets.PRODUCTION_USER }} 
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+
+      - name: Deploy stack
+        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=true --prune --resolve-image=always
