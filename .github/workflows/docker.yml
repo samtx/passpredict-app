@@ -85,7 +85,21 @@ jobs:
           password: ${{ secrets.VULTR_CR_PASSWORD }}
 
       - name: Deploy stack
-        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=false --prune --resolve-image=always
+        run: docker --context production stack deploy --compose-file=infra/stack.prod.yaml passpredict --with-registry-auth --detach=true --prune --resolve-image=always
 
       - name: Check services
-        run: docker --context production stack ps passpredict
+        run: |
+          docker --context production stack ps passpredict --filter "desired-state=running" --no-trunc --format json > stack.json
+          cat stack.json
+          # echo "stack=$(cat stack.json)" >> "$GITHUB_OUTPUT" 
+      
+      - uses: buildingcash/json-to-markdown-table-action@v1
+        id: table
+        with:
+          json_file_path: "stack.json"
+
+      - name: Output summary
+        env:
+          STACK_TABLE: ${{ steps.table.outputs.table }}
+        run: echo "$STACK_TABLE" >> $GITHUB_STEP_SUMMARY
+        
