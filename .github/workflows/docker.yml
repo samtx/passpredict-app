@@ -91,11 +91,11 @@ jobs:
         run: |
           # echo "| Name | Image | Desired State | Current State | Error |" >> $GITHUB_STEP_SUMMARY
           # echo "| --- | --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo \`\`\` >> $GITHUB_STEP_SUMMARY
           docker --context production stack ps passpredict \
             -f "desired-state=running" -f "desired-state=ready" -f "desired-state=accepted" \
             --format "table {{.Name}}\t{{.Image}}\t{{.DesiredState}}\t{{.CurrentState}}\t{{.Error}}" \
             >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo \`\`\` >> $GITHUB_STEP_SUMMARY
           
             
