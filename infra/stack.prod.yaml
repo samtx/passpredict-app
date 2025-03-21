@@ -14,13 +14,10 @@ services:
   #     DB__PATH: /app/db/ppapi.db
 
   api:
-    image: ewr.vultrcr.com/passpredict/api:2.0.3
+    image: ewr.vultrcr.com/passpredict/api:latest
     deploy:
       mode: replicated
       replicas: 1
-      placement:
-        constraints:
-          - node.labels.ppapi-db==true
       labels:
         - traefik.enable=true
         - traefik.http.routers.api-router.rule=Host(`api.passpredict.space`)
@@ -36,29 +33,33 @@ services:
     ports:
       - "8000:8000"
     environment:
-      HATCHET_CLIENT_TLS_STRATEGY: "none"
       DB__PATH: /app/db/ppapi.db
+    # secrets:
+    #   - source: hatchet-token
+    #     target: hatchet-token.env
     networks:
       - traefik-public
+      # - hatchet
 
-  # api-worker:
-  #   image: ewr.vultrcr.com/passpredict/api:2.0.2
-  #   command: ["python", "-m", "api.workflows"]
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     placement:
-  #       constraints:
-  #         - "node.labels.ppapi-db==true"
-  #   volumes:
-  #     - ppapi-db:/app/db
-    # environment:
-    #   HATCHET_CLIENT_TLS_STRATEGY: "none"
-    #   DB__PATH: /app/db/ppapi.db
-  #   secrets:
-  #     - source: spacetrack-credentials
-  #       target: spacetrack-credentials.env
-  #   #   - hatchet_client_token
+  api-worker:
+    image: ewr.vultrcr.com/passpredict/api:latest
+    command: ["python", "-m", "api.workflows"]
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ppapi-db:/app/db
+    environment:
+      DB__PATH: /app/db/ppapi.db
+      HATCHET__TOKEN_FILE: /run/secrets/token
+      SPACETRACK__AUTH_FILE: /run/secrets/spacetrack-auth
+    secrets:
+      - source: spacetrack-auth
+        target: spacetrack-auth
+      - source: hatchet-token
+        target: token
+    networks:
+      - hatchet
 
   traefik:
     image: docker.io/traefik:v3.3
@@ -74,6 +75,7 @@ services:
       labels:
         - traefik.enable=true
         - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.passpredict.space`)
+        - traefik.http.routers.traefik-dashboard.entrypoints=websecure
         - traefik.http.routers.traefik-dashboard.service=api@internal
         - traefik.http.routers.traefik-dashboard.middlewares=traefik-dashboard-auth
         - traefik.http.routers.traefik-dashboard.tls.certResolver=vultr-resolver
@@ -117,62 +119,66 @@ services:
       - source: admin-users
         target: users
 
-  # postgres:
-  #   image: docker.io/postgres:15.6
-  #   command: postgres -c 'max_connections=200'
-  #   environment:
-  #     - POSTGRES_USER=hatchet
-  #     - POSTGRES_PASSWORD=hatchet
-  #     - POSTGRES_DB=hatchet
-  #   volumes:
-  #     - hatchet_lite_postgres_data:/var/lib/postgresql/data
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -d hatchet -U hatchet"]
-  #     interval: 10s
-  #     timeout: 10s
-  #     retries: 5
-  #     start_period: 10s
+  postgres:
+    image: docker.io/postgres:15.6
+    command: postgres -c 'max_connections=200'
+    environment:
+      - POSTGRES_USER=hatchet
+      - POSTGRES_PASSWORD=hatchet
+      - POSTGRES_DB=hatchet
+    volumes:
+      - hatchet_lite_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d hatchet -U hatchet"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hatchet
 
-  # hatchet-lite:
-  #   image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:latest
-  #   deploy:
-  #     labels:
-  #       - "traefik.enable=true"
-  #       - "traefik.swarm.network=traefik-public"
-  #       - "traefik.constraint-label=traefik-public"
-  #       - "traefik.http.middlewares.hatchet-auth.basicauth.usersFile=/run/secrets/users"
-  #       - "traefik.http.routers.hatchet-router.rule=Host(`hatchet.passpredict.space`)"
-  #       - "traefik.http.routers.hatchet-router.entrypoints=websecure"
-  #       # - "traefik.http.routers.hatchet-router.service=api-service"
-  #       - "traefik.http.services.hatchet-service.loadbalancer.server.port=8888"
-  #   ports:
-  #     - "8888:8888"
-  #     - "7077:7077"
-  #   environment:
-  #     RABBITMQ_DEFAULT_USER: "user"
-  #     RABBITMQ_DEFAULT_PASS: "password"
-  #     DATABASE_URL: "postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable"
-  #     SERVER_TASKQUEUE_RABBITMQ_URL: amqp://user:password@localhost:5672/
-  #     SERVER_AUTH_COOKIE_DOMAIN: localhost
-  #     SERVER_AUTH_COOKIE_INSECURE: "t"
-  #     SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
-  #     SERVER_GRPC_INSECURE: "t"
-  #     SERVER_GRPC_BROADCAST_ADDRESS: localhost:7077
-  #     SERVER_GRPC_PORT: "7077"
-  #     SERVER_URL: http://localhost:8888
-  #     SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
-  #     SERVER_LOGGER_LEVEL: warn
-  #     SERVER_LOGGER_FORMAT: console
-  #     DATABASE_LOGGER_LEVEL: warn
-  #     DATABASE_LOGGER_FORMAT: console
-  #   networks:
-  #     - traefik-public
-  #   volumes:
-  #     - "hatchet_lite_rabbitmq_data:/var/lib/rabbitmq"
-  #     - "hatchet_lite_config:/config"
-  #   secrets:
-  #     - source: admin-users
-  #       target: users
+  hatchet-lite:
+    image: ghcr.io/hatchet-dev/hatchet/hatchet-lite:v0.54.8
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.hatchet-router.rule=Host(`hatchet.passpredict.space`)
+        - traefik.http.routers.hatchet-router.entrypoints=websecure
+        - traefik.http.routers.hatchet-router.service=hatchet-service
+        - traefik.http.routers.hatchet-router.middlewares=hatchet-auth
+        - traefik.http.routers.hatchet-router.tls.certResolver=vultr-resolver
+        - traefik.http.middlewares.hatchet-auth.basicauth.usersFile=/run/secrets/users
+        - traefik.http.services.hatchet-service.loadbalancer.server.port=8888
+    ports:
+      - "8888:8888"
+      - "7077:7077"
+    environment:
+      RABBITMQ_DEFAULT_USER: "user"
+      RABBITMQ_DEFAULT_PASS: "password"
+      DATABASE_URL: "postgresql://hatchet:hatchet@postgres:5432/hatchet?sslmode=disable"
+      SERVER_TASKQUEUE_RABBITMQ_URL: amqp://user:password@localhost:5672/
+      SERVER_AUTH_COOKIE_DOMAIN: hatchet.passpredict.space
+      SERVER_AUTH_COOKIE_INSECURE: "t"
+      SERVER_ALLOW_SIGNUP: "false"
+      SERVER_GRPC_BIND_ADDRESS: "0.0.0.0"
+      SERVER_GRPC_INSECURE: "t"
+      SERVER_GRPC_BROADCAST_ADDRESS: hatchet-lite:7077
+      SERVER_GRPC_PORT: "7077"
+      SERVER_URL: http://hatchet-lite:8888
+      SERVER_AUTH_SET_EMAIL_VERIFIED: "t"
+      SERVER_LOGGER_LEVEL: warn
+      SERVER_LOGGER_FORMAT: console
+      DATABASE_LOGGER_LEVEL: warn
+      DATABASE_LOGGER_FORMAT: console
+    networks:
+      - traefik-public
+      - hatchet
+    volumes:
+      - "hatchet_lite_rabbitmq_data:/var/lib/rabbitmq"
+      - "hatchet_lite_config:/config"
+    secrets:
+      - source: admin-users
+        target: users
 
 volumes:
   traefik-public-certificates:
@@ -184,11 +190,17 @@ volumes:
 networks:
   traefik-public:
     external: true
+  hatchet:
+    external: true
 
 secrets:
   admin-users:
     external: true
-  spacetrack-credentials:
+  spacetrack-auth:
     external: true
+    name: spacetrack-auth
   dns-api-key:
     external: true
+  hatchet-token:
+    external: true
+    name: hatchet-token
