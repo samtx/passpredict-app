@@ -37,7 +37,7 @@ DEFAULT_SPACETRACK_EPOCH_DAYS_SINCE = 3
 
 @hatchet.workflow(
     on_events=["fetch-orbits:celestrak"],
-    on_crons=["17 2,10,18 * * *"],
+    # on_crons=["17 2,10,18 * * *"],
 )
 class FetchCelestrakOrbits:
 

@@ -18,8 +18,8 @@ def start():
             duration=fetch_config.duration,
         )
     worker = hatchet.worker(name="passpredict-api-worker")
-    worker.register_workflow(FetchCelestrakOrbits())
-    worker.register_workflow(CelestrakOrbitRequest())
+    # worker.register_workflow(FetchCelestrakOrbits())
+    # worker.register_workflow(CelestrakOrbitRequest())
     worker.register_workflow(FetchSpacetrackOrbits(
         username=config.spacetrack.username,
         password=config.spacetrack.password.get_secret_value(),
