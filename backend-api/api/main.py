@@ -2,6 +2,7 @@ import asyncio
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 from typing import TypedDict
+from importlib.resources import files as resource_files
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
@@ -37,7 +38,17 @@ async def lifespan(app: FastAPI) -> AsyncIterator[State]:
     await asyncio.gather(read_engine.dispose(), write_engine.dispose())
 
 
+# DESCRIPTION = resource_files("api").joinpath("DESCRIPTION.md").read_text()
+
+
 app = FastAPI(
+    title="Pass Predict API",
+    summary="An HTTP API to return predicted passes of satellites over Earth observers.",
+    # description=DESCRIPTION,
+    contact={
+        "name": "Sam Friedman",
+        "email": "info@passpredict.space",
+    },
     debug=config.debug,
     version="2.0.0",
     lifespan=lifespan,
